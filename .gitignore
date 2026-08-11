@@ -1,0 +1,12 @@
+node_modules/
+.env
+*.log
+
+# 运行时产物：抓到的原始数据、数据库、生成的报告都不入库，
+# 只提交代码和规则。data/ 和 reports/ 目录本身用 .gitkeep 占位。
+data/*
+!data/.gitkeep
+reports/*
+!reports/.gitkeep
+
+.DS_Store
