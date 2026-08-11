@@ -58,6 +58,11 @@ ${SCORING_RULE}
 demo_track 必须从这个列表里选一个，不许自创：
 ${DEMO_TRACKS.map((t) => `- ${t}`).join("\n")}
 
+选 demo_track 时**要看作者昵称**。小红书商家号的昵称经常直接写明行业
+（「XX Fitness」是健身房、「XX 甲油胶」是美甲、「XX 地产」是经纪），
+正文没提行业时，昵称往往是唯一的线索。但昵称只是线索不是确证：
+昵称看不出行业、或与正文明显冲突时，才选「其他」。
+
 ${FOLLOWUP_RULE}
 
 输出要求（严格遵守）：只输出一个 JSON 对象，不要代码块、不要任何解释文字。
@@ -74,9 +79,11 @@ ${FOLLOWUP_RULE}
 }
 
 ---
-${lead.title ? `所在笔记标题：${lead.title}\n` : ""}${lead.keyword ? `搜索词：${lead.keyword}\n` : ""}${
-    lead.likes != null ? `点赞：${lead.likes}\n` : ""
-  }${lead.published_at ? `发布日期：${lead.published_at}\n` : ""}
+${lead.author ? `作者昵称：${lead.author}\n` : ""}${lead.title ? `所在笔记标题：${lead.title}\n` : ""}${
+    lead.keyword ? `搜索词：${lead.keyword}\n` : ""
+  }${lead.likes != null ? `点赞：${lead.likes}\n` : ""}${
+    lead.published_at ? `发布日期：${lead.published_at}\n` : ""
+  }
 正文：
 ${(lead.body || "").slice(0, 3000)}`;
 }
