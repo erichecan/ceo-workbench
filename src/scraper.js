@@ -111,18 +111,33 @@ async function maybeScreenshot(target, noteId) {
   }
 }
 
+/**
+ * 详情页的标题兜底。
+ *
+ * `#detail-title` 不是每篇都有 —— 小红书图文笔记的标题是可选的，没填时
+ * 第一行正文就充当标题。2026-08-11 实测两篇首页笔记都取不到 #detail-title，
+ * 标题整个落进了 note_body，报告里显示成「(无标题)」。
+ * 搜索模式不受影响（标题取自搜索卡片的 .title），只有 --url 模式会暴露。
+ */
+export function fallbackTitle(body) {
+  const line = (body || "").split("\n").map((s) => s.trim()).find(Boolean) || "";
+  const stripped = line.replace(/#\S+/g, "").trim(); // 纯标签行不是标题
+  return stripped.slice(0, 30);
+}
+
 /** 把一个详情页的返回摊平成若干条线索（笔记本体 1 条 + 每条评论 1 条）。 */
 function toLeads(detail, card, keyword, shot) {
   const leads = [];
   const url = detail.url || card?.url || null;
   const body = (detail.note_body || "").trim();
+  const title = (detail.note_title || card?.title || "").trim() || fallbackTitle(body);
   if (body) {
     leads.push({
       source: "note",
       keyword,
       note_id: card?.note_id || null,
       url,
-      title: (detail.note_title || card?.title || "").trim(),
+      title,
       author: detail.note_author || card?.author || null,
       body: body.slice(0, 4000),
       likes: card?.likes ?? null,
@@ -139,7 +154,7 @@ function toLeads(detail, card, keyword, shot) {
       keyword,
       note_id: card?.note_id || null,
       url,
-      title: (detail.note_title || card?.title || "").trim(),
+      title,
       author: c.author || null,
       body: text,
       likes: null,
