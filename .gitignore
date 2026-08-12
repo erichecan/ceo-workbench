@@ -9,4 +9,7 @@ data/*
 reports/*
 !reports/.gitkeep
 
+# CEO 站点生成产物（由 npm run site 从 docs/ tasks/ finance/ 编译而来）
+site/dist/
+
 .DS_Store

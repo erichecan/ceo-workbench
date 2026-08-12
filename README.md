@@ -1,10 +1,25 @@
-# 建站线索发现器（webproject）
+# webproject
+
+**位置**：`AIcoding/webproject/`，独立仓库。这个仓库装着两样东西：
+
+| 子系统 | 是什么 | 入口 |
+|---|---|---|
+| **建站线索发现器** | 从小红书捞「在找人做网站」的人 | `src/`，`npm run daily` |
+| **CEO 工作台** | 任务看板 · 财务账本 · 文档中心，部署在 Cloud Run | `site/` `tasks/` `finance/` `docs/`，`npm run site` |
+
+两者**互不依赖**：共用一个 `package.json` 和一条 npm 依赖树，除此之外没有任何代码耦合。
+`.github/workflows/deploy-ceo-site.yml` 用 `paths` 过滤器隔开，改线索发现器不会触发站点部署。
+
+迁移沿革：线索发现器 2026-08-12 从 `businessskills/webproject/` 迁出；
+CEO 工作台同日从 `consulting/` 迁入（那边现在只留公司官网）。
+
+---
+
+## 一、建站线索发现器
 
 每天从小红书捞出「在找人做网站」的人，逐条判断值不值得联系、该做什么 demo、第一句话怎么说。
 
-**位置**：`AIcoding/webproject/`，独立仓库
-（2026-08-12 从 `businessskills/webproject/` 迁出）。
-本项目**自包含**——不读 businessskills 的任何文件，数据全在自己的 `data/`。
+本部分**自包含**——不读 businessskills 的任何文件，数据全在自己的 `data/`。
 代码注释里提到 businessskills 的地方，指的是从那边借鉴的做法，不是运行时依赖。
 
 ```
@@ -149,3 +164,42 @@ reports/          生成的日报（不入库）
 - 评论抓不到稳定 ID（详情页 DOM 里没有），用正文哈希去重；同一个人在不同笔记下发一模一样的话会被当成两条。
 - 搜索结果页只有前排若干条，不翻页 —— 翻页是触发风控的高危动作。
 - `CAPTURE_SCREENSHOT=1` 才存截图，默认关（体积大，且报告里链接已经够用）。
+
+---
+
+## 二、CEO 工作台
+
+任务看板 + 财务账本 + 文档中心，编译成一个带 Basic Auth 的静态站，跑在 Cloud Run
+（`ceo-workbench` / `supply-491510` / asia-east1）。2026-08-12 从 `consulting/` 迁入。
+
+```
+docs/*.md  +  tasks/board.json  +  finance/ledger.jsonl
+        ↓  npm run site（构建期编译，marked 渲染 Markdown）
+   site/dist/  →  site/server.cjs 提供服务
+```
+
+### 命令
+
+```bash
+npm run board -- check       # 看板不变量校验
+npm run board -- next        # 下一件该做的事
+npm run ledger -- check      # 账本不变量校验
+npm run ledger -- status     # 财务概况
+npm run site                 # 编译静态站到 site/dist/
+SITE_USER=… SITE_PASS=… npm run site:serve    # 本地起服务（密码至少 10 位）
+```
+
+### 三个容易踩的点
+
+1. **`site/server.cjs` 不能改回 `.js`**。本仓库 `package.json` 有 `"type": "module"`，
+   而这个服务器用 `require` / `__dirname`。改扩展名是刻意的。
+2. **`site/Dockerfile` 里的 `npm ci --ignore-scripts` 不能去掉**。线索发现器依赖
+   better-sqlite3（原生模块），alpine 是 musl 拿不到预编译包，会现场 node-gyp 然后失败
+   —— 而站点构建只需要 marked（纯 JS）。2026-08-12 实测去掉就 exit 1。
+3. **`site/Dockerfile.dockerignore` 必须存在**（BuildKit 专用，故 workflow 里
+   `DOCKER_BUILDKIT=1` 是必需的）。少了它会构建出一个「能访问但里面什么都没有」的空壳站。
+
+### 看板与账本是构建期快照
+
+`npm run site` 把当时的 `board.json` / `ledger.jsonl` 编译进静态页。
+改了数据要重新 commit + 部署才会反映到线上，这是设计取舍不是 bug。

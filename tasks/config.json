@@ -1,0 +1,36 @@
+{
+  "stages": {
+    "inbox":   { "name": "想法收件箱", "desc": "用户随口说的想法先进这里，等 CEO 判断" },
+    "backlog": { "name": "待办", "desc": "已立项：有验收标准，等调度提取" },
+    "icebox":  { "name": "冷藏", "desc": "想法不错但现在不做，定期回顾" },
+    "ready":   { "name": "已拆解", "desc": "拆成了可执行的子任务，等进开发" },
+    "dev":     { "name": "开发中", "desc": "正在做，WIP 上限 2" },
+    "test":    { "name": "测试中", "desc": "开发完成，验证验收标准" },
+    "deploy":  { "name": "上线中", "desc": "部署/交付环节，通常需要用户提供凭据" },
+    "done":    { "name": "完成", "desc": "有产出物证据（commit hash / 文件路径）" },
+    "rejected":{ "name": "已否决", "desc": "判断不立项，理由留档" }
+  },
+  "transitions": {
+    "inbox":   ["backlog", "icebox", "rejected"],
+    "backlog": ["ready", "dev", "icebox"],
+    "icebox":  ["backlog"],
+    "ready":   ["dev", "backlog"],
+    "dev":     ["test", "backlog"],
+    "test":    ["deploy", "done", "dev"],
+    "deploy":  ["done", "test"],
+    "done":    [],
+    "rejected": []
+  },
+  "wipLimits": { "dev": 2, "test": 2 },
+  "projects": ["1688", "businessskills", "consulting", "easetax", "idearise", "IErepair", "localrank", "print-main", "satgame", "seomachine", "training", "veerytee", "veggie", "shared"],
+  "priorities": ["P0", "P1", "P2"],
+  "judgment": {
+    "note": "CEO 判断想法立不立项的四条标准，缺一不可才进 backlog",
+    "criteria": [
+      "战略匹配：服务三线之一（资产线=被动收入内容账号 / 现金流线=职场咨询+咨询式demo建站系统 / 月费线=评价管理+代运营），以 docs/20260811-公司战略.md 现行版为准；都不沾 → icebox",
+      "可验证：能写出明确的验收标准；写不出来说明想法还没想清楚 → 退回细化或否决",
+      "成本可控：一周内能出第一个可交付单元；做不到就先拆一个能做到的切片",
+      "不踩红线：合规红线（评价门控/代写评价等）与安全红线，踩线直接否决，不讨论"
+    ]
+  }
+}

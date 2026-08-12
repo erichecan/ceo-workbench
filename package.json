@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "小红书建站需求线索发现器：抓取 → AI 分析 → 每日报告",
+  "description": "建站线索发现器 + CEO 工作台（任务看板 · 财务账本 · 文档中心）",
   "bin": {
     "leads": "./src/cli.js"
   },
@@ -13,10 +13,15 @@
     "report": "node src/cli.js report",
     "daily": "node src/cli.js daily",
     "list": "node src/cli.js list",
-    "doctor": "node src/cli.js doctor"
+    "doctor": "node src/cli.js doctor",
+    "board": "node tasks/scripts/board.mjs",
+    "ledger": "node finance/scripts/ledger.mjs",
+    "site": "node site/build.mjs",
+    "site:serve": "node site/server.cjs"
   },
   "dependencies": {
-    "better-sqlite3": "^12.2.0"
+    "better-sqlite3": "^12.2.0",
+    "marked": "^18.0.9"
   },
   "engines": {
     "node": ">=20"

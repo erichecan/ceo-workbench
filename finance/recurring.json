@@ -1,0 +1,28 @@
+[
+  {
+    "id": "ghl-starter",
+    "name": "GoHighLevel Starter",
+    "type": "expense",
+    "project": "shared",
+    "category": "工具订阅",
+    "amount": 97,
+    "currency": "USD",
+    "counterparty": "GoHighLevel",
+    "active": false,
+    "startDate": null,
+    "note": "T3 开通后：active 改 true、startDate 填首次扣款日，然后跑 roll"
+  },
+  {
+    "id": "localfalcon-starter",
+    "name": "Local Falcon Starter",
+    "type": "expense",
+    "project": "localrank",
+    "category": "工具订阅",
+    "amount": 24.99,
+    "currency": "USD",
+    "counterparty": "Local Falcon",
+    "active": false,
+    "startDate": null,
+    "note": "T3 开通后启用，同上"
+  }
+]

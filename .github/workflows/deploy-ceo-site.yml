@@ -1,0 +1,99 @@
+name: Deploy CEO Site to Cloud Run
+
+# CEO 工作台（任务看板 + 财务工作台 + 文档中心）。
+# 看板与账本是构建期快照——commit 后重新部署才会更新，这是设计取舍。
+#
+# 2026-08-12 从 erichecan/consulting 迁来。本仓库同时还装着建站线索发现器
+# （src/ data/ reports/），那部分与本工作流无关，靠下面的 paths 过滤隔开。
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "tasks/**"
+      - "finance/**"
+      - "docs/**"
+      - "site/**"
+      # 依赖或 lockfile 变了，站点镜像的 npm ci 结果就会变，也要重建
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-ceo-site.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: supply-491510
+      REGION: asia-east1
+      SERVICE_NAME: ceo-workbench
+      IMAGE: asia-east1-docker.pkg.dev/supply-491510/triplan/ceo-workbench:${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build
+        env:
+          DOCKER_BUILDKIT: "1"   # 必须开：只有 BuildKit 会用 site/Dockerfile.dockerignore
+        run: |
+          docker build -t ${{ env.IMAGE }} -f site/Dockerfile .
+          # 构建期自检：镜像里必须真的有文档和账本，否则就是空壳站
+          DOCS=$(docker run --rm --entrypoint sh ${{ env.IMAGE }} -c 'ls site/dist/docs/*.html 2>/dev/null | wc -l')
+          echo "镜像内文档页数: $DOCS"
+          if [ "$DOCS" -lt 2 ]; then
+            echo "✗ 镜像里几乎没有文档——多半是 .dockerignore 把 *.md 排除了"
+            exit 1
+          fi
+
+      - run: docker push ${{ env.IMAGE }}
+
+      - name: Deploy
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.IMAGE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --allow-unauthenticated \
+            --min-instances=0 --max-instances=2 \
+            --cpu=0.5 --memory=256Mi --port=8080 \
+            --set-secrets="SITE_USER=ceo-site-user:latest,SITE_PASS=ceo-site-pass:latest" \
+            --quiet
+          # 说明：--allow-unauthenticated 让浏览器能直接访问，
+          # 真正的门在应用层 Basic Auth（site/server.cjs 无密码则拒绝启动）。
+
+      - name: Verify
+        run: |
+          URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+            --format="value(status.url)")
+          echo "URL: $URL"
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
+          echo "未带凭据访问首页 → HTTP $CODE"
+          if [ "$CODE" != "401" ]; then
+            echo "✗ 鉴权未生效：期望 401，实际 $CODE"
+            exit 1
+          fi
+
+          # ⚠️ HTTP 200 只证明服务器活着，不证明页面里有东西。
+          # 2026-08-12 首次部署即为「200 但内容全空」，故加下面的内容断言。
+          U=$(gcloud secrets versions access latest --secret=ceo-site-user --project=${{ env.PROJECT_ID }})
+          P=$(gcloud secrets versions access latest --secret=ceo-site-pass --project=${{ env.PROJECT_ID }})
+          DOCS_HTML=$(curl -s -u "$U:$P" "$URL/docs/")
+          DOC_COUNT=$(echo "$DOCS_HTML" | grep -c 'class="doc"' || true)
+          echo "文档中心可点击文档数: $DOC_COUNT"
+          if [ "$DOC_COUNT" -lt 2 ]; then
+            echo "✗ 文档中心是空的"
+            exit 1
+          fi
+          if ! curl -s -u "$U:$P" "$URL/" | grep -q "应收未收"; then
+            echo "✗ 首页缺少财务数据（finance/ 未进镜像？）"
+            exit 1
+          fi
+          echo "✅ 部署成功：鉴权生效 + $DOC_COUNT 份文档 + 财务数据在位 → $URL"

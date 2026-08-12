@@ -1,0 +1,16 @@
+# CEO 站点专用的构建排除表（BuildKit 会优先用 <dockerfile>.dockerignore）。
+#
+# ⚠️ 为什么需要这个文件：根目录的 .dockerignore 是给 consulting 官网镜像用的，
+# 它排除了 `*.md` 和 `finance` —— 而这两样恰恰是本站点的全部内容来源。
+# 沿用根规则会构建出一个「能访问但里面什么都没有」的空壳站。
+# 2026-08-12 第一次部署就是这么翻的车。
+node_modules
+.next
+.git
+.env
+.env.*
+.claude
+.playwright-mcp
+site/dist
+*.png
+*.jpg

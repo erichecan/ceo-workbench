@@ -1,0 +1,1498 @@
+[
+  {
+    "id": "c-a6c278",
+    "title": "财务记账工作台（账本+自动过账+封账冻结）",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P1",
+    "source": "CEO会话 2026-08-11",
+    "note": "",
+    "acceptance": "六命令可用；封账篡改可检测；工作台生成；全链路实测通过",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "commit 481cae5（finance/ + docs/20260811-记账工作台.md）",
+    "verdictReason": "阶段一判定一半是财务数字，账本是判定依据",
+    "createdAt": "2026-08-11T17:37:44.495Z",
+    "doneAt": "2026-08-11T17:38:07.287Z",
+    "history": [
+      {
+        "at": "2026-08-11T17:37:44.495Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.028Z",
+        "action": "judge:accept",
+        "note": "阶段一判定一半是财务数字，账本是判定依据"
+      },
+      {
+        "at": "2026-08-11T17:38:07.121Z",
+        "action": "move:backlog->dev",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.206Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.288Z",
+        "action": "move:test->done",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "id": "c-dca70a",
+    "title": "SuperAICrew 调研与 AI 公司工作台方案",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P1",
+    "source": "用户想法（短视频）",
+    "note": "",
+    "acceptance": "查证 SuperAICrew 真伪；给出不引入新框架的论证与替代方案",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "commit 7d5477a（docs/20260811-AI公司工作台调研与方案.md）",
+    "verdictReason": "用户指令调研；判断影响后续所有自动化投入方向",
+    "createdAt": "2026-08-11T17:37:44.565Z",
+    "doneAt": "2026-08-11T17:38:07.617Z",
+    "history": [
+      {
+        "at": "2026-08-11T17:37:44.565Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.374Z",
+        "action": "judge:accept",
+        "note": "用户指令调研；判断影响后续所有自动化投入方向"
+      },
+      {
+        "at": "2026-08-11T17:38:07.455Z",
+        "action": "move:backlog->dev",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.538Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.617Z",
+        "action": "move:test->done",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "id": "c-08f72f",
+    "title": "全自动任务流水线（想法→判断→拆解→开发→测试→上线 看板）",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P1",
+    "source": "用户想法（Trello 模型）",
+    "note": "",
+    "acceptance": "idea/judge/split/move/next/check/report 七命令可用且不变量守住；看板页面生成；定时调度 Routine 建立",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "commit c5d1e36（tasks/ + docs/20260811-任务流水线.md + Routine trig_01172hbByTX7ZjWRURNKRriJ）",
+    "verdictReason": "用户明确要求；是全部自动化的主干",
+    "createdAt": "2026-08-11T17:37:44.643Z",
+    "doneAt": "2026-08-11T17:49:55.995Z",
+    "history": [
+      {
+        "at": "2026-08-11T17:37:44.643Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.699Z",
+        "action": "judge:accept",
+        "note": "用户明确要求；是全部自动化的主干"
+      },
+      {
+        "at": "2026-08-11T17:38:07.781Z",
+        "action": "move:backlog->dev",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.862Z",
+        "action": "move:dev->test",
+        "note": "本会话交付中，commit 后回填证据"
+      },
+      {
+        "at": "2026-08-11T17:49:55.995Z",
+        "action": "move:test->done",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "id": "c-3111b6",
+    "title": "AI 公司员工体系 company/（花名册+秘书/会计岗位说明书+worklog+公司工作台页）",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P1",
+    "source": "docs/20260811-AI公司工作台调研与方案.md",
+    "note": "",
+    "acceptance": "roster+秘书/会计岗位说明书+worklog 机制+公司工作台页；秘书晨报试运行 3 天有产出",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "调研方案首批编制；本次用户指令批准了定时调度方向",
+    "createdAt": "2026-08-11T17:37:44.719Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T17:37:44.719Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:07.951Z",
+        "action": "judge:accept",
+        "note": "调研方案首批编制；本次用户指令批准了定时调度方向"
+      }
+    ]
+  },
+  {
+    "id": "c-73a943",
+    "title": "localrank 仓库接入云端（推 GitHub + 授权），云端员工才能碰产品代码",
+    "stage": "backlog",
+    "project": "localrank",
+    "priority": "P1",
+    "source": "CEO判断",
+    "note": "",
+    "acceptance": "云端会话能 clone localrank 并跑通 build",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "不解锁则云端员工永远碰不了产品代码，卡死开发线",
+    "createdAt": "2026-08-11T17:37:44.800Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T17:37:44.800Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:08.033Z",
+        "action": "judge:accept",
+        "note": "不解锁则云端员工永远碰不了产品代码，卡死开发线"
+      },
+      {
+        "at": "2026-08-11T17:38:08.137Z",
+        "action": "block",
+        "note": "需用户：把本地 localrank 仓库推到 GitHub，并在会话中用 add_repo 授权"
+      },
+      {
+        "at": "2026-08-11T22:23:10.279Z",
+        "action": "unblock",
+        "note": "运营迁至本地：localrank 就在 /Volumes/datacenter/04-eric/AIcoding/localrank，本地会话直接读写，不必为「让云端够到」而推 GitHub。推远端仍有备份/CI 价值，冷藏待日后按需重启"
+      },
+      {
+        "at": "2026-08-11T22:23:10.280Z",
+        "action": "move:backlog->icebox",
+        "note": "运营迁至本地：localrank 就在 /Volumes/datacenter/04-eric/AIcoding/localrank，本地会话直接读写，不必为「让云端够到」而推 GitHub。推远端仍有备份/CI 价值，冷藏待日后按需重启"
+      },
+      {
+        "at": "2026-08-12T05:46:32.247Z",
+        "action": "move:icebox->backlog",
+        "note": "重新激活：localrank 已并入 idearise，而 idearise 有 GitHub remote 且走 GHA 部署——推 GitHub 这件事由合并自动解决"
+      }
+    ]
+  },
+  {
+    "id": "c-3b5669",
+    "title": "开通 GoHighLevel + Local Falcon 并跑通全流程",
+    "stage": "backlog",
+    "project": "localrank",
+    "priority": "P1",
+    "source": "SaaS台账 T3",
+    "note": "",
+    "acceptance": "以原台账 T3 验收为准（本卡是指针，状态真相在原台账）",
+    "parent": null,
+    "blockedOn": "需用户：付款开通 GoHighLevel Starter（$97）与 Local Falcon Starter（$24.99）",
+    "ref": "docs/20260807-gbp-reviews-saas-tasks.md T3",
+    "evidence": null,
+    "verdictReason": "SaaS 台账既定任务，白标收入路径的前置",
+    "createdAt": "2026-08-11T17:37:44.882Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T17:37:44.882Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T17:38:08.235Z",
+        "action": "judge:accept",
+        "note": "SaaS 台账既定任务，白标收入路径的前置"
+      },
+      {
+        "at": "2026-08-11T17:38:08.322Z",
+        "action": "block",
+        "note": "需用户：付款开通 GoHighLevel Starter（$97）与 Local Falcon Starter（$24.99）"
+      }
+    ]
+  },
+  {
+    "id": "c-a1bbf9",
+    "title": "小红书自动笔记产线：纳入流水线管理，保持不断更（养账号）",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P0",
+    "source": "用户战略指示 2026-08-11",
+    "note": "",
+    "acceptance": "产线接入云端可见；有断更检测与周产出记录；连续 4 周不断更",
+    "parent": null,
+    "blockedOn": "需用户：小红书账号登录态、发什么内容、目标频率（产线代码位置本地可自查，已不再是阻塞项）",
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "用户声明为不能停的长期线；账号是随时间增值的资产，断更即贬值",
+    "createdAt": "2026-08-11T18:12:36.626Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T18:12:36.642Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T18:12:36.892Z",
+        "action": "judge:accept",
+        "note": "用户声明为不能停的长期线；账号是随时间增值的资产，断更即贬值"
+      },
+      {
+        "at": "2026-08-11T18:12:37.029Z",
+        "action": "block",
+        "note": "需用户：产线现在在哪（仓库/工具/账号）、发什么内容、目标频率——接入后云端才能守住「不断更」"
+      },
+      {
+        "at": "2026-08-11T22:23:13.267Z",
+        "action": "block",
+        "note": "需用户：小红书账号登录态、发什么内容、目标频率（产线代码位置本地可自查，已不再是阻塞项）"
+      }
+    ]
+  },
+  {
+    "id": "c-e44562",
+    "title": "喜马拉雅自动课程产线（3-6月养育，目标长期被动收入）",
+    "stage": "ready",
+    "project": "shared",
+    "priority": "P0",
+    "source": "用户战略指示 2026-08-11",
+    "note": "",
+    "acceptance": "v1 产线跑通选题→脚本→音频→上架，一门课出第一批节目并进入周更",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "用户声明的被动收入线；课程内容可复用既有积累（ERP/本地SEO/GBP/按摩垂直），边际成本低",
+    "createdAt": "2026-08-11T18:12:36.741Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T18:12:36.741Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T18:12:36.961Z",
+        "action": "judge:accept",
+        "note": "用户声明的被动收入线；课程内容可复用既有积累（ERP/本地SEO/GBP/按摩垂直），边际成本低"
+      },
+      {
+        "at": "2026-08-11T18:12:37.096Z",
+        "action": "split",
+        "note": "拆出 3 张子卡"
+      }
+    ]
+  },
+  {
+    "id": "c-2a2643",
+    "title": "喜马拉雅平台调研：课程/专辑变现路径、AI 生成内容政策、开号认证要求、对标账号",
+    "stage": "dev",
+    "project": "shared",
+    "priority": "P0",
+    "source": "拆自 c-e44562",
+    "note": "",
+    "acceptance": "调研报告入 docs：已有账号的放大路径（扩容/完播/涨订阅）、课程变现门槛数字、AI 内容政策原文出处、3 个对标账号拆解",
+    "parent": "c-e44562",
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": null,
+    "createdAt": "2026-08-11T18:12:37.095Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T18:12:37.095Z",
+        "action": "split",
+        "note": "从「喜马拉雅自动课程产线（3-6月养育，目标长期被动收入）」拆出"
+      },
+      {
+        "at": "2026-08-11T19:24:58.155Z",
+        "action": "amend",
+        "note": "战略v2纠偏：账号与课程已存在，调研重点由从零开号改为放大既有账号"
+      },
+      {
+        "at": "2026-08-11T20:24:58.179Z",
+        "action": "move:ready->dev",
+        "note": "市场判断与平台生态完成（docs/20260811-喜马拉雅AI课程路线调研.md）"
+      },
+      {
+        "at": "2026-08-11T20:24:58.305Z",
+        "action": "block",
+        "note": "喜马拉雅全域被云端网络屏蔽：专辑分析/对标拆解/政策原文需用户提供 App 截图或课程目录文本（本地会话亦可抓取）"
+      },
+      {
+        "at": "2026-08-11T22:23:04.211Z",
+        "action": "unblock",
+        "note": "运营迁至本地会话：喜马拉雅可直连抓取，不再受云端出口屏蔽"
+      }
+    ]
+  },
+  {
+    "id": "c-235e8a",
+    "title": "课程选题与定位方案：盘点现有积累，提 2-3 个能做 100+ 集的方向",
+    "stage": "ready",
+    "project": "shared",
+    "priority": "P0",
+    "source": "拆自 c-e44562",
+    "note": "",
+    "acceptance": "方案含选题、目标听众、变现假设、首门课前 10 集大纲",
+    "parent": "c-e44562",
+    "blockedOn": "需用户：喜马拉雅账号现状（已有课程清单、播放/订阅/收入数据）",
+    "ref": null,
+    "evidence": null,
+    "verdictReason": null,
+    "createdAt": "2026-08-11T18:12:37.096Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T18:12:37.096Z",
+        "action": "split",
+        "note": "从「喜马拉雅自动课程产线（3-6月养育，目标长期被动收入）」拆出"
+      },
+      {
+        "at": "2026-08-11T19:24:58.269Z",
+        "action": "block",
+        "note": "需用户：喜马拉雅账号现状（已有课程清单、播放/订阅/收入数据）"
+      }
+    ]
+  },
+  {
+    "id": "c-9b358d",
+    "title": "产线 MVP：选题→脚本→TTS 音频的最小流程",
+    "stage": "ready",
+    "project": "shared",
+    "priority": "P0",
+    "source": "拆自 c-e44562",
+    "note": "",
+    "acceptance": "产出 1 集可听样片，单集边际成本可算",
+    "parent": "c-e44562",
+    "blockedOn": "任务性质需重定：产线 MVP 已存在于 businessskills/喜马拉雅（src+台账+2 期含 audio.mp3 的成品），不是从零建。待确认现有 TTS 方案与单期成本，再决定是接管自动化还是重做",
+    "ref": null,
+    "evidence": null,
+    "verdictReason": null,
+    "createdAt": "2026-08-11T18:12:37.096Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T18:12:37.096Z",
+        "action": "split",
+        "note": "从「喜马拉雅自动课程产线（3-6月养育，目标长期被动收入）」拆出"
+      },
+      {
+        "at": "2026-08-11T18:12:37.208Z",
+        "action": "block",
+        "note": "依赖前两张子卡结论；TTS 工具选型与预算需用户确认"
+      },
+      {
+        "at": "2026-08-12T02:47:01.048Z",
+        "action": "block",
+        "note": "任务性质需重定：产线 MVP 已存在于 businessskills/喜马拉雅（src+台账+2 期含 audio.mp3 的成品），不是从零建。待确认现有 TTS 方案与单期成本，再决定是接管自动化还是重做"
+      }
+    ]
+  },
+  {
+    "id": "c-fe3b70",
+    "title": "AI Coding 工作目录全项目梳理：定 继续/暂停/归档",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P1",
+    "source": "用户指示 2026-08-11",
+    "note": "",
+    "acceptance": "全项目清单入 docs：每个项目一行结论（继续/暂停/归档）+ 理由 + 维护成本",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "docs/20260811-项目审计报告.md",
+    "verdictReason": "在养线（自媒体）与在售线（SaaS/咨询）之外的项目都在消耗注意力；定暂停名单本身就是产能",
+    "createdAt": "2026-08-11T18:18:53.042Z",
+    "doneAt": "2026-08-12T02:46:37.941Z",
+    "history": [
+      {
+        "at": "2026-08-11T18:18:53.042Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T18:18:53.317Z",
+        "action": "judge:accept",
+        "note": "在养线（自媒体）与在售线（SaaS/咨询）之外的项目都在消耗注意力；定暂停名单本身就是产能"
+      },
+      {
+        "at": "2026-08-11T18:18:53.497Z",
+        "action": "split",
+        "note": "拆出 2 张子卡"
+      },
+      {
+        "at": "2026-08-12T02:46:37.698Z",
+        "action": "move:ready->dev",
+        "note": "子卡全完成，父卡走完流转"
+      },
+      {
+        "at": "2026-08-12T02:46:37.823Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T02:46:37.941Z",
+        "action": "move:test->done",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "id": "c-29f67e",
+    "title": "小红书获客产线：持续挖掘建站客户与系统（ERP）客户",
+    "stage": "ready",
+    "project": "consulting",
+    "priority": "P0",
+    "source": "用户战略指示 2026-08-11（不能停）",
+    "note": "",
+    "acceptance": "线索台账建立且连续 4 周每周有新增线索记录",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "用户原话：只有更多获客才有更多可行性；服务咨询/建站两条在售线，且给小红书产线一个商业 KPI",
+    "createdAt": "2026-08-11T18:18:53.136Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T18:18:53.136Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T18:18:53.395Z",
+        "action": "judge:accept",
+        "note": "用户原话：只有更多获客才有更多可行性；服务咨询/建站两条在售线，且给小红书产线一个商业 KPI"
+      },
+      {
+        "at": "2026-08-11T18:18:53.592Z",
+        "action": "split",
+        "note": "拆出 2 张子卡"
+      }
+    ]
+  },
+  {
+    "id": "c-a473ff",
+    "title": "审计方法与本地会话指令",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P1",
+    "source": "拆自 c-fe3b70",
+    "note": "",
+    "acceptance": "可直接粘贴进工作电脑 Claude Code 的完整指令文档，含产出模板与只读红线",
+    "parent": "c-fe3b70",
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "docs/20260811-项目审计指令.md（含只读红线、产出模板、交回方式）",
+    "verdictReason": null,
+    "createdAt": "2026-08-11T18:18:53.495Z",
+    "doneAt": "2026-08-11T18:19:40.322Z",
+    "history": [
+      {
+        "at": "2026-08-11T18:18:53.495Z",
+        "action": "split",
+        "note": "从「AI Coding 工作目录全项目梳理：定 继续/暂停/归档」拆出"
+      },
+      {
+        "at": "2026-08-11T18:19:40.091Z",
+        "action": "move:ready->dev",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T18:19:40.226Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T18:19:40.322Z",
+        "action": "move:test->done",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "id": "c-1afbf6",
+    "title": "执行审计并出报告",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P1",
+    "source": "拆自 c-fe3b70",
+    "note": "",
+    "acceptance": "全项目 继续/暂停/归档 结论清单入 docs",
+    "parent": "c-fe3b70",
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "docs/20260811-项目审计报告.md",
+    "verdictReason": null,
+    "createdAt": "2026-08-11T18:18:53.497Z",
+    "doneAt": "2026-08-12T02:46:31.662Z",
+    "history": [
+      {
+        "at": "2026-08-11T18:18:53.497Z",
+        "action": "split",
+        "note": "从「AI Coding 工作目录全项目梳理：定 继续/暂停/归档」拆出"
+      },
+      {
+        "at": "2026-08-11T18:18:53.785Z",
+        "action": "block",
+        "note": "需用户：在工作电脑上用 Claude Code 打开 AI Coding 目录，粘贴审计指令（指令文档即将就绪）"
+      },
+      {
+        "at": "2026-08-11T22:23:04.341Z",
+        "action": "unblock",
+        "note": "本地会话即审计指令的执行环境，无需用户在工作电脑上转手粘贴"
+      },
+      {
+        "at": "2026-08-12T02:46:31.432Z",
+        "action": "move:ready->dev",
+        "note": "本地会话执行审计"
+      },
+      {
+        "at": "2026-08-12T02:46:31.544Z",
+        "action": "move:dev->test",
+        "note": "22 个项目采集完成，报告成文"
+      },
+      {
+        "at": "2026-08-12T02:46:31.662Z",
+        "action": "move:test->done",
+        "note": "含总览表、两条产线专节、暂停归档清单、隐性成本、F3 核实、7 条待确认"
+      }
+    ]
+  },
+  {
+    "id": "c-49beee",
+    "title": "获客方案与线索台账：内容型引流+需求帖监测双路径、合规边界、线索表结构",
+    "stage": "ready",
+    "project": "consulting",
+    "priority": "P0",
+    "source": "拆自 c-29f67e",
+    "note": "",
+    "acceptance": "方案文档 + 线索台账文件建立",
+    "parent": "c-29f67e",
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": null,
+    "createdAt": "2026-08-11T18:18:53.591Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T18:18:53.591Z",
+        "action": "split",
+        "note": "从「小红书获客产线：持续挖掘建站客户与系统（ERP）客户」拆出"
+      }
+    ]
+  },
+  {
+    "id": "c-a9e980",
+    "title": "获客执行接入：账号与产线接入后按周运转",
+    "stage": "ready",
+    "project": "consulting",
+    "priority": "P0",
+    "source": "拆自 c-29f67e",
+    "note": "",
+    "acceptance": "连续 2 周线索台账有新增记录",
+    "parent": "c-29f67e",
+    "blockedOn": "需用户：小红书账号与现有产线接入（与 c-a1bbf9 同一把锁）",
+    "ref": null,
+    "evidence": null,
+    "verdictReason": null,
+    "createdAt": "2026-08-11T18:18:53.592Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T18:18:53.592Z",
+        "action": "split",
+        "note": "从「小红书获客产线：持续挖掘建站客户与系统（ERP）客户」拆出"
+      },
+      {
+        "at": "2026-08-11T18:18:53.850Z",
+        "action": "block",
+        "note": "需用户：小红书账号与现有产线接入（与 c-a1bbf9 同一把锁）"
+      }
+    ]
+  },
+  {
+    "id": "c-ed1b6a",
+    "title": "喜马拉雅账号现状接入：已有课程与被动收入数据入视野与财务台账",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P0",
+    "source": "战略v2纠偏",
+    "note": "",
+    "acceptance": "账号/课程清单在案；历史被动收入按月入财务台账；后续月度收入有固定入账动作",
+    "parent": null,
+    "blockedOn": "需用户：喜马拉雅账号、课程清单、收入数据（截图或后台导出）",
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "三个不能停账号目前一个都不在视野内（战略v2风险#4）；被动收入必须入账",
+    "createdAt": "2026-08-11T19:24:58.393Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T19:24:58.393Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T19:24:58.611Z",
+        "action": "judge:accept",
+        "note": "三个不能停账号目前一个都不在视野内（战略v2风险#4）；被动收入必须入账"
+      },
+      {
+        "at": "2026-08-11T19:24:58.721Z",
+        "action": "block",
+        "note": "需用户：喜马拉雅账号、课程清单、收入数据（截图或后台导出）"
+      }
+    ]
+  },
+  {
+    "id": "c-a0bb0a",
+    "title": "「AI 当 CEO」账号：本公司 AI 运营全过程实录（资产线第三账号）",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P1",
+    "source": "用户提方向、CEO 决策 2026-08-11",
+    "note": "",
+    "acceptance": "定位方案入 docs：目标听众、平台选择、更新节奏、首月 20 条选题、台账→内容的素材自动化设计；红线：数字必须取自台账，失败也发",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "素材零成本自产（台账/看板即内容）；与职场认知内容同源；反市场叙事有辨识度；喂课程线。成功案例号因冷启动死结不单开，案例攒够进获客内容线",
+    "createdAt": "2026-08-11T19:24:58.826Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T19:24:58.826Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T19:24:58.994Z",
+        "action": "judge:accept",
+        "note": "素材零成本自产（台账/看板即内容）；与职场认知内容同源；反市场叙事有辨识度；喂课程线。成功案例号因冷启动死结不单开，案例攒够进获客内容线"
+      }
+    ]
+  },
+  {
+    "id": "c-92fce4",
+    "title": "咨询式 demo 产线：小红书线索→行业/生意诊断→定制 demo，≤48h 交付",
+    "stage": "backlog",
+    "project": "consulting",
+    "priority": "P0",
+    "source": "战略v2（用户定义的差异化打法）",
+    "note": "",
+    "acceptance": "产线流程文档 + 可复用 demo 骨架（诊断结构+行业化模板）；首个真实线索实测 ≤48h 出 demo 且 AI 人时 ≤4h",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "建站线的生死线：不做这个就退化成 299/499 模板店，与模板站和纯AI生成无差异；风险#2 要求产线化控制单件人时",
+    "createdAt": "2026-08-11T19:24:59.082Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-11T19:24:59.082Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-11T19:24:59.241Z",
+        "action": "judge:accept",
+        "note": "建站线的生死线：不做这个就退化成 299/499 模板店，与模板站和纯AI生成无差异；风险#2 要求产线化控制单件人时"
+      }
+    ]
+  },
+  {
+    "id": "c-c56c6f",
+    "title": "CEO 工作台上线：任务看板+财务工作台部署到 Cloud Run，带鉴权",
+    "stage": "backlog",
+    "project": "consulting",
+    "priority": "P0",
+    "source": "用户 6 条指令第 2 条",
+    "note": "",
+    "acceptance": "线上可访问看板与财务页；⛔ 财务数据必须有鉴权，不得 allow-unauthenticated 裸奔；页面数据与本地 board.json/ledger.jsonl 一致；走 GitHub Actions 部署，非 Cloud Build",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "月费线与现金流线的运营中枢，CEO 每日读写；用户明确要生产地址",
+    "createdAt": "2026-08-12T02:42:44.540Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T02:42:44.541Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T02:43:00.906Z",
+        "action": "judge:accept",
+        "note": "月费线与现金流线的运营中枢，CEO 每日读写；用户明确要生产地址"
+      }
+    ]
+  },
+  {
+    "id": "c-25cca7",
+    "title": "喜马拉雅产线独立成库：从 businessskills 拆出，新目录+新 GitHub 仓库",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P0",
+    "source": "用户 6 条指令第 3 条",
+    "note": "",
+    "acceptance": "新仓库含现有 src/data/output 与 git 历史交代；businessskills 下原目录处置有明确结论（迁走或保留指针），不留两份真相；调研文档随迁",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "资产线核心产线，已有实跑产出，独立成库便于按项目管理与后续部署",
+    "createdAt": "2026-08-12T02:42:44.659Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T02:42:44.659Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T02:43:01.040Z",
+        "action": "judge:accept",
+        "note": "资产线核心产线，已有实跑产出，独立成库便于按项目管理与后续部署"
+      }
+    ]
+  },
+  {
+    "id": "c-3bf505",
+    "title": "localrank 与 Birdeye 调研迁入 1688ie 仓库",
+    "stage": "icebox",
+    "project": "localrank",
+    "priority": "P1",
+    "source": "用户 6 条指令第 5 条",
+    "note": "",
+    "acceptance": "迁移后 localrank 16 个 commit 的历史可追溯；1688ie 仓库能正常构建部署；consulting/docs 下 Birdeye 与 GBP 台账的去留有结论，不留两份真相",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "localrank 与 Birdeye 调研同属本地商家数字营销线，1688ie 是该线的对外载体且已配好 GitHub Actions",
+    "createdAt": "2026-08-12T02:42:44.778Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T02:42:44.779Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T02:43:01.159Z",
+        "action": "judge:accept",
+        "note": "localrank 与 Birdeye 调研同属本地商家数字营销线，1688ie 是该线的对外载体且已配好 GitHub Actions"
+      },
+      {
+        "at": "2026-08-12T04:29:41.255Z",
+        "action": "block",
+        "note": "⚠️ 迁移理由需重新确认：1688.ie 是爱尔兰华人生意平台，localrank 服务 GTA 华人商家——两个国家的市场。原判断「同属本地商家数字营销线」基于我把 1688 误认为 GTA 站点。是能力复用到爱尔兰，还是另有考虑？"
+      },
+      {
+        "at": "2026-08-12T05:46:32.128Z",
+        "action": "unblock",
+        "note": "作废：localrank 已并入 idearise（c-6a011f），不再迁往爱尔兰站 1688.ie；Birdeye 调研文档留在 consulting/docs"
+      },
+      {
+        "at": "2026-08-12T05:46:32.128Z",
+        "action": "move:backlog->icebox",
+        "note": "作废：localrank 已并入 idearise（c-6a011f），不再迁往爱尔兰站 1688.ie；Birdeye 调研文档留在 consulting/docs"
+      }
+    ]
+  },
+  {
+    "id": "c-a05945",
+    "title": "小红书产线数据日监测：CEO 每日读产线数据并回写看板",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P0",
+    "source": "用户 6 条指令第 6 条",
+    "note": "",
+    "acceptance": "每日产出一份数据快照入库（笔记数/曝光/互动/涨粉）；异常（断更、跑挂）当天在看板开卡；数据源与采集方式写清，不靠人工截图",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "小红书是获客入口，产线已存在，CEO 职责是让它不断更并用数据反馈选题",
+    "createdAt": "2026-08-12T02:42:44.894Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T02:42:44.894Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T02:43:01.280Z",
+        "action": "judge:accept",
+        "note": "小红书是获客入口，产线已存在，CEO 职责是让它不断更并用数据反馈选题"
+      }
+    ]
+  },
+  {
+    "id": "c-95a75f",
+    "title": "抢救未提交代码：supply/secondme/stockmate/beauty 共 1282 项无远端备份",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P1",
+    "source": "审计报告 §3",
+    "note": "",
+    "acceptance": "四个项目各完成一次抢救提交并推到远端（beauty/supply 需先建 remote）；确认无独有代码后方可标记归档",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "无远端备份的工作丢了不可恢复，且是归档动作的前置",
+    "createdAt": "2026-08-12T02:46:38.062Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T02:46:38.063Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T02:47:00.801Z",
+        "action": "judge:accept",
+        "note": "无远端备份的工作丢了不可恢复，且是归档动作的前置"
+      }
+    ]
+  },
+  {
+    "id": "c-6eb43f",
+    "title": "veerytee 夜间自动生成任务是否仍在扣费——唯一可能无声花钱的",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P0",
+    "source": "审计报告 §4.2",
+    "note": "",
+    "acceptance": "确认夜间任务是否在跑；在跑则停掉或明确保留理由；实际月成本数字入财务台账周期项",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "launchctl list 无 veerytee/night 任务；pipeline/night_run.sh 硬编码 /Users/he/Desktop/eric-workspace 路径（另一台机器）；deploy-store.yml 无 schedule 段",
+    "verdictReason": "审计发现的唯一可能持续扣费项，钱的事优先",
+    "createdAt": "2026-08-12T02:46:38.177Z",
+    "doneAt": "2026-08-12T03:10:45.422Z",
+    "history": [
+      {
+        "at": "2026-08-12T02:46:38.178Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T02:47:00.925Z",
+        "action": "judge:accept",
+        "note": "审计发现的唯一可能持续扣费项，钱的事优先"
+      },
+      {
+        "at": "2026-08-12T03:10:45.079Z",
+        "action": "move:backlog->dev",
+        "note": "查证 launchd 与脚本"
+      },
+      {
+        "at": "2026-08-12T03:10:45.215Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:10:45.423Z",
+        "action": "move:test->done",
+        "note": "证伪：veerytee 自动化在本机从未运行，没有在扣费。审计 §4.2 的『唯一可能无声花钱』判断错误"
+      }
+    ]
+  },
+  {
+    "id": "c-943857",
+    "title": "veggie 尾款入账：金额、收款条件、预计到账时间进财务台账应收",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P0",
+    "source": "用户答复审计 §5",
+    "note": "",
+    "acceptance": "财务台账有一条应收记录（金额/客户/收款条件/预计到账）；收回后过账并反映到 MRR 之外的一次性收入",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "目前唯一确定的应收账款，不入账则账本失真；且它是月费线何时启动的触发条件",
+    "createdAt": "2026-08-12T03:07:38.756Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T03:07:38.757Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:07:52.758Z",
+        "action": "judge:accept",
+        "note": "目前唯一确定的应收账款，不入账则账本失真；且它是月费线何时启动的触发条件"
+      },
+      {
+        "at": "2026-08-12T03:07:52.885Z",
+        "action": "block",
+        "note": "需用户：veggie 尾款金额、约定收款条件（验收节点？）、预计到账时间"
+      },
+      {
+        "at": "2026-08-12T04:49:16.906Z",
+        "action": "unblock",
+        "note": "尾款 1700 EUR 已挂应收 tx-6b402864（CAD 2734.28 @1.6084）；账本加了 receivable 类型与 settle 命令"
+      }
+    ]
+  },
+  {
+    "id": "c-75e674",
+    "title": "9 个项目归档执行完毕，工作目录降至 13 个活跃项目",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P2",
+    "source": "用户指令",
+    "note": "",
+    "acceptance": "9 个项目在 _archive/，审计报告 §3 有清单与风险说明",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "_archive/ 下 9 个项目；docs/20260811-项目审计报告.md §3",
+    "verdictReason": "记录已执行的归档动作，留痕",
+    "createdAt": "2026-08-12T03:07:38.868Z",
+    "doneAt": "2026-08-12T03:07:53.451Z",
+    "history": [
+      {
+        "at": "2026-08-12T03:07:38.868Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:07:53.080Z",
+        "action": "judge:accept",
+        "note": "记录已执行的归档动作，留痕"
+      },
+      {
+        "at": "2026-08-12T03:07:53.211Z",
+        "action": "move:backlog->dev",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:07:53.329Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:07:53.452Z",
+        "action": "move:test->done",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "id": "c-d85059",
+    "title": "调研：seomachine 提炼成独立 SEO 工具，月费模式可行性与定价",
+    "stage": "done",
+    "project": "seomachine",
+    "priority": "P0",
+    "source": "用户指令",
+    "note": "",
+    "acceptance": "调研报告入 docs：① 现有能力盘点（哪些脚本可直接变功能）② 3-5 个同类 SEO 工具的定价与功能对标 ③ DataForSEO 成本结构与毛利测算 ④ 目标客户与最小可卖版本定义 ⑤ 明确「做/不做」建议及理由",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "docs/20260811-seomachine月费化调研.md",
+    "verdictReason": "月费线只占 1.6% 精力，而 seomachine 的 DataForSEO 全套封装是现成的月费产品雏形——这是投入产出比最高的一条月费线补强路径",
+    "createdAt": "2026-08-12T03:10:45.528Z",
+    "doneAt": "2026-08-12T03:16:26.812Z",
+    "history": [
+      {
+        "at": "2026-08-12T03:10:45.529Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:11:14.755Z",
+        "action": "judge:accept",
+        "note": "月费线只占 1.6% 精力，而 seomachine 的 DataForSEO 全套封装是现成的月费产品雏形——这是投入产出比最高的一条月费线补强路径"
+      },
+      {
+        "at": "2026-08-12T03:16:26.421Z",
+        "action": "move:backlog->dev",
+        "note": "家底盘点+市场对标"
+      },
+      {
+        "at": "2026-08-12T03:16:26.633Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:16:26.812Z",
+        "action": "move:test->done",
+        "note": "结论：不做独立 SaaS（Phase1-4 全待开发、正面打 Surfer/Frase/Koala 无优势），改做 localrank 月费套餐加价模块"
+      }
+    ]
+  },
+  {
+    "id": "c-cc157b",
+    "title": "调研：veerytee 能否产品化卖给 T恤定制客户（首选 print-main 客户），做到什么程度、卖多少钱",
+    "stage": "done",
+    "project": "veerytee",
+    "priority": "P0",
+    "source": "用户指令",
+    "note": "",
+    "acceptance": "调研报告入 docs：① veerytee 现有能力与可复用部分 ② T恤定制行业对该能力的真实需求验证 ③ 产品化程度的 2-3 档方案（各自工作量）④ 每档的定价建议与依据 ⑤ 向 print-main 客户提案的切入方式",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "docs/20260811-veerytee产品化调研.md",
+    "verdictReason": "把已有资产卖给已有客户是最短的现金流路径，且 print-main 客户关系已存在，获客成本为零",
+    "createdAt": "2026-08-12T03:10:45.679Z",
+    "doneAt": "2026-08-12T03:16:27.464Z",
+    "history": [
+      {
+        "at": "2026-08-12T03:10:45.680Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:11:14.866Z",
+        "action": "judge:accept",
+        "note": "把已有资产卖给已有客户是最短的现金流路径，且 print-main 客户关系已存在，获客成本为零"
+      },
+      {
+        "at": "2026-08-12T03:16:26.992Z",
+        "action": "move:backlog->dev",
+        "note": "家底盘点+定价锚点+客户画像"
+      },
+      {
+        "at": "2026-08-12T03:16:27.207Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T03:16:27.465Z",
+        "action": "move:test->done",
+        "note": "结论：卖上新托管（B档 -399/月），不卖设计图；print-main 客户为现成目标"
+      }
+    ]
+  },
+  {
+    "id": "c-0dc591",
+    "title": "veerytee 上新托管提案页：客户可直接看的 demo（B 档）",
+    "stage": "done",
+    "project": "veerytee",
+    "priority": "P0",
+    "source": "用户：做就完了",
+    "note": "",
+    "acceptance": "页面可直接发客户：话术按客户认知写、价格锚定人力成本、独占写进承诺；⛔ 展示图必须是我方真实产出，不得用竞品参考图",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "veerytee@2addbed preview/20260812-上新托管提案.html",
+    "verdictReason": "客户看得见的东西优先于内部文档；提案页是「先看样再谈钱」打法的载体",
+    "createdAt": "2026-08-12T04:07:29.596Z",
+    "doneAt": "2026-08-12T04:11:13.356Z",
+    "history": [
+      {
+        "at": "2026-08-12T04:07:29.599Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:11:12.799Z",
+        "action": "judge:accept",
+        "note": "客户看得见的东西优先于内部文档；提案页是「先看样再谈钱」打法的载体"
+      },
+      {
+        "at": "2026-08-12T04:11:12.917Z",
+        "action": "move:backlog->dev",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:11:13.143Z",
+        "action": "move:dev->test",
+        "note": "页面成型并截图复核"
+      },
+      {
+        "at": "2026-08-12T04:11:13.356Z",
+        "action": "move:test->done",
+        "note": "结构与话术完成；样品图区块留空——发客户前必须先生成真实样品"
+      }
+    ]
+  },
+  {
+    "id": "c-bb762f",
+    "title": "生成第一批真实样品图：填充提案页，走 Codex CLI 免费额度优先",
+    "stage": "icebox",
+    "project": "veerytee",
+    "priority": "P0",
+    "source": "提案页阻塞项",
+    "note": "",
+    "acceptance": "≥8 个原创设计，每个含印刷原稿+模特图+平铺图+社媒图；⛔ 优先 Codex CLI 免费额度，超限改 OpenAI API 前必须报预估费用等用户确认；样品填入提案页并复核无第三方水印",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "提案页没有真实样品就发不出去，这是唯一挡在第一单前面的东西",
+    "createdAt": "2026-08-12T04:11:13.633Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T04:11:13.633Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:11:31.570Z",
+        "action": "judge:accept",
+        "note": "提案页没有真实样品就发不出去，这是唯一挡在第一单前面的东西"
+      },
+      {
+        "at": "2026-08-12T04:11:31.706Z",
+        "action": "block",
+        "note": "需用户：① 目标客户品类（决定选题方向）② 若 Codex CLI 额度不足，确认 OpenAI API 费用（8设计×6图=48张×$0.042≈$2）"
+      },
+      {
+        "at": "2026-08-12T05:46:32.016Z",
+        "action": "unblock",
+        "note": "veerytee 已归档，不再推进；提案页与调研结论已留存在 consulting/preview 与 docs，将来要卖再取回"
+      },
+      {
+        "at": "2026-08-12T05:46:32.016Z",
+        "action": "move:backlog->icebox",
+        "note": "veerytee 已归档，不再推进；提案页与调研结论已留存在 consulting/preview 与 docs，将来要卖再取回"
+      }
+    ]
+  },
+  {
+    "id": "c-2b64b3",
+    "title": "GTA 线的对外 demo 载体定在哪：idearise.ca 还是另起（现在行业样板在爱尔兰站 1688.ie）",
+    "stage": "backlog",
+    "project": "idearise",
+    "priority": "P1",
+    "source": "审计 §7.2 附带发现",
+    "note": "",
+    "acceptance": "明确 GTA 线的 demo 页归属（idearise.ca 增设行业样板 or 另起）；1688.ie 的爱尔兰定位与之划清，不混用",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "获客素材散在两个市场的站点里会让「咨询式 demo」打法无处落地",
+    "createdAt": "2026-08-12T04:29:41.368Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T04:29:41.368Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:30:03.047Z",
+        "action": "judge:accept",
+        "note": "获客素材散在两个市场的站点里会让「咨询式 demo」打法无处落地"
+      }
+    ]
+  },
+  {
+    "id": "c-62a26c",
+    "title": "training 已归档，活跃项目降至 12 个",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P2",
+    "source": "用户质疑归档判断",
+    "note": "",
+    "acceptance": "training 在 _archive/，审计 §7.3 有理由",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "_archive/training；docs/20260811-项目审计报告.md §7.3",
+    "verdictReason": "记录归档动作，留痕",
+    "createdAt": "2026-08-12T04:29:41.482Z",
+    "doneAt": "2026-08-12T04:30:03.528Z",
+    "history": [
+      {
+        "at": "2026-08-12T04:29:41.482Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:30:03.174Z",
+        "action": "judge:accept",
+        "note": "记录归档动作，留痕"
+      },
+      {
+        "at": "2026-08-12T04:30:03.300Z",
+        "action": "move:backlog->dev",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:30:03.413Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:30:03.528Z",
+        "action": "move:test->done",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "id": "c-6a011f",
+    "title": "idearise 与 localrank 合并成一个项目（品牌站+SaaS 同域）",
+    "stage": "deploy",
+    "project": "idearise",
+    "priority": "P0",
+    "source": "用户指令",
+    "note": "",
+    "acceptance": "合并后一个项目同时提供品牌站与 SaaS；localrank 16 个 commit 历史可追溯；两者路由不冲突（next-intl 与 /app /api 分离）；原有 idearise.ca 线上服务不中断",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "idearise 是获客前端、localrank 是交付后端，同一门生意分两个仓库会导致线索与交付割裂",
+    "createdAt": "2026-08-12T04:49:17.024Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T04:49:17.025Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:49:29.379Z",
+        "action": "judge:accept",
+        "note": "idearise 是获客前端、localrank 是交付后端，同一门生意分两个仓库会导致线索与交付割裂"
+      },
+      {
+        "at": "2026-08-12T05:24:38.947Z",
+        "action": "move:backlog->dev",
+        "note": "agent 认领执行，分支 merge/localrank"
+      },
+      {
+        "at": "2026-08-12T05:24:39.064Z",
+        "action": "move:dev->test",
+        "note": "CEO 复核：main 未动(3fc2cb8=origin)、未推送、localrank 原目录 0 改动、16 commit 逐哈希核对无缺失、路由组 (saas) 就位"
+      },
+      {
+        "at": "2026-08-12T05:24:39.241Z",
+        "action": "block",
+        "note": "⛔ 两项硬阻塞，未解决前绝不能合 main（一 push 即触发部署）：① 数据库仍是 SQLite，Cloud Run 文件系统临时且每实例独立——需定 Cloud SQL（稳但有固定月费，与 0 费用配置冲突）还是 Neon/Supabase（有免费额度，多一个供应商）② Prisma 7 query_compiler wasm 未被 trace 进 standalone（已复核属实：.next 内只有 sharp 的 wasm），容器首次查询即炸；修法取决于①的选择，故不能先修"
+      },
+      {
+        "at": "2026-08-12T05:24:39.250Z",
+        "action": "move:test->deploy",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T05:46:32.366Z",
+        "action": "unblock",
+        "note": "用户拍板：数据库选 Neon。剩余技术阻塞（Prisma wasm 未进 standalone）随 Postgres 改造一并处理"
+      }
+    ]
+  },
+  {
+    "id": "c-445a28",
+    "title": "CEO 生产环境站点：任务看板+财务工作台+文档中心，全部文档网页可点击查看",
+    "stage": "done",
+    "project": "consulting",
+    "priority": "P0",
+    "source": "用户指令",
+    "note": "",
+    "acceptance": "线上可访问：首页导航 + 任务看板 + 财务工作台 + 文档中心（docs/ 全部文档可点击阅读）；⛔ 财务数据必须有鉴权不得公开；走 GitHub Actions 部署非 Cloud Build；本地 commit 后能重新生成",
+    "parent": null,
+    "blockedOn": "需用户：① 确认 GCP Project ID（仓库现有值 supply-491510）② 定 Basic Auth 用户名与密码（≥12 位），我建 Secret Manager 的 ceo-site-user / ceo-site-pass ③ 确认 GCP_SA_KEY 这个 GitHub Secret 是否已配",
+    "ref": null,
+    "evidence": "https://ceo-workbench-dfd7b2qpra-de.a.run.app ；commit 91dd23d；GHA run 31565936502",
+    "verdictReason": "用户明确要生产环境访问；看板与账本是每天要看的东西，锁在本地等于没有",
+    "createdAt": "2026-08-12T04:49:17.180Z",
+    "doneAt": "2026-08-12T05:18:02.110Z",
+    "history": [
+      {
+        "at": "2026-08-12T04:49:17.180Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:49:29.211Z",
+        "action": "judge:accept",
+        "note": "用户明确要生产环境访问；看板与账本是每天要看的东西，锁在本地等于没有"
+      },
+      {
+        "at": "2026-08-12T04:54:07.921Z",
+        "action": "move:backlog->dev",
+        "note": "站点生成器+服务器+Dockerfile+workflow"
+      },
+      {
+        "at": "2026-08-12T04:54:08.048Z",
+        "action": "move:dev->test",
+        "note": "本地实测：无密码拒启动、401 拦截、目录穿越 404、多次未授权后进程存活"
+      },
+      {
+        "at": "2026-08-12T04:54:08.171Z",
+        "action": "block",
+        "note": "需用户：① 确认 GCP Project ID（仓库现有值 supply-491510）② 定 Basic Auth 用户名与密码（≥12 位），我建 Secret Manager 的 ceo-site-user / ceo-site-pass ③ 确认 GCP_SA_KEY 这个 GitHub Secret 是否已配"
+      },
+      {
+        "at": "2026-08-12T04:54:08.171Z",
+        "action": "move:test->deploy",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T05:18:02.111Z",
+        "action": "move:deploy->done",
+        "note": "生产实测：无凭据 401；15 份文档可点击；看板 37 卡；应收 CAD 2734.28 在位"
+      }
+    ]
+  },
+  {
+    "id": "c-a7fc98",
+    "title": "IErepair 与 veerytee 已归档，chrome 重新归档（上次移动未生效）",
+    "stage": "done",
+    "project": "shared",
+    "priority": "P2",
+    "source": "用户指令",
+    "note": "",
+    "acceptance": "三个项目在 _archive/；提案页已保留到 consulting/preview/",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": "_archive/IErepair；consulting/preview/20260812-上新托管提案.html",
+    "verdictReason": "记录归档动作",
+    "createdAt": "2026-08-12T04:49:17.441Z",
+    "doneAt": "2026-08-12T04:49:29.969Z",
+    "history": [
+      {
+        "at": "2026-08-12T04:49:17.441Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:49:29.533Z",
+        "action": "judge:accept",
+        "note": "记录归档动作"
+      },
+      {
+        "at": "2026-08-12T04:49:29.704Z",
+        "action": "move:backlog->dev",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:49:29.847Z",
+        "action": "move:dev->test",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T04:49:29.970Z",
+        "action": "move:test->done",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "id": "c-47a13f",
+    "title": "localrank 首页体检问卷挪到 /checkup 后成孤儿页：是否接进品牌站导航、是否做英文版",
+    "stage": "backlog",
+    "project": "idearise",
+    "priority": "P1",
+    "source": "合并任务的产品决策",
+    "note": "",
+    "acceptance": "决定是否入导航并执行；若入导航则中英双语一致",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "孤儿页等于白做；体检问卷本可作为品牌站的线索入口",
+    "createdAt": "2026-08-12T05:24:39.398Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T05:24:39.398Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T05:24:58.344Z",
+        "action": "judge:accept",
+        "note": "孤儿页等于白做；体检问卷本可作为品牌站的线索入口"
+      }
+    ]
+  },
+  {
+    "id": "c-b814f7",
+    "title": "合并后 localrank 12 个功能模块的端到端回归（agent 明确声明未做）",
+    "stage": "backlog",
+    "project": "idearise",
+    "priority": "P0",
+    "source": "合并任务遗留",
+    "note": "",
+    "acceptance": "12 个模块在合并分支上逐个走通增删改查；至少一次真人浏览器点击；失败项开卡",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "合并只搬文件未改业务逻辑，但没测过就是没测过——上线前必须补",
+    "createdAt": "2026-08-12T05:24:39.557Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-12T05:24:39.558Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-12T05:24:58.476Z",
+        "action": "judge:accept",
+        "note": "合并只搬文件未改业务逻辑，但没测过就是没测过——上线前必须补"
+      },
+      {
+        "at": "2026-08-12T05:24:58.649Z",
+        "action": "block",
+        "note": "等 c-6a011f 的数据库决策落地——数据库一换，回归要在新数据源上重做"
+      },
+      {
+        "at": "2026-08-12T05:46:32.489Z",
+        "action": "unblock",
+        "note": "数据库已定 Neon，回归在 Postgres 上做"
+      }
+    ]
+  }
+]

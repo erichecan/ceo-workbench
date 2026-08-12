@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Google 评价管理 + 地图排名 SaaS — 完整产品规划</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --forest:  #1C3A2F;
+    --forest2: #2E5C4A;
+    --gold:    #C9A84C;
+    --dark:    #111827;
+    --slate:   #6B7280;
+    --slate2:  #9CA3AF;
+    --border:  #E5E7EB;
+    --muted:   #F9FAFB;
+    --white:   #FFFFFF;
+    --fill:    #FBF7EA;
+    --red:     #A8342A;
+    --redbg:   #FDF3F2;
+    --green:   #2F6B4F;
+    --greenbg: #F1F7F3;
+    --amber:   #8A6414;
+    --amberbg: #FDF8EC;
+    --blue:    #2C4C6E;
+    --bluebg:  #F2F6FA;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--dark);
+    background: #E9EBEA;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell { max-width: 1180px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* ── 顶部 ── */
+  .masthead {
+    background: var(--forest);
+    color: #fff;
+    margin: 0 -20px 0;
+    padding: 52px 48px 44px;
+  }
+  .masthead .kicker {
+    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin-bottom: 14px;
+  }
+  .masthead h1 { font-size: 34px; line-height: 1.3; font-weight: 700; letter-spacing: .01em; }
+  .masthead .sub { margin-top: 14px; font-size: 15px; color: #C3D2CB; max-width: 760px; line-height: 1.8; }
+  .masthead .meta {
+    margin-top: 26px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.16);
+    display: flex; flex-wrap: wrap; gap: 32px; font-size: 12px; color: #9FB5AB;
+  }
+  .masthead .meta b { color: #fff; font-weight: 600; display: block; font-size: 13px; margin-top: 2px; }
+
+  /* ── 布局 ── */
+  .layout { display: grid; grid-template-columns: 210px 1fr; gap: 40px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } nav.toc { position: static !important; } }
+
+  nav.toc {
+    position: sticky; top: 24px; margin-top: 36px;
+    font-size: 12.5px; border-left: 2px solid var(--border); padding-left: 16px;
+  }
+  nav.toc a { display: block; color: var(--slate); text-decoration: none; padding: 5px 0; line-height: 1.5; }
+  nav.toc a:hover { color: var(--forest); }
+  nav.toc a.top { color: var(--dark); font-weight: 600; margin-top: 10px; }
+  nav.toc a.top:first-child { margin-top: 0; }
+  nav.toc a.sub { padding-left: 12px; font-size: 12px; color: var(--slate2); }
+
+  main { min-width: 0; padding-top: 36px; }
+
+  /* ── 章节 ── */
+  section { margin-bottom: 54px; scroll-margin-top: 20px; }
+  h2 {
+    font-size: 22px; font-weight: 700; color: var(--forest);
+    padding-bottom: 10px; border-bottom: 2px solid var(--forest); margin-bottom: 22px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  h2 .num { font-size: 13px; color: var(--gold); font-weight: 700; letter-spacing: .08em; }
+  h3 { font-size: 16.5px; font-weight: 700; color: var(--forest2); margin: 30px 0 12px; }
+  h4 { font-size: 14.5px; font-weight: 700; color: var(--dark); margin: 20px 0 8px; }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 0 0 14px 20px; }
+  li { margin-bottom: 6px; }
+  strong { font-weight: 600; }
+  code {
+    font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 12px;
+    background: var(--muted); border: 1px solid var(--border); border-radius: 3px;
+    padding: 1px 5px; color: var(--forest2); word-break: break-all;
+  }
+  a { color: var(--forest2); }
+
+  /* ── 卡片 ── */
+  .card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 22px 24px; margin-bottom: 18px; }
+  .card.tinted { background: var(--fill); border-color: #EADFC0; }
+
+  .callout {
+    border-left: 3px solid var(--gold); background: var(--fill);
+    padding: 14px 18px; margin: 16px 0; font-size: 13.5px; border-radius: 0 4px 4px 0;
+  }
+  .callout.danger { border-left-color: var(--red); background: var(--redbg); }
+  .callout.ok     { border-left-color: var(--green); background: var(--greenbg); }
+  .callout.info   { border-left-color: var(--blue); background: var(--bluebg); }
+  .callout .lbl { font-weight: 700; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 5px; color: var(--amber); }
+  .callout.danger .lbl { color: var(--red); }
+  .callout.ok .lbl { color: var(--green); }
+  .callout.info .lbl { color: var(--blue); }
+
+  /* ── 表格 ── */
+  .tw { overflow-x: auto; margin: 16px 0 20px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--forest); color: #fff; text-align: left; padding: 10px 13px;
+    font-weight: 600; font-size: 12px; letter-spacing: .03em; white-space: nowrap;
+  }
+  td { padding: 10px 13px; border-top: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+  tbody tr:nth-child(even) { background: #FCFCFC; }
+  table.compact td, table.compact th { padding: 7px 11px; font-size: 12.5px; }
+  td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .tag {
+    display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 7px;
+    border-radius: 3px; letter-spacing: .04em; white-space: nowrap; line-height: 1.6;
+  }
+  .tag.yes  { background: var(--greenbg); color: var(--green); border: 1px solid #C9E0D3; }
+  .tag.no   { background: var(--redbg);   color: var(--red);   border: 1px solid #EDCFCB; }
+  .tag.warn { background: var(--amberbg); color: var(--amber); border: 1px solid #E8DAB6; }
+  .tag.info { background: var(--bluebg);  color: var(--blue);  border: 1px solid #CDDCEA; }
+  .tag.p0 { background: var(--forest); color: #fff; }
+  .tag.p1 { background: #DCE6E1; color: var(--forest); }
+  .tag.p2 { background: var(--muted); color: var(--slate); border: 1px solid var(--border); }
+
+  /* ── 结论卡 ── */
+  .findings { counter-reset: f; }
+  .finding {
+    display: grid; grid-template-columns: 34px 1fr; gap: 14px;
+    padding: 15px 0; border-bottom: 1px solid var(--border);
+  }
+  .finding:last-child { border-bottom: none; }
+  .finding::before {
+    counter-increment: f; content: counter(f, decimal-leading-zero);
+    font-size: 15px; font-weight: 700; color: var(--gold); line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+  .finding h4 { margin: 0 0 4px; font-size: 14.5px; }
+  .finding p { margin: 0; font-size: 13.5px; color: #374151; }
+
+  /* ── 流程图 ── */
+  .flow { margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin-bottom: 10px; }
+  .step {
+    flex: 1 1 0; min-width: 128px; background: #fff; border: 1px solid var(--border);
+    border-radius: 5px; padding: 11px 13px; position: relative; margin-right: 26px;
+  }
+  .step:last-child { margin-right: 0; }
+  .step::after {
+    content: '→'; position: absolute; right: -21px; top: 50%; transform: translateY(-50%);
+    color: var(--gold); font-size: 17px; font-weight: 700;
+  }
+  .step:last-child::after { display: none; }
+  .step .n { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: .1em; }
+  .step .t { font-size: 13px; font-weight: 700; margin: 3px 0 4px; color: var(--forest); }
+  .step .d { font-size: 11.5px; color: var(--slate); line-height: 1.55; }
+  .step.accent { background: var(--fill); border-color: #E3D5AE; }
+  .step.alert  { background: var(--redbg); border-color: #EDCFCB; }
+  .step.alert .t, .step.alert .n { color: var(--red); }
+  .step.autom  { background: var(--greenbg); border-color: #C9E0D3; }
+  .step.autom .t, .step.autom .n { color: var(--green); }
+
+  .branch { border-left: 2px dashed var(--border); margin: 8px 0 8px 18px; padding-left: 18px; }
+  .branch > .lbl {
+    font-size: 11.5px; font-weight: 700; color: var(--slate); letter-spacing: .04em;
+    margin-bottom: 7px; display: block;
+  }
+
+  /* ── 泳道 ── */
+  .lane { display: grid; grid-template-columns: 96px 1fr; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 16px 0; background: #fff; }
+  .lane > div { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .lane > div:nth-last-child(-n+2) { border-bottom: none; }
+  .lane .who { background: var(--muted); font-size: 12px; font-weight: 700; color: var(--forest); border-right: 1px solid var(--border); }
+  .lane .act { font-size: 13px; }
+  .lane .act .sm { display: block; font-size: 12px; color: var(--slate); margin-top: 3px; }
+
+  /* ── 定位象限 ── */
+  .quad { position: relative; height: 380px; border: 1px solid var(--border); border-radius: 6px; background: #fff; margin: 18px 0; }
+  .quad .axis-x, .quad .axis-y { position: absolute; background: var(--border); }
+  .quad .axis-x { left: 0; right: 0; top: 50%; height: 1px; }
+  .quad .axis-y { top: 0; bottom: 0; left: 50%; width: 1px; }
+  .quad .lab { position: absolute; font-size: 11px; color: var(--slate); font-weight: 600; letter-spacing: .04em; }
+  .quad .dot {
+    position: absolute; transform: translate(-50%,-50%); font-size: 11.5px;
+    background: var(--muted); border: 1px solid var(--border); border-radius: 12px;
+    padding: 3px 9px; white-space: nowrap; line-height: 1.5;
+  }
+  .quad .dot.us { background: var(--forest); color: #fff; border-color: var(--forest); font-weight: 700; box-shadow: 0 2px 8px rgba(28,58,47,.28); }
+  .quad .dot.rival { background: var(--redbg); border-color: #EDCFCB; color: var(--red); font-weight: 600; }
+
+  /* ── 时间线 ── */
+  .gantt { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 16px 0; background: #fff; }
+  .gantt-row { display: grid; grid-template-columns: 168px 1fr; border-bottom: 1px solid var(--border); align-items: center; }
+  .gantt-row:last-child { border-bottom: none; }
+  .gantt-row .nm { padding: 9px 13px; font-size: 12.5px; font-weight: 600; border-right: 1px solid var(--border); background: var(--muted); }
+  .gantt-row .bar-area { position: relative; height: 38px; }
+  .gantt-row .bar {
+    position: absolute; top: 9px; height: 20px; border-radius: 3px;
+    font-size: 10.5px; color: #fff; line-height: 20px; padding: 0 8px; white-space: nowrap;
+    font-weight: 600; overflow: hidden;
+  }
+  .gantt-head { display: grid; grid-template-columns: 168px 1fr; background: var(--forest); color: #fff; }
+  .gantt-head .nm { padding: 8px 13px; font-size: 11.5px; font-weight: 600; }
+  .gantt-head .wks { display: flex; }
+  .gantt-head .wks span { flex: 1; text-align: center; font-size: 10.5px; padding: 8px 0; border-left: 1px solid rgba(255,255,255,.14); }
+  .grid-lines { position: absolute; inset: 0; display: flex; }
+  .grid-lines span { flex: 1; border-left: 1px solid #F1F1F1; }
+
+  /* ── 清单 ── */
+  .checklist { list-style: none; margin-left: 0; }
+  .checklist li {
+    display: grid; grid-template-columns: 22px 1fr; gap: 10px;
+    padding: 9px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px;
+  }
+  .checklist li::before { content: '☐'; color: var(--gold); font-size: 15px; line-height: 1.5; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist .wk { font-size: 11px; color: var(--slate2); font-weight: 600; letter-spacing: .05em; }
+
+  /* ── KPI ── */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin: 18px 0; }
+  .kpi { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+  .kpi .v { font-size: 22px; font-weight: 700; color: var(--forest); line-height: 1.25; font-variant-numeric: tabular-nums; }
+  .kpi .k { font-size: 11.5px; color: var(--slate); margin-top: 3px; line-height: 1.5; }
+
+  /* ── 定价卡 ── */
+  .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px,1fr)); gap: 14px; margin: 18px 0; }
+  .plan { border: 1px solid var(--border); border-radius: 6px; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
+  .plan.hero { border: 2px solid var(--forest); }
+  .plan .ph { padding: 15px 17px 13px; border-bottom: 1px solid var(--border); }
+  .plan.hero .ph { background: var(--forest); color: #fff; border-bottom: none; }
+  .plan .pn { font-size: 15px; font-weight: 700; }
+  .plan .pp { font-size: 25px; font-weight: 700; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .plan .pp small { font-size: 12px; font-weight: 400; opacity: .72; }
+  .plan .pw { font-size: 11.5px; opacity: .8; margin-top: 3px; }
+  .plan ul { margin: 0; padding: 13px 17px 15px; list-style: none; font-size: 12.5px; flex: 1; }
+  .plan ul li { padding-left: 15px; position: relative; margin-bottom: 6px; line-height: 1.6; }
+  .plan ul li::before { content: '·'; position: absolute; left: 3px; color: var(--gold); font-weight: 700; font-size: 16px; line-height: 1.3; }
+
+  /* ── 热力图示意 ── */
+  .heat { display: inline-grid; grid-template-columns: repeat(7, 22px); gap: 2px; margin: 4px 12px 4px 0; vertical-align: middle; }
+  .heat i { height: 22px; border-radius: 2px; font-style: normal; font-size: 9.5px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
+  .h1 { background: #2F6B4F; } .h2 { background: #6E9A7E; } .h3 { background: #C9A84C; }
+  .h4 { background: #C97F4C; } .h5 { background: #A8342A; }
+  .legend { font-size: 11.5px; color: var(--slate); display: inline-block; vertical-align: middle; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .two { grid-template-columns: 1fr; } .flow-row { flex-direction: column; } .step { margin: 0 0 22px; } .step::after { content: '↓'; right: 50%; top: auto; bottom: -20px; transform: translateX(50%); } }
+
+  footer {
+    margin-top: 50px; padding-top: 22px; border-top: 2px solid var(--forest);
+    font-size: 12px; color: var(--slate); line-height: 1.9;
+  }
+  footer h3 { margin-top: 0; }
+  .srcs { columns: 2; column-gap: 34px; font-size: 11.5px; }
+  .srcs a { display: block; break-inside: avoid; margin-bottom: 4px; color: var(--slate); text-decoration: none; }
+  .srcs a:hover { color: var(--forest); text-decoration: underline; }
+  @media (max-width: 760px) { .srcs { columns: 1; } }
+
+  @media print {
+    body { background: #fff; font-size: 10pt; }
+    .shell { max-width: none; padding: 0; }
+    nav.toc { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    section { page-break-inside: avoid; }
+    .masthead { margin: 0; }
+    h2 { page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header class="masthead">
+  <div class="kicker">产品规划 · Product Plan v1.0</div>
+  <h1>Google 评价管理 + 地图排名<br>面向 GTA 华人中小商家的月费型 AI 工具</h1>
+  <p class="sub">
+    从技术可行性、竞品格局、法规红线三条线同时验证后得出的完整规划。核心结论：<strong style="color:#E6D9A8">技术全部可行，但真正的门槛不在开发，在两道 Google 审批和三条合规红线；商业上唯一能守住的护城河不是功能，是语言与本地服务。</strong>
+  </p>
+  <div class="meta">
+    <div>日期<b>2026-08-07</b></div>
+    <div>交付路径<b>混合：先白标转售，后自建</b></div>
+    <div>目标客户<b>GTA 华人商家</b></div>
+    <div>首版范围<b>评价闭环 + Maps 排名</b></div>
+    <div>目标<b>3 个月内见收入</b></div>
+  </div>
+</header>
+
+<div class="layout">
+
+<nav class="toc">
+  <a href="#s1" class="top">一 · 结论先行</a>
+  <a href="#s2" class="top">二 · 技术可行性</a>
+  <a href="#s2-1" class="sub">API 能力边界</a>
+  <a href="#s2-2" class="sub">两道审批门</a>
+  <a href="#s2-3" class="sub">排名数据从哪来</a>
+  <a href="#s2-4" class="sub">参考架构</a>
+  <a href="#s3" class="top">三 · 竞品格局</a>
+  <a href="#s3-1" class="sub">全球竞品</a>
+  <a href="#s3-2" class="sub">最危险的对手</a>
+  <a href="#s3-3" class="sub">GTA 本地基准</a>
+  <a href="#s3-4" class="sub">空位在哪</a>
+  <a href="#s4" class="top">四 · 产品设计</a>
+  <a href="#s4-1" class="sub">三层架构</a>
+  <a href="#s4-2" class="sub">功能清单</a>
+  <a href="#s4-3" class="sub">AI 的边界</a>
+  <a href="#s5" class="top">五 · 交互流程</a>
+  <a href="#s5-1" class="sub">获客到上线</a>
+  <a href="#s5-2" class="sub">评价闭环</a>
+  <a href="#s5-3" class="sub">索评闭环</a>
+  <a href="#s5-4" class="sub">排名周循环</a>
+  <a href="#s5-5" class="sub">界面清单</a>
+  <a href="#s6" class="top">六 · 定价与单位经济</a>
+  <a href="#s7" class="top">七 · 合规与风险</a>
+  <a href="#s8" class="top">八 · 路线图</a>
+  <a href="#s9" class="top">九 · 第一个月清单</a>
+  <a href="#s10" class="top">十 · 待验证问题</a>
+</nav>
+
+<main>
+
+<!-- ═══════════ 一 ═══════════ -->
+<section id="s1">
+  <h2><span class="num">一</span>结论先行</h2>
+
+  <div class="card findings">
+    <div class="finding">
+      <div>
+        <h4>技术上没有拦路虎，Google 官方 API 覆盖了评价闭环的每一步</h4>
+        <p>读评价、批量读、回复、删回复、实时新评价推送（Pub/Sub）、发帖、传照片、改资料、拉绩效数据——全部有官方接口，且 <strong>API 本身免费，不按调用计费</strong>，默认配额 300 QPM。你不需要爬虫，也不需要无头浏览器。</p>
+      </div>
+    </div>
+    <div class="finding">
+      <div>
+        <h4>真正的门槛是两道 Google 审批，加起来 2–8 周，且必须提前启动</h4>
+        <p>第一道是 GBP API 的 Basic Access 申请（新项目默认配额 0 QPM，批了才变 300）；第二道是 OAuth 应用验证（<code>business.manage</code> 属敏感权限，不验证就只能 100 个测试用户、refresh token 7 天过期，生产不可用）。<strong>这两道门决定了「自建」最快也要 2 个月才能接第一个客户，所以第一阶段必须走白标。</strong></p>
+      </div>
+    </div>
+    <div class="finding">
+      <div>
+        <h4>Maps 排名数据 Google 一个字都不给，必须外采——但便宜到可以忽略</h4>
+        <p>GBP API 完全不含排名。geo-grid 扫描要买第三方：阶段一直接用 Local Falcon（$24.99/月起，白标报告全档包含），阶段二自建改走 DataForSEO（$0.60/1000 次请求，折合<strong>每客户每月约 $0.60</strong>）。⛔ 不要自己爬 Google Maps——Maps Platform 条款明写禁止 scraping，Places 坐标缓存上限 30 天。</p>
+      </div>
+    </div>
+    <div class="finding">
+      <div>
+        <h4>你想做的东西已经存在，叫 Merchynt Paige，$99/月</h4>
+        <p>它已经在做：自动发帖、自动回评、自动索评、自动 Q&amp;A、同步社媒，号称设置一次全自动。<strong>「AI 全自动管 GBP」这个功能点不再是差异化，是入场券。</strong>拿功能去打它是打不赢的——它有 2 万+ 个 profile 的调优数据。</p>
+      </div>
+    </div>
+    <div class="finding">
+      <div>
+        <h4>但它们全都不说中文，而这正好是 GTA 华人商家最疼的地方</h4>
+        <p>Birdeye、Podium、NiceJob、Merchynt、Localo——没有一家有中文界面、中文月报、微信触达。华人老板的真实痛点是：<strong>英文差评看不懂也不敢回、GBP 密码握在三年前那家外包公司手里、店名塞了关键词随时会被封</strong>。这三件事都不是「AI 自动化」能解决的，是「有个说中文的人替我盯着」能解决的。护城河在这儿，不在功能列表。</p>
+      </div>
+    </div>
+    <div class="finding">
+      <div>
+        <h4>三条合规红线，踩任何一条都是生意终结级别</h4>
+        <p><strong>①评价门控绝对禁止</strong>——先做满意度筛选、只把好评客户导向 Google，Google 2026 年 4 月政策更新明确禁止并用 AI 回溯删除；FTC 规则 2024-10-21 生效，最高每次 $51,744；加拿大 Bill C-59 自 2025-06-20 起允许私人告到竞争法庭。<strong>②CASL</strong>——短信索评必须明示同意，邮件在既有商业关系下才可默示同意，举证责任在你。<strong>③批量自动编辑资料</strong>——这是 2026 年封号潮的触发因素之一。</p>
+      </div>
+    </div>
+    <div class="finding">
+      <div>
+        <h4>你 8 月 5 日那份定价调研已经把前端漏斗铺好了</h4>
+        <p>CAD $249 一次性诊断报告不是独立产品，是<strong>月费订阅的获客入口</strong>：免费简版诊断 → $249 完整报告 → 15 分钟中文视频讲报告 → 转月费。这条路径比冷启动卖订阅的转化率高一个量级，而且诊断本身就付费，获客成本为负。</p>
+      </div>
+    </div>
+    <div class="finding">
+      <div>
+        <h4>单位经济极好：1 个客户就打平工具成本，10 个客户毛利率 80%+</h4>
+        <p>阶段一工具成本约 USD $122/月（GoHighLevel Starter $97 + Local Falcon Starter $24.99）。按主力档 CAD $299/月定价，<strong>第一个客户就覆盖全部工具成本</strong>。10 个客户时月收入 CAD ~$2,990、成本 CAD ~$580、毛利率 81%，人工投入约 15 小时/月。瓶颈从来不是成本，是获客和交付人力。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <span class="lbl">最该警惕的一件事</span>
+    这门生意最容易死的方式不是竞争，是<strong>某个客户的 GBP 因为你的自动化操作被封号</strong>。2026 年 4 月和 5 月发生过两波大规模封号，「突发的密集编辑」是公认触发因素之一。产品设计必须把「节流 + 人审 + 变更前快照」做成硬约束，而不是可选项。一次封号足以让你在华人社群里的口碑归零——这个客群传播速度极快，正反都是。
+  </div>
+</section>
+
+<!-- ═══════════ 二 ═══════════ -->
+<section id="s2">
+  <h2><span class="num">二</span>技术可行性</h2>
+
+  <h3 id="s2-1">2.1 Google Business Profile API 能力边界</h3>
+  <p>Google 在 2021–2022 年把原来的单体 GMB API 拆成了一组按功能划分的 API，各自独立域名。评价和发帖至今仍留在 v4 老接口上（<code>mybusiness.googleapis.com/v4</code>），这不是弃用，是 Google 一直没迁完。</p>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:130px">能力</th><th style="width:110px">状态</th><th>接口</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><strong>读取评价</strong></td><td><span class="tag yes">支持</span></td><td><code>reviews.list</code> / <code>reviews.get</code> / <code>batchGetReviews</code></td><td>batchGetReviews 可一次拉多个门店，支持分页与排序。v4</td></tr>
+      <tr><td><strong>回复评价</strong></td><td><span class="tag yes">支持</span></td><td><code>reviews.updateReply</code></td><td>回复不存在则创建。<strong>门店必须已验证</strong>。v4</td></tr>
+      <tr><td><strong>删除回复</strong></td><td><span class="tag yes">支持</span></td><td><code>reviews.deleteReply</code></td><td>只能删自己的回复。v4</td></tr>
+      <tr><td><strong>实时新评价通知</strong></td><td><span class="tag yes">支持</span></td><td>Notifications API + Cloud Pub/Sub</td><td>可订阅：新/更新评价、新 Q&amp;A、Google 主动改资料、重复门店、Voice of Merchant 变化。<strong>这是差评 15 分钟告警的技术基础。</strong></td></tr>
+      <tr><td><strong>发布 GBP 帖子</strong></td><td><span class="tag yes">支持</span></td><td><code>localPosts.create/patch/delete/list</code></td><td>支持活动排期、CTA 按钮（预约/下单/购买）、优惠码。⚠️ <strong>Product posts 不支持。</strong>v4</td></tr>
+      <tr><td><strong>上传照片 / 视频</strong></td><td><span class="tag yes">支持</span></td><td><code>media.startUpload</code> → <code>media.create</code></td><td>先取上传引用再传字节。v4</td></tr>
+      <tr><td><strong>读写商家资料</strong></td><td><span class="tag yes">支持</span></td><td>Business Information API v1</td><td>名称、类目、属性、营业时间、服务项、简介等</td></tr>
+      <tr><td><strong>绩效数据</strong></td><td><span class="tag yes">支持</span></td><td><code>fetchMultiDailyMetricsTimeSeries</code></td><td>曝光、搜索、通话、路线请求等。⚠️ 老的 <code>reportInsights</code> 已于 2023-03-30 停用</td></tr>
+      <tr><td><strong>账号 / 门店管理</strong></td><td><span class="tag yes">支持</span></td><td>Account Management API v1</td><td>列出授权账号下的所有门店</td></tr>
+      <tr><td><strong>Q&amp;A 提问与回答</strong></td><td><span class="tag warn">待实测</span></td><td>v4 <code>locations.questions</code></td><td>通知类型里明确有 Q&amp;A 事件，说明资源存在；但写入权限与限制未逐条核对，<strong>接第一个客户前必须实测</strong></td></tr>
+      <tr><td>创建 / 编辑用户评价</td><td><span class="tag no">禁止</span></td><td>—</td><td>永远不可能。任何声称能代写评价的做法都是违规</td></tr>
+      <tr><td>删除差评</td><td><span class="tag no">不可能</span></td><td>—</td><td>只能举报违规评价走人工审核，<strong>不保证结果</strong>。这一点必须写进合同</td></tr>
+      <tr><td>读取竞品的评价</td><td><span class="tag no">不支持</span></td><td>—</td><td>GBP API 只能操作已授权门店。竞品数据要走 Places API 或第三方，且受缓存条款约束</td></tr>
+      <tr><td>Maps 排名 / 网格排名</td><td><span class="tag no">不提供</span></td><td>—</td><td>Google 从未开放排名数据。必须外采，见 2.3</td></tr>
+      <tr><td>Business Calls API</td><td><span class="tag no">已停用</span></td><td>—</td><td>2023-05-30 停用，无替代</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>配额</h4>
+  <p>各 API 默认 <strong>300 QPM</strong>，API 调用免费。特殊限制在 Business Information API：创建门店 300 次/天、SearchGoogleLocation 300 次/天、更新门店 10,000 次/天，另有一条<strong>「每个 GBP 每分钟最多 10 次」</strong>的硬限制。</p>
+  <div class="callout ok">
+    <span class="lbl">这条硬限制其实是好事</span>
+    「每个 GBP 每分钟 10 次」和你为了防封号做的节流策略是同向的。把它当成产品设计的下限约束，而不是要绕开的障碍——真实需求下，一个门店一天做 2 次编辑就够了，离配额上限差着几个数量级。提高配额的申请通常会被拒，因为 Google 要求平均用量达到当前上限的 50% 以上才受理。
+  </div>
+
+  <h3 id="s2-2">2.2 审批门（真正的门槛）</h3>
+
+  <div class="callout danger">
+    <span class="lbl">2026-08-07 修正 · 本节原写「两道门」，实测后确认只有一道</span>
+    <strong>门 2（OAuth 敏感权限验证）不存在。</strong>Cloud Console 把 <code>business.manage</code> 归类为 <strong>non-sensitive</strong>，验证中心根本没有针对它的提交入口——所以不用拍演示视频，也不触发 CASA 安全评估（省下 $500–4,500/年 + 年度复审）。<br><br>
+    代价是另一件事：<strong>在 Basic Access 批准之前，外部用户走 OAuth 授权会被 403 access_denied 硬拦，而且因为系统认为它「非敏感」，连申诉入口都没有</strong>，只能等批准，没有第二条路。已有开发者在 Google 官方论坛报告卡死在这个循环里。<br><br>
+    <strong>官方 FAQ 给了绕开 OAuth 的第二条授权路径，这是本次调研最有价值的发现：商家把你的 Google 账号加为 Manager（管理员），你就能用自己的凭据直接调 API，完全不走 OAuth。</strong>它一次性解决了外部用户 403、100 个测试用户上限、refresh token 7 天过期三个问题；对华人小商家来说，「把权限给你」也比「点一个全英文授权页」成功率高得多。<br>
+    ⚠️ 边界：Manager 路径替代的是 OAuth，<strong>不替代项目级的 Basic Access 审批</strong>。API 访问权按 GCP 项目授予，没有它一切免谈。
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <h4 style="margin-top:0">门 1 · GBP API Basic Access</h4>
+      <table class="compact"><tbody>
+        <tr><td style="width:76px;color:var(--slate)">入口</td><td><code>support.google.com/business/contact/api_default</code>，下拉选 "Application for Basic API Access"</td></tr>
+        <tr><td style="color:var(--slate)">前提</td><td>GBP 已验证且<strong>活跃 60 天以上</strong>、资料里有官网、<strong>用 owner 身份的邮箱提交</strong>（manager 账号会被驳回）</td></tr>
+        <tr><td style="color:var(--slate)">范围</td><td><strong>每个 GCP 项目单独申请</strong>，之前批过的不通用</td></tr>
+        <tr><td style="color:var(--slate)">如何判断批没批</td><td>Cloud Console 看配额：0 QPM = 没批，300 QPM = 批了。<strong>控制台不会有任何待审提示</strong>，未批时调用返回 429，极易误判成限速</td></tr>
+        <tr><td style="color:var(--slate)">耗时</td><td>官方口径 7–10 工作日；社区实测 <strong>4 天到 6 周</strong>都有</td></tr>
+        <tr><td style="color:var(--slate)">费用</td><td>免费</td></tr>
+      </tbody></table>
+      <div class="callout" style="margin-bottom:0">
+        <span class="lbl">申请话术</span>
+        写具体自用场景，别写宏大叙事。「自动化评论回复和每周发帖」比「AI 驱动的全渠道声誉管理平台」通过率高。多租户 SaaS 的表述会引来更多追问。
+      </div>
+    </div>
+
+    <div class="card" style="opacity:.62">
+      <h4 style="margin-top:0"><s>门 2 · OAuth 应用验证</s> <span class="tag no">已证伪</span></h4>
+      <p style="font-size:12.5px;color:var(--red);margin-bottom:10px"><strong>以下内容保留作记录，实际不适用。</strong>该 scope 被归为 non-sensitive，没有验证流程可走。未验证状态的两条限制（100 测试用户、refresh token 7 天过期）依然存在，但解法不是「去验证」，而是改用 Manager 授权路径。</p>
+      <table class="compact"><tbody>
+        <tr><td style="width:76px;color:var(--slate)">权限</td><td><code>https://www.googleapis.com/auth/business.manage</code>（唯一 scope），属 <strong>sensitive</strong> 级别</td></tr>
+        <tr><td style="color:var(--slate)">不验证的后果</td><td>最多 <strong>100 个测试用户</strong>；<strong>refresh token 7 天过期</strong>，之后返回 invalid_grant，客户要每周重新授权一次 —— 生产环境完全不可用</td></tr>
+        <tr><td style="color:var(--slate)">要交什么</td><td>域名所有权、隐私政策、<strong>英文演示视频</strong>（必须拍到 OAuth 同意界面、地址栏里的 client ID、以及权限的实际用途）</td></tr>
+        <tr><td style="color:var(--slate)">耗时</td><td>无问题时 3–5 工作日</td></tr>
+        <tr><td style="color:var(--slate)">是否要安全评估</td><td><span class="tag ok" style="background:var(--greenbg);color:var(--green);border:1px solid #C9E0D3">很可能不需要</span> business.manage 未出现在 restricted scope 清单（Gmail/Drive/Fitness 等）中，<strong>因此应不触发 CASA 第三方安全评估</strong>（那需要 $500–4,500 且每 12 个月复审）</td></tr>
+      </tbody></table>
+      <div class="callout warn" style="margin-bottom:0;border-left-color:var(--amber);background:var(--amberbg)">
+        <span class="lbl">这一条需要实测确认</span>
+        「不需要 CASA」是基于 Google 公开的 restricted scope 清单推断的，不是官方对 business.manage 的明文表述。在 Cloud Console 的 OAuth 同意屏幕添加该 scope 时，界面会标出 sensitive / restricted，<strong>以那里显示的为准</strong>。这条如果判断错了，成本会多出 $500–4,500/年。
+      </div>
+    </div>
+  </div>
+
+  <h4>时间线：为什么第一阶段必须走白标</h4>
+  <div class="gantt">
+    <div class="gantt-head">
+      <div class="nm">阶段一并行推进</div>
+      <div class="wks"><span>W1</span><span>W2</span><span>W3</span><span>W4</span><span>W5</span><span>W6</span><span>W7</span><span>W8</span><span>W9</span><span>W10</span><span>W11</span><span>W12</span></div>
+    </div>
+    <div class="gantt-row"><div class="nm">白标工具搭建</div><div class="bar-area"><div class="grid-lines"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="bar" style="left:0.5%;width:15%;background:var(--forest)">GHL + Local Falcon</div></div></div>
+    <div class="gantt-row"><div class="nm">前 3 个客户上线</div><div class="bar-area"><div class="grid-lines"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="bar" style="left:16%;width:25%;background:var(--forest2)">诊断 → 签约 → 交付</div></div></div>
+    <div class="gantt-row"><div class="nm">💰 第一笔收入</div><div class="bar-area"><div class="grid-lines"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="bar" style="left:24%;width:8%;background:var(--gold)">W4</div></div></div>
+    <div class="gantt-row"><div class="nm">GBP API 申请</div><div class="bar-area"><div class="grid-lines"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="bar" style="left:0.5%;width:40%;background:#8A6414">提交 W1 → 4 天至 6 周不等</div></div></div>
+    <div class="gantt-row"><div class="nm">OAuth 验证</div><div class="bar-area"><div class="grid-lines"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="bar" style="left:33%;width:16%;background:#8A6414">视频 + 提交</div></div></div>
+    <div class="gantt-row"><div class="nm">自研 MVP 开发</div><div class="bar-area"><div class="grid-lines"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="bar" style="left:33%;width:58%;background:var(--blue)">评价闭环 + 中文看板 + 网格追踪</div></div></div>
+    <div class="gantt-row"><div class="nm">首客迁移到自研</div><div class="bar-area"><div class="grid-lines"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="bar" style="left:91%;width:8.5%;background:var(--forest)">W12+</div></div></div>
+  </div>
+  <p style="font-size:12.5px;color:var(--slate)">关键点：<strong>两道审批的申请必须在第 1 周就提交</strong>，它们的等待时间和白标交付完全并行，不占用任何开发资源。等你把前 3 个客户跑通、验证了交付流程，审批通常也下来了。反过来，如果第 1 周不提交，第 12 周你还在等审批。</p>
+
+  <h3 id="s2-3">2.3 排名数据从哪来</h3>
+  <p>geo-grid（地理网格排名）是这类产品最有说服力的可视化：在门店周围铺 N×N 个虚拟坐标点，在每个点上查「按摩 / massage near me」这类词，看你排第几，画成热力图。Google 官方不提供这个数据。</p>
+
+  <div style="margin:16px 0">
+    <div class="heat">
+      <i class="h5">8</i><i class="h4">6</i><i class="h3">4</i><i class="h3">4</i><i class="h4">7</i><i class="h5">11</i><i class="h5">14</i>
+      <i class="h4">6</i><i class="h3">4</i><i class="h2">2</i><i class="h2">2</i><i class="h3">3</i><i class="h4">6</i><i class="h5">9</i>
+      <i class="h3">4</i><i class="h2">2</i><i class="h1">1</i><i class="h1">1</i><i class="h2">2</i><i class="h3">4</i><i class="h4">7</i>
+      <i class="h3">3</i><i class="h2">2</i><i class="h1">1</i><i class="h1">1</i><i class="h1">1</i><i class="h3">3</i><i class="h4">6</i>
+      <i class="h4">5</i><i class="h3">3</i><i class="h2">2</i><i class="h1">1</i><i class="h2">2</i><i class="h3">4</i><i class="h5">8</i>
+      <i class="h5">9</i><i class="h4">6</i><i class="h3">4</i><i class="h3">3</i><i class="h3">4</i><i class="h4">7</i><i class="h5">12</i>
+      <i class="h5">15</i><i class="h5">10</i><i class="h4">7</i><i class="h4">6</i><i class="h4">7</i><i class="h5">11</i><i class="h5">20+</i>
+    </div>
+    <span class="legend">7×7 网格示意，数字为该坐标点上的 Maps 排名。<br>绿色 = 前 3，金色 = 4–5，橙红 = 掉出首屏。<strong>这张图是销售转化率最高的单一素材</strong>——老板一眼就懂自己「只在店门口能被搜到」。</span>
+  </div>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:130px">方案</th><th style="width:190px">价格</th><th style="width:88px">合规责任</th><th>判断</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--greenbg)"><td><strong>Local Falcon</strong></td><td>$24.99–199.99/月，credit 制<br><span style="color:var(--slate);font-size:12px">1 credit = 1 个网格点，7×7 = 49 credits<br>额外 credit $0.05，永不过期</span></td><td>供应商</td><td><span class="tag p0">阶段一选它</span> 白标报告<strong>全档位包含</strong>，多客户管理，$49.99 档以上送数据检索 API。省掉自研全部工作</td></tr>
+      <tr style="background:var(--bluebg)"><td><strong>DataForSEO</strong></td><td>$0.60 / 1000 次 SERP<br><span style="color:var(--slate);font-size:12px">≈ $0.0006 / 次，无月费无门槛</span></td><td>供应商</td><td><span class="tag p1">阶段二选它</span> 便宜两个数量级。5 词 × 7×7 网格 × 每周 1 次 ≈ <strong>$0.59/月/客户</strong>。要自己写热力图和存储</td></tr>
+      <tr><td>SerpApi</td><td>$25/1000 起，30K 档降到 $9.17/1000</td><td>供应商</td><td>比 DataForSEO 贵 15–40 倍，除非需要它独有的 AI Overview 抓取，否则没理由选</td></tr>
+      <tr><td>Local Falcon 按需 API</td><td>$199/月 + $0.0032/次</td><td>供应商</td><td>只有做到需要把网格数据嵌进自研产品、又不想自建采集时才值得</td></tr>
+      <tr style="background:var(--redbg)"><td>Google Places API</td><td>Text Search Pro $32/1000<br>含 reviews 字段 Enterprise $40/1000</td><td><strong>你自己</strong></td><td><span class="tag no">不适合排名追踪</span> 贵 50 倍，且 Maps Platform 条款第 3.2.3(a) 明写<strong>禁止 scraping</strong>，坐标缓存上限 30 天、商家名/评分/评价内容不得入库。只适合一次性查 place_id（place_id 可永久存）</td></tr>
+      <tr style="background:var(--redbg)"><td>自己爬 Google Maps</td><td>「免费」</td><td><strong>你自己</strong></td><td><span class="tag no">别做</span> 违反条款、IP 被封、页面结构一改就挂。第三方 API 供应商替你承担了这部分风险，这正是你付的那 $0.0006</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 id="s2-4">2.4 阶段二自研参考架构</h3>
+  <div class="card">
+    <table class="compact"><tbody>
+      <tr><td style="width:118px;font-weight:600;color:var(--forest)">前端</td><td>Next.js App Router + Tailwind + shadcn/ui。<strong>双语言包，中文为默认</strong>（不是"支持中文"，是"中文优先"）</td></tr>
+      <tr><td style="font-weight:600;color:var(--forest)">后端</td><td>Next.js Server Actions + Route Handlers；重任务走独立 worker</td></tr>
+      <tr><td style="font-weight:600;color:var(--forest)">数据库</td><td>PostgreSQL + Prisma。多租户用 <code>tenant_id</code> 行级隔离；<strong>OAuth refresh token 必须加密静态存储</strong></td></tr>
+      <tr><td style="font-weight:600;color:var(--forest)">任务队列</td><td>所有对 Google 的写操作<strong>一律进队列</strong>，不允许请求线程直接写。队列层实现节流、重试、审计、快照</td></tr>
+      <tr><td style="font-weight:600;color:var(--forest)">事件入口</td><td>Cloud Pub/Sub push 订阅 → <code>/api/webhooks/gbp</code>。必须校验推送签名并做幂等</td></tr>
+      <tr><td style="font-weight:600;color:var(--forest)">AI</td><td>Claude API 生成回复草稿。<strong>每条草稿存 prompt 版本 + 模型 ID + 是否被人工改过</strong>——出问题时这是唯一能复盘的东西</td></tr>
+      <tr><td style="font-weight:600;color:var(--forest)">排名采集</td><td>DataForSEO，定时任务按客户分片，结果只存<strong>聚合排名指标</strong>，不落 Places 原始内容（规避缓存条款）</td></tr>
+      <tr><td style="font-weight:600;color:var(--forest)">部署</td><td>GCP Cloud Run（min-instances=0）+ Cloud SQL。30 个客户规模下月成本约 USD $100</td></tr>
+      <tr><td style="font-weight:600;color:var(--forest)">触达</td><td>邮件 Resend / SendGrid；短信 Twilio；<strong>微信通过企业微信或服务号模板消息</strong>（这条要单独调研，是差异化的关键实现）</td></tr>
+    </tbody></table>
+  </div>
+  <div class="callout info">
+    <span class="lbl">架构上唯一不可妥协的一条</span>
+    <strong>写操作队列 + 变更前快照</strong>。每次改客户 GBP 之前，先把当前资料完整快照存库。这既是封号后申诉的证据，也是客户问「你把我店名改了？」时的唯一答案。这一条不是 nice-to-have，是接第一个客户前就必须有的。
+  </div>
+</section>
+
+<!-- ═══════════ 三 ═══════════ -->
+<section id="s3">
+  <h2><span class="num">三</span>竞品格局</h2>
+
+  <h3 id="s3-1">3.1 全球竞品</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:112px">产品</th><th style="width:158px">定价</th><th style="width:96px">定位</th><th>能力与合约</th><th style="width:150px">对我们意味着</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Birdeye</strong></td><td>$299–449/月/门店</td><td>企业 / 多店</td><td>200+ 平台集成、情绪分析、竞品追踪、网页聊天、统一收件箱。<strong>12 个月合约自动续约</strong></td><td>功能最深但对单店 SMB 是严重过度配置</td></tr>
+      <tr><td><strong>Podium</strong></td><td>$399–599/月/门店</td><td>全渠道消息</td><td>强在 SMS 沟通与支付，评价只是其中一块。<strong>12 个月合约</strong></td><td>它卖的其实是通讯，不是评价，不直接冲突</td></tr>
+      <tr><td><strong>NiceJob</strong></td><td>$75–125/月<br><strong>无合约</strong></td><td>Home services 单店</td><td>评价请求自动化 + 现场服务软件集成</td><td><strong>价格锚点</strong>。SMB 心里「评价管理该值多少钱」的参照</td></tr>
+      <tr style="background:var(--redbg)"><td><strong>Merchynt<br>（Paige）</strong></td><td><strong>$99/月/商家</strong><br>$1 试用<br>另有代理商计划</td><td>AI Agent 全自动</td><td>自动写+排期+发 GBP 帖（能自动配图、把五星评价转成帖子）、自动回评或给建议、自动索评+未评提醒、自动生成并回答 Q&amp;A、同步 FB/IG。设置一次即托管。已优化 2 万+ profile</td><td><span class="tag no">最危险</span> <strong>就是你想做的东西，已经做了三年</strong></td></tr>
+      <tr><td><strong>Localo</strong></td><td>&lt; $50/月</td><td>单店自助</td><td>资料审计 + AI 发帖 + 网格排名追踪</td><td>低价工具锚点，功能覆盖面已经不小</td></tr>
+      <tr><td><strong>Local Falcon</strong></td><td>$24.99–199.99/月</td><td>网格排名专精</td><td>3×3 到 21×21 网格、白标报告全档包含、Falcon AI 分析（25 credits/份）</td><td><span class="tag yes">当供应商用</span> 不是对手</td></tr>
+      <tr><td><strong>BrightLocal</strong></td><td>改为询价制<br>（Track / Manage / Grow）<br>+ citation $2/条<br>+ 托管 SEO $1,299/月</td><td>代理商全家桶</td><td>网格追踪全档含；白标报告 Manage 档起；<strong>评价管理只在 Grow 档</strong></td><td>备选供应商；已开始做 AI Overviews 追踪</td></tr>
+      <tr><td><strong>GoHighLevel</strong></td><td>$97 / $297 / $497</td><td>白标 SaaS 底座</td><td>Starter 3 个子账号；Unlimited 无限子账号 + API；Agency Pro 开 SaaS Mode（自动开户 + Stripe 自有品牌收款）。<strong>GBP 集成已通过 Google 验证</strong>，评价管理全档标配</td><td><span class="tag yes">阶段一底座</span> 借它已批的 API 资质，绕过两道审批</td></tr>
+      <tr><td>Vendasta</td><td>$99 / $499 / $999<br>+ <strong>$500–2,500 开户费</strong><br>+ 每席位 $30–65</td><td>白标市场</td><td>转售第三方工具，毛利仅 10–30%</td><td>费用结构太重，跳过</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 id="s3-2">3.2 最危险的对手：Merchynt Paige</h3>
+  <div class="card" style="border-left:3px solid var(--red)">
+    <p style="margin-bottom:10px"><strong>必须先承认的事实：</strong>你在这个对话里描述的产品——「AI 小工具自动根据每个授权账号进行管理维护，客户只付月费」——Merchynt 的 Paige 已经是这个形态，$99/月，而且做了三年、优化过 2 万+ 个 profile、有代理商分销计划。</p>
+    <p style="margin-bottom:10px">这不意味着不能做，意味着<strong>不能用功能清单去竞争</strong>。任何「我们也能自动回评 / 自动发帖」的宣传都会被它的先发优势和数据积累碾压。</p>
+    <p style="margin-bottom:0"><strong>它做不到、而且短期内不会做的：</strong></p>
+    <ul style="margin-bottom:0;margin-top:8px">
+      <li>不说中文——界面、月报、客服全英文。华人老板看不懂报告 = 感受不到价值 = 三个月后退订</li>
+      <li>没有微信——它的索评走 SMS/Email，而 GTA 华人商家的老客户关系全在微信群和朋友圈里</li>
+      <li>没有本地人——GBP 被封、所有权找不回、类目选错，这些都需要一个能打电话、能上门、能在微信里回你的人</li>
+      <li>不懂华人商家特有的坑——店名塞英文关键词（封号头号原因）、地址用了公寓单元号、多个历史重复列表、外包公司还挂着 owner 权限</li>
+    </ul>
+  </div>
+
+  <h4>定位象限</h4>
+  <div class="quad">
+    <div class="axis-x"></div><div class="axis-y"></div>
+    <div class="lab" style="left:12px;top:8px">纯软件 · 自助</div>
+    <div class="lab" style="right:12px;top:8px">软件 + 人工服务</div>
+    <div class="lab" style="left:12px;bottom:8px">低价</div>
+    <div class="lab" style="right:12px;bottom:8px">高价</div>
+    <div class="lab" style="left:50%;top:8px;transform:translateX(-50%);color:var(--slate2)">← 交付方式 →</div>
+    <div class="lab" style="left:8px;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:left center;color:var(--slate2)">← 价格 →</div>
+
+    <div class="dot" style="left:18%;top:78%">Local Falcon $25</div>
+    <div class="dot" style="left:22%;top:70%">Localo &lt;$50</div>
+    <div class="dot" style="left:26%;top:64%">Renew Local $30/店</div>
+    <div class="dot rival" style="left:36%;top:52%">Merchynt Paige $99</div>
+    <div class="dot" style="left:32%;top:44%">NiceJob $75–125</div>
+    <div class="dot" style="left:42%;top:58%">BrightLocal</div>
+    <div class="dot" style="left:55%;top:30%">GoHighLevel（底座）</div>
+    <div class="dot" style="left:70%;top:20%">Birdeye $299–449</div>
+    <div class="dot" style="left:79%;top:11%">Podium $399–599</div>
+    <div class="dot" style="left:74%;top:44%">Storyteller CAD $285–475</div>
+    <div class="dot" style="left:83%;top:29%">GTA 全案代理 CAD $600–1500</div>
+    <div class="dot us" style="left:57%;top:64%">我们 CAD $149–549<br><span style="font-weight:400;font-size:10px">中文 · 微信 · 本地人</span></div>
+  </div>
+  <p style="font-size:12.5px;color:var(--slate)">空位在<strong>右中区域</strong>：比纯工具贵，因为含人工兜底；比全案代理便宜一半以上，因为核心执行是 AI。而中文 / 微信 / 本地这三条，在整张图上没有第二个点。</p>
+
+  <h3 id="s3-3">3.3 GTA 本地价格基准</h3>
+  <p style="font-size:13px;color:var(--slate)">以下数据来自你 2026-08-05 的竞品调研文档，直接沿用。</p>
+  <div class="tw">
+  <table class="compact">
+    <thead><tr><th style="width:180px">服务商</th><th style="width:200px">价格</th><th>包含</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Storyteller Media</strong>（加拿大）</td><td><strong>CAD $285/月</strong> Essentials<br><strong>CAD $475/月</strong> Growth<br>年付送两个月</td><td>Essentials：邀评 App、NAP 监控、GBP 发帖、关键词优化、月报<br><strong>Growth 加：回复所有评价</strong>（说明「回复评价」被行业视为升档理由）</td></tr>
+      <tr><td>Renew Local</td><td>USD $30/月/门店<br>（21–30 店降 $20）</td><td>AI 评价回复、封号监控、资料备份、变更提醒、自动发帖。<strong>价格下限参照</strong></td></tr>
+      <tr><td>Renew Local 单次服务</td><td>差评申诉 <strong>$425/条</strong><br>GBP 验证 / 恢复 <strong>$750/次</strong></td><td>已被市场验证的一次性高价项目</td></tr>
+      <tr><td>Merchynt（含人工档）</td><td>$499 设置费<br>$125–400/月/门店</td><td>每周 2 条发帖、月度/季度报告</td></tr>
+      <tr><td>GTA 全案本地 SEO</td><td>CAD $600–1,500/月起步<br>激进型 $3,000–6,000+</td><td>GBP 优化 + 引文建设 + 社区落地页</td></tr>
+      <tr><td>一次性 GBP 设置</td><td>CAD $299 起</td><td>无合约</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 id="s3-4">3.4 空位在哪</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:150px">差异化维度</th><th style="width:88px">竞品覆盖</th><th>为什么它有效，以及怎么落地</th></tr></thead>
+    <tbody>
+      <tr><td><strong>全中文界面 + 中文月报</strong></td><td><span class="tag no">零</span></td><td>老板看得懂报告，才会觉得每月这笔钱花得值。<strong>续费率的第一决定因素不是效果，是感知到的效果。</strong>落地：i18n 中文优先 + 月报 PDF 中文版</td></tr>
+      <tr><td><strong>微信作为主触达通道</strong></td><td><span class="tag no">零</span></td><td>差评告警发到微信 3 分钟内会看，发到邮件三天后才看。索评卡片发微信群比发短信转化率高得多，且天然规避 CASL 的短信明示同意要求</td></tr>
+      <tr><td><strong>双语 AI：英文回复 / 中文摘要</strong></td><td><span class="tag no">零</span></td><td>回复给 Google 的必须是地道英文（面向本地客人），给老板看的必须是中文（含原评价翻译 + 建议动作 + 一键批准）</td></tr>
+      <tr><td><strong>华人商家专属风险体检</strong></td><td><span class="tag no">零</span></td><td>店名塞英文关键词、公寓单元号当地址、历史重复列表、外包公司仍持 owner 权限。<strong>这四项在华人商家中的发生率远高于本地商家</strong>，且每一项都可能导致封号或排名塌陷。做成 onboarding 的必检项，本身就是可独立收费的服务</td></tr>
+      <tr><td><strong>本地人工兜底</strong></td><td><span class="tag warn">部分</span></td><td>Merchynt 是纯 SaaS，出事只能提工单。你能打电话、能微信、必要时能上门。这是 AI 产品结构性做不到的</td></tr>
+      <tr><td><strong>诊断报告作为漏斗前端</strong></td><td><span class="tag warn">部分</span></td><td>你 8/5 的方案已经跑通逻辑：免费简版诊断 → CAD $249 完整报告 → 讲报告 → 转月费。<strong>获客成本为负</strong>，且诊断过程天然筛掉了不愿付钱的客户</td></tr>
+      <tr><td>AI 搜索可见性追踪</td><td><span class="tag warn">刚起步</span></td><td>2026 年 AI Overviews 出现在 68% 的本地搜索中。BrightLocal / Whitespark 刚开始做。<strong>本次不做（P2）</strong>，但要在第 6–12 个月盯住</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════ 四 ═══════════ -->
+<section id="s4">
+  <h2><span class="num">四</span>产品设计</h2>
+
+  <div class="card tinted">
+    <div style="font-size:11px;letter-spacing:.16em;color:var(--gold);font-weight:700;margin-bottom:8px">产品定位一句话</div>
+    <p style="font-size:16px;line-height:1.7;margin-bottom:10px"><strong>「给多伦多华人老板的 Google 门面管家」</strong>——每月一笔固定费用，我们用 AI 帮你把 Google 上的评价接住、回好，把地图排名一点点推上去；出事的时候，有个说中文的人替你顶着。</p>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:0">注意这句话里没有「AI 全自动」。<strong>华人 SMB 老板对「全自动」的第一反应是不放心，不是省心。</strong>卖点应该是「有人替我盯着，而且很便宜」，AI 是让它便宜的手段，不是卖点本身。</p>
+  </div>
+
+  <h3 id="s4-1">4.1 三层架构</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:104px">层</th><th style="width:120px">解决什么</th><th>核心动作</th><th style="width:130px">自动化程度</th></tr></thead>
+    <tbody>
+      <tr><td><strong>① 采集层<br>Collect</strong></td><td>评价数量太少、太旧</td><td>合规邀评：桌卡二维码 / 收银小票 / 微信卡片 / 短信 / 邮件 → 直达 <code>search.google.com/local/writereview?placeid={PLACE_ID}</code></td><td><span class="tag autom" style="background:var(--greenbg);color:var(--green);border:1px solid #C9E0D3">全自动</span><br><span style="font-size:11px;color:var(--slate)">但发送对象必须无差别</span></td></tr>
+      <tr><td><strong>② 应答层<br>Respond</strong></td><td>评价没人回、差评没人管</td><td>Pub/Sub 收到新评价 → AI 分级 → 好评自动回、差评微信告警老板 → 人工确认 → 回复 → 记录</td><td><span class="tag warn">分级</span><br><span style="font-size:11px;color:var(--slate)">4–5 星可自动，1–3 星必须人审</span></td></tr>
+      <tr><td><strong>③ 增长层<br>Rank</strong></td><td>地图上搜不到</td><td>每周网格扫描 → AI 诊断出任务清单 → 节流执行（发帖 / 补图 / Q&amp;A / 类目 / 属性）→ 中文周报月报</td><td><span class="tag warn">半自动</span><br><span style="font-size:11px;color:var(--slate)">内容自动，资料变更人审</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 id="s4-2">4.2 功能清单</h3>
+  <div class="tw">
+  <table class="compact">
+    <thead><tr><th style="width:62px">优先级</th><th style="width:172px">功能</th><th>说明</th><th style="width:100px">阶段一能否用白标实现</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag p0">P0</span></td><td>GBP 授权与健康体检</td><td>所有权确认、店名合规检查、地址格式、重复列表扫描、类目审计。<strong>出报告，且四项都是封号风险源</strong></td><td><span class="tag warn">人工</span></td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>评价实时同步 + 告警</td><td>Pub/Sub 推送（&lt;5 分钟）。1–3 星立即微信告警，含中文翻译与建议动作</td><td><span class="tag yes">GHL</span> 告警渠道需改造</td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>AI 回复草稿（中英双语）</td><td>英文回复正文 + 中文摘要。带商家语气配置（正式 / 亲切 / 简短）</td><td><span class="tag warn">半</span> GHL 有 AI 回复，中文摘要需自建</td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>人审队列 + 一键发布</td><td>内部工作台：多客户统一收件箱、按星级筛选、批量批准</td><td><span class="tag yes">GHL</span></td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>合规邀评物料包</td><td>桌卡二维码、收银小票模板、微信卡片图、双语短信/邮件模板。<strong>模板本身内置合规措辞</strong></td><td><span class="tag yes">自制</span></td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>geo-grid 周扫描 + 热力图</td><td>5 个关键词 × 7×7 网格，每周一次，与上周对比</td><td><span class="tag yes">Local Falcon</span></td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>中文月报 PDF</td><td>排名热力图对比、评价增长、回复率与响应时长、曝光数据、下月计划</td><td><span class="tag warn">半</span> LF 白标报告是英文，中文层需自制</td></tr>
+      <tr><td><span class="tag p0">P0</span></td><td>变更前快照 + 操作审计</td><td>每次改 GBP 前存全量快照；所有操作记录人/时间/前后值</td><td><span class="tag no">自建</span> <strong>阶段一先用手工记录顶上，不能没有</strong></td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>自动 GBP 发帖</td><td>每周 1–2 条，AI 生成，可把五星评价转成帖子。<strong>发布前人审第一个月，稳定后转自动</strong></td><td><span class="tag yes">GHL / LF</span></td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>照片定期上传</td><td>提醒商家提供，或从客户提供的素材库排期上传</td><td><span class="tag warn">人工</span></td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>索评自动化 + 一次跟进</td><td>接入触发源（POS / 预约 / 人工导入），24h 未评提醒一次，仅一次</td><td><span class="tag yes">GHL</span></td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>商家中文看板</td><td>口碑分、本月新评、待回复、平均响应时间、热力图</td><td><span class="tag no">自建</span> 阶段一用月报替代</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>差评申诉代办</td><td>识别疑似违规评价，生成申诉材料。<strong>单次收费，明确不保证结果</strong></td><td><span class="tag warn">人工</span></td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>Q&amp;A 维护</td><td>依据商家网站生成常见问题并回答。<strong>API 写入能力待实测</strong></td><td><span class="tag warn">待验证</span></td></tr>
+      <tr><td><span class="tag p2">P2</span></td><td>竞品对标</td><td>同类目周边商家的评分、评价数、排名对比</td><td>—</td></tr>
+      <tr><td><span class="tag p2">P2</span></td><td>NAP 多平台一致性</td><td>Yelp / Bing / Apple Maps 信息同步与重复列表清理</td><td>—</td></tr>
+      <tr><td><span class="tag p2">P2</span></td><td>AI 搜索可见性</td><td>ChatGPT / Gemini / AI Overviews 中被推荐的追踪</td><td>—</td></tr>
+      <tr><td><span class="tag p2">P2</span></td><td>白标转售给其他代理</td><td>B2B2B。<strong>产品成熟前不碰</strong></td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>明确不做（YAGNI）</h4>
+  <p style="font-size:13px">网页聊天 / 短信客服（Podium 的地盘，跟评价没关系）· 支付收款 · CRM · 官网建站 · 社媒<strong>内容策划与拍摄</strong>（是另一门生意，别混）· 多门店企业级权限体系（客群不需要）。<strong>每加一个模块，交付复杂度是乘法不是加法。</strong></p>
+
+  <h4 style="margin-top:18px">⚠️ 2026-08-08 范围变更：社媒纳入产品</h4>
+  <p style="font-size:13px">原清单里「社媒代运营」与「统一收件箱」被列为不做，<strong>本次由用户决定推翻</strong>。纳入的是<strong>门面维度的社媒</strong>，不是代运营：</p>
+  <ul style="font-size:13px">
+    <li><strong>做</strong>：一条内容一次撰写、多平台分发（Google / Facebook / Instagram / TikTok）；各平台评论与私信收敛到一个收件箱，与 Google 评价共用人审逻辑（负面强制人审）。</li>
+    <li><strong>仍然不做</strong>：内容策划、拍摄剪辑、涨粉运营、投流。那是内容公司的活，交付复杂度和人力模型完全不同。</li>
+  </ul>
+  <p style="font-size:13px"><strong>三个必须先解决的现实约束</strong>：① Facebook / Instagram 发布需 Meta 商务验证 + 应用审核（<code>pages_manage_posts</code>）；② TikTok 需 Content Posting API 单独申请与审核，且只接受视频；③ 阶段一的白标（GoHighLevel）<strong>不覆盖这些平台</strong>，社媒能力只能走阶段二自研，等于把自研时间点提前了。</p>
+  <p style="font-size:13px"><strong>对瓶颈的影响必须正视</strong>：本方案的瓶颈从来不是成本，是人力（阶段一 10 客户约 15 小时/月）。社媒互动收件箱按每客户每月 10–20 条互动、每条 3 分钟估算，<strong>额外 5–10 小时/月</strong>，即瓶颈资源增加 33–67%。下方定价若不同步上调，等于用毛利换工时。</p>
+
+  <h3 id="s4-3">4.3 AI 的边界（最重要的一张表）</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:180px">动作</th><th style="width:118px">默认模式</th><th>理由</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--greenbg)"><td>回复 4–5 星评价</td><td><span class="tag yes">可全自动</span></td><td>出错代价低，量大，是 AI 最该干的活。首月仍走人审建立信任，稳定后由客户自选切换</td></tr>
+      <tr style="background:var(--redbg)"><td>回复 1–3 星评价</td><td><span class="tag no">强制人审</span></td><td>差评回复涉及事实认定、可能引发法律纠纷、措辞不当会二次激怒。<strong>永不开放全自动，这是产品原则不是配置项</strong></td></tr>
+      <tr style="background:var(--amberbg)"><td>发布 GBP 帖子</td><td><span class="tag warn">首月人审</span></td><td>内容错误影响品牌但可撤回。建立信任后转自动</td></tr>
+      <tr style="background:var(--redbg)"><td>修改店名 / 地址 / 主类目</td><td><span class="tag no">强制人审 + 二次确认</span></td><td><strong>封号头号风险区。</strong>必须人工双确认 + 变更前快照 + 单独记录理由</td></tr>
+      <tr style="background:var(--amberbg)"><td>修改营业时间 / 属性 / 服务项</td><td><span class="tag warn">人审</span></td><td>低风险但仍计入编辑频次节流</td></tr>
+      <tr style="background:var(--greenbg)"><td>上传照片</td><td><span class="tag yes">可自动</span></td><td>素材需商家事先提供，排期上传</td></tr>
+      <tr style="background:var(--redbg)"><td>代写评价</td><td><span class="tag no">绝对禁止</span></td><td>Google 自 2025 年起明确禁止 AI 生成的评价；FTC 规则下属虚假评价。<strong>产品里不存在这个功能，代码里也不存在</strong></td></tr>
+      <tr style="background:var(--redbg)"><td>按情绪筛选索评对象</td><td><span class="tag no">绝对禁止</span></td><td>就是 review gating。见第七节</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout danger">
+    <span class="lbl">节流硬约束（写进队列层，不做成配置）</span>
+    <strong>每个 GBP 每天最多 2 次写操作</strong>（回复评价不计入）· 新客户接入后<strong>前 14 天只读不写</strong>，只做观察和体检 · 店名/地址/主类目变更<strong>每 30 天最多 1 次</strong>，且必须人工双确认 · 批量操作一律拆散、随机化时间分布，绝不在同一分钟集中提交。<br>
+    这些数字看起来保守到不像自动化产品该有的样子。<strong>但客户要的是排名，不是操作次数。</strong>而 2026 年两波封号潮里，「突发密集编辑」是公认的触发因素。
+  </div>
+</section>
+
+<!-- ═══════════ 五 ═══════════ -->
+<section id="s5">
+  <h2><span class="num">五</span>交互流程</h2>
+
+  <h3 id="s5-1">5.1 获客 → 签约 → 上线（Day 0–7）</h3>
+  <div class="flow">
+    <div class="flow-row">
+      <div class="step"><div class="n">STEP 1</div><div class="t">免费简版诊断</div><div class="d">网页输入店名 → 自动匹配 GBP 公开信息 → 出 0–100 分 + 3 个最严重的问题。行业标配入口，不是创新</div></div>
+      <div class="step accent"><div class="n">STEP 2</div><div class="t">完整诊断报告</div><div class="d">CAD $249，24–48 小时交付中文 PDF。含网格热力图、评价体检、四项封号风险自查、90 天路线图</div></div>
+      <div class="step"><div class="n">STEP 3</div><div class="t">15 分钟中文视频讲报告</div><div class="d">不是销售电话，是讲报告。讲完自然引出月费方案。<strong>转化就发生在这一步</strong></div></div>
+      <div class="step accent"><div class="n">STEP 4</div><div class="t">签约</div><div class="d">月付无合约，价格不含 HST。合同必须写明：差评不可删、申诉不保证结果、不承诺排名数字</div></div>
+    </div>
+    <div class="flow-row">
+      <div class="step alert"><div class="n">STEP 5</div><div class="t">权限体检</div><div class="d"><strong>华人商家最常卡在这里。</strong>谁是 owner？外包公司还挂着权限吗？有重复列表吗？店名违规吗？找不回所有权可独立收费 CAD $399–599</div></div>
+      <div class="step"><div class="n">STEP 6</div><div class="t">授权（客户自己点，2 分钟）</div><div class="d"><strong>必须屏幕共享看着客户点完</strong>，不要发 PDF 让他自己摸索。这是代理商最常见的卡壳点</div></div>
+      <div class="step"><div class="n">STEP 7</div><div class="t">基线快照</div><div class="d">当前评分、评价数、回复率、网格排名、资料完整度全部存档。<strong>这是三个月后证明价值的唯一依据</strong></div></div>
+      <div class="step"><div class="n">STEP 8</div><div class="t">物料交付</div><div class="d">桌卡二维码、小票模板、微信卡片、双语短信模板。当面教一遍怎么用</div></div>
+    </div>
+  </div>
+
+  <h4>授权的两条路径</h4>
+  <div class="two">
+    <div class="card">
+      <h4 style="margin-top:0">路径 A · 阶段一（推荐，零技术门槛）</h4>
+      <p style="font-size:13px">客户在自己的 GBP 后台，把你的工作 Google 账号<strong>加为「管理员 Manager」</strong>；或走 GoHighLevel 的 GBP 集成，客户点一次 OAuth（GHL 的应用已通过 Google 验证）。</p>
+      <p style="font-size:13px;margin-bottom:0"><strong>优点：</strong>今天就能做，不等任何审批。<strong>缺点：</strong>权限散落在工具里，迁移到自研时要重新授权一次。</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">路径 B · 阶段二（自研）</h4>
+      <p style="font-size:13px">客户点你自己的 OAuth 授权链接 → 跳转 Google 官方登录页 → 勾选权限 → token 回到你的后台。<strong>全程你看不到密码。</strong></p>
+      <p style="font-size:13px;margin-bottom:0"><strong>前提：</strong>两道审批都已通过。<strong>话术：</strong>「我不需要你的密码，你自己点授权，随时可以撤销」——这是比要密码好卖十倍的信任话术。</p>
+    </div>
+  </div>
+
+  <h3 id="s5-2">5.2 评价闭环（日常，事件驱动）</h3>
+  <div class="lane">
+    <div class="who">Google</div><div class="act">顾客发布新评价 <span class="sm">→ Pub/Sub 主题推送事件（通常 5 分钟内）</span></div>
+    <div class="who">系统</div><div class="act">接收 webhook → 幂等校验 → 拉取评价全文 → <strong>AI 分级</strong>：星级 / 情绪 / 主题（服务·出品·环境·价格·等待）/ 是否涉及具体投诉 / 是否疑似违规</div>
+    <div class="who" style="color:var(--green)">4–5 星</div><div class="act">AI 生成英文回复（带商家语气配置）→ <strong>首月进人审队列，稳定后自动发布</strong> <span class="sm">目标：24 小时内回复率 100%</span></div>
+    <div class="who" style="color:var(--red)">1–3 星</div><div class="act"><strong>立即微信告警老板</strong>（含原文中文翻译 + 事件摘要 + 2 条建议动作 + 一键批准按钮）<span class="sm">目标：15 分钟内老板知情，4 小时内公开回复</span></div>
+    <div class="who" style="color:var(--red)">疑似违规</div><div class="act">垃圾信息 / 仇恨言论 / 竞争对手 / 明显未消费 → 生成申诉材料 → 走 CAD $299 单次服务 <span class="sm">⚠️ 必须提前告知客户：申诉不保证结果，差评无法删除</span></div>
+    <div class="who">记录</div><div class="act">回复内容、AI 草稿版本、是否被人改过、响应时长全部入库 → 月报统计 → 争议时可复盘</div>
+  </div>
+
+  <h3 id="s5-3">5.3 索评闭环（合规是设计约束，不是事后检查）</h3>
+  <div class="flow">
+    <div class="flow-row">
+      <div class="step"><div class="n">触发</div><div class="t">消费事件</div><div class="d">POS / 预约系统 / 人工导入 / 现场扫码。<strong>必须无差别覆盖全部顾客</strong></div></div>
+      <div class="step alert"><div class="n">红线</div><div class="t">禁止满意度前置筛选</div><div class="d">不允许「先问满意吗 → 满意的才给 Google 链接」。这就是 review gating，Google 会 AI 回溯删除历史评价</div></div>
+      <div class="step autom"><div class="n">渠道</div><div class="t">微信优先</div><div class="d">微信卡片（首选，且规避 CASL 短信明示同意要求）→ 邮件（既有商业关系可默示同意）→ 短信（<strong>必须明示同意</strong>）</div></div>
+      <div class="step"><div class="n">链接</div><div class="t">直达评价页</div><div class="d"><code>search.google.com/local/writereview?placeid={ID}</code>，双语一句话说明，不指定评价内容、不给星级暗示</div></div>
+    </div>
+    <div class="branch">
+      <span class="lbl">后续</span>
+      <div class="flow-row">
+        <div class="step"><div class="n">跟进</div><div class="t">24h 未评提醒一次</div><div class="d">只发一次。第二次就是骚扰，且增加 CASL 风险</div></div>
+        <div class="step"><div class="n">存证</div><div class="t">同意来源 + 时间戳 + 退订记录</div><div class="d">CASL 的举证责任在发送方。<strong>存不下来 = 无法自证 = 违规</strong>。退订须在 10 个工作日内生效</div></div>
+        <div class="step"><div class="n">禁止</div><div class="t">任何形式的激励</div><div class="d">折扣、赠品、抽奖换评价——FTC 规则和 Google 政策双重禁止，最高 $51,744/次</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 id="s5-4">5.4 排名优化周循环</h3>
+  <div class="lane">
+    <div class="who">周一</div><div class="act"><strong>网格扫描</strong> <span class="sm">5 个关键词 × 7×7 网格 = 245 个数据点，与上周、上月对比，标出退步区域</span></div>
+    <div class="who">周二</div><div class="act"><strong>AI 诊断出任务清单</strong> <span class="sm">对照本地排名因素：主类目是否最优 / 附加类目是否补全 / 营业状态 / 评分与评价近期性 / 资料完整度 / 地图钉位置 / 帖子频率</span></div>
+    <div class="who">周三–五</div><div class="act"><strong>节流执行</strong> <span class="sm">每天每门店 ≤2 次写操作，随机时间分布。发帖与照片自动，资料变更必须人审</span></div>
+    <div class="who">周日</div><div class="act"><strong>中文周简报推微信</strong> <span class="sm">三行字：本周排名变化、做了什么、下周做什么。不要发 PDF，老板不会打开</span></div>
+    <div class="who">月末</div><div class="act"><strong>中文月报 PDF</strong> <span class="sm">热力图三期对比、评价增长与回复率、平均响应时长、GBP 曝光与路线请求、下月计划。这是续费谈判的唯一素材</span></div>
+  </div>
+
+  <div class="callout info">
+    <span class="lbl">排名优先级依据（Whitespark 2026 报告，2025-11-06 发布，47 位专家、187 项因素）</span>
+    Local Pack 前 10 位因素依次是：<strong>①主 GBP 类目 ②与搜索点的距离 ③店名中的关键词 ④地址在搜索城市内 ⑤搜索时是否营业中 ⑥高评分（4–5 星） ⑦GBP 上地址是否可见 ⑧附加类目 ⑨Google 原生评价数量 ⑩地图钉位置准确度</strong>。<br>
+    两条可操作的推论：<strong>(a) 主类目选对，比后面所有工作加起来都重要</strong>——onboarding 必检项。<strong>(b) 「店名中的关键词」排第 3，但往店名里塞关键词是封号头号原因</strong>——这是一个赚了排名赔了账号的陷阱，必须明确告诉客户不做，并在体检时把已经塞了的清理掉。此外，评价<strong>近期性</strong>在 2026 年权重明显上升，稳定的新评价流比一堆陈年五星更有用——这直接支撑了索评自动化的价值。
+  </div>
+
+  <h3 id="s5-5">5.5 界面清单（阶段二自研）</h3>
+  <div class="tw">
+  <table class="compact">
+    <thead><tr><th style="width:150px">界面</th><th style="width:74px">面向</th><th>核心内容</th></tr></thead>
+    <tbody>
+      <tr><td>商家看板（中文）</td><td>客户</td><td>口碑分、本月新评数、待回复数、平均响应时长、网格热力图缩略、本月已做动作时间轴</td></tr>
+      <tr><td>评价工作台</td><td>内部</td><td><strong>跨客户统一收件箱</strong>，按星级/客户/是否已回筛选，AI 草稿并排原文，一键批准或改后发布</td></tr>
+      <tr><td>网格热力图</td><td>双方</td><td>本周 / 上周 / 上月三期切换对比，关键词切换，点击格子看该点的前 10 名</td></tr>
+      <tr><td>任务队列</td><td>内部</td><td>本周待执行动作、节流拦截项、需人审的资料变更、失败重试</td></tr>
+      <tr><td>健康体检页</td><td>双方</td><td>四项封号风险（店名/地址/重复列表/权限）+ 资料完整度评分 + 类目建议</td></tr>
+      <tr><td>月报生成器</td><td>内部</td><td>一键生成中文 PDF，可编辑「本月小结」和「下月计划」两段人工文字</td></tr>
+      <tr><td>授权管理</td><td>内部</td><td>各客户 token 状态、过期预警、重新授权引导链接</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════ 六 ═══════════ -->
+<section id="s6">
+  <h2><span class="num">六</span>定价与单位经济</h2>
+
+  <div class="plans">
+    <div class="plan">
+      <div class="ph"><div class="pn">守住口碑</div><div class="pp">$149<small> CAD/月</small></div><div class="pw">对标 Renew Local + NiceJob</div></div>
+      <ul>
+        <li>评价实时同步与监控</li>
+        <li>AI 回复草稿（中英双语）</li>
+        <li>差评微信告警（15 分钟内）</li>
+        <li>邀评物料包</li>
+        <li>中文月报</li>
+        <li>封号风险监控</li>
+      </ul>
+    </div>
+    <div class="plan hero">
+      <div class="ph"><div class="pn">稳步上榜 ★ 主力</div><div class="pp">$299<small> CAD/月</small></div><div class="pw">对标 Storyteller CAD $285</div></div>
+      <ul>
+        <li>入门档全部内容</li>
+        <li><strong>geo-grid 周扫描</strong>（5 词 × 7×7）</li>
+        <li>每周 1–2 条 GBP 发帖</li>
+        <li>照片与 Q&amp;A 维护</li>
+        <li>索评自动化 + 一次跟进</li>
+        <li>中文周简报（微信）</li>
+        <li>季度策略沟通</li>
+        <li><strong>内容多平台分发</strong>（Facebook / Instagram）<span style="color:#b45309">※</span></li>
+        <li><strong>社媒评论与私信收件箱</strong><span style="color:#b45309">※</span></li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="ph"><div class="pn">区域压制</div><div class="pp">$549<small> CAD/月</small></div><div class="pw">对标 Storyteller Growth $475</div></div>
+      <ul>
+        <li>主力档全部内容</li>
+        <li>10 个关键词 × 9×9 网格</li>
+        <li>竞品对标追踪</li>
+        <li>NAP 多平台一致性</li>
+        <li>AI 搜索可见性（上线后）</li>
+        <li>月度策略会</li>
+        <li><strong>TikTok 内容分发</strong>（仅视频）<span style="color:#b45309">※</span></li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="ph" style="background:var(--muted)"><div class="pn">一次性服务</div><div class="pp" style="font-size:19px">$249–599</div><div class="pw">获客入口与增项</div></div>
+      <ul>
+        <li>完整诊断报告 <strong>$249</strong></li>
+        <li>GBP 所有权找回 / 验证 <strong>$399–599</strong></li>
+        <li>差评申诉代办 <strong>$299/条</strong><br><span style="color:var(--red);font-size:11px">明确不保证结果</span></li>
+        <li>邀评物料包单卖 <strong>$149</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="font-size:13px;color:#b45309;border-left:3px solid #f59e0b;padding-left:10px;margin:14px 0"><strong>※ 标记项为 2026-08-08 新增的社媒能力，价格尚未重算，需你拍板。</strong>这些项使交付人力增加 33–67%（见上方范围变更），按现价捆绑进去等于自己吃掉这部分工时。两个方向：<strong>(a)</strong> 主力档提到 $349、区域压制提到 $649；<strong>(b)</strong> 维持现价，社媒作为加购 +$149/月（Facebook + Instagram）、TikTok 再 +$100/月。建议 (b) —— 加购能验证真实需求，也便于对不需要社媒的客户守住 $299 的价格竞争力。<strong>价格定下来之前，这几项不要写进客户合同。</strong></p>
+
+  <p style="font-size:12.5px;color:var(--slate)"><strong>必写条款：</strong>价格不含 HST · 月付无合约可随时取消 · 年付送两个月 · 不承诺具体排名或客流数字 · 差评无法删除，仅代写回复 · 申诉结果由 Google 判定 · 多门店从第 2 家起 8 折。</p>
+
+  <h3>单位经济</h3>
+  <div class="two">
+    <div class="card">
+      <h4 style="margin-top:0">阶段一 · 10 个客户（白标）</h4>
+      <table class="compact"><tbody>
+        <tr><td>收入（10 × CAD $299）</td><td class="num"><strong>CAD 2,990</strong></td></tr>
+        <tr><td style="color:var(--slate)">GoHighLevel Unlimited</td><td class="num" style="color:var(--slate)">USD 297</td></tr>
+        <tr><td style="color:var(--slate)">Local Falcon Basic（15,150 credits）</td><td class="num" style="color:var(--slate)">USD 50</td></tr>
+        <tr><td style="color:var(--slate)">Claude API（回复 + 月报）</td><td class="num" style="color:var(--slate)">USD 30</td></tr>
+        <tr><td style="color:var(--slate)">短信 / 邮件</td><td class="num" style="color:var(--slate)">USD 40</td></tr>
+        <tr style="border-top:2px solid var(--border)"><td><strong>成本合计</strong></td><td class="num"><strong>≈ CAD 580</strong></td></tr>
+        <tr><td><strong>毛利 / 毛利率</strong></td><td class="num"><strong style="color:var(--forest)">CAD 2,410 / 81%</strong></td></tr>
+        <tr><td colspan="2" style="color:var(--slate);font-size:12px;padding-top:10px">人工投入约 15 小时/月（人审队列 + 月报人工段落 + 客户沟通）。<strong>瓶颈在这里，不在成本。</strong></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">阶段二 · 30 个客户（自研）</h4>
+      <table class="compact"><tbody>
+        <tr><td>收入（30 × CAD $299）</td><td class="num"><strong>CAD 8,970</strong></td></tr>
+        <tr><td style="color:var(--slate)">Cloud Run + Cloud SQL</td><td class="num" style="color:var(--slate)">USD 35</td></tr>
+        <tr><td style="color:var(--slate)">DataForSEO（30 × $0.60）</td><td class="num" style="color:var(--slate)">USD 18</td></tr>
+        <tr><td style="color:var(--slate)">Claude API</td><td class="num" style="color:var(--slate)">USD 90</td></tr>
+        <tr><td style="color:var(--slate)">短信 / 邮件 / 微信</td><td class="num" style="color:var(--slate)">USD 110</td></tr>
+        <tr><td style="color:var(--slate)">GBP API</td><td class="num" style="color:var(--slate)">$0（免费）</td></tr>
+        <tr style="border-top:2px solid var(--border)"><td><strong>成本合计</strong></td><td class="num"><strong>≈ CAD 350</strong></td></tr>
+        <tr><td><strong>毛利 / 毛利率</strong></td><td class="num"><strong style="color:var(--forest)">CAD 8,620 / 96%</strong></td></tr>
+        <tr><td colspan="2" style="color:var(--slate);font-size:12px;padding-top:10px">自研后边际成本趋近于零：<strong>每多一个客户月成本约 CAD $12</strong>。这就是从白标迁到自研的全部理由。</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">1 个</div><div class="k">打平阶段一工具成本所需客户数<br><span style="font-size:11px">GHL Starter $97 + LF Starter $25 ≈ CAD $170</span></div></div>
+    <div class="kpi"><div class="v">3 个</div><div class="k">第 3 个月的最低目标客户数<br><span style="font-size:11px">验证交付流程跑得通</span></div></div>
+    <div class="kpi"><div class="v">10 个</div><div class="k">第 6 个月目标<br><span style="font-size:11px">MRR ≈ CAD $3,000</span></div></div>
+    <div class="kpi"><div class="v">30 个</div><div class="k">第 12 个月目标<br><span style="font-size:11px">MRR ≈ CAD $9,000，需自研支撑</span></div></div>
+    <div class="kpi"><div class="v">$0</div><div class="k">获客成本<br><span style="font-size:11px">$249 诊断报告本身盈利</span></div></div>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">定价逻辑</span>
+    主力档定 CAD $299 是刻意的：略高于 Storyteller 的 $285（因为我们含中文服务和微信响应），显著低于 GTA 全案代理的 $600–1,500（因为核心执行是 AI）。<strong>不要定 $199——那会把你推进「工具」的心理分类里，而工具的对手是 $50 的 Localo，你打不过。</strong>$299 让客户把你归类为「服务」，服务是可以按人的价值定价的。
+  </div>
+</section>
+
+<!-- ═══════════ 七 ═══════════ -->
+<section id="s7">
+  <h2><span class="num">七</span>合规与风险</h2>
+
+  <h3>7.1 三条红线</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:118px">红线</th><th style="width:230px">法规依据</th><th>产品层面必须怎么做</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--redbg)">
+        <td><strong>评价门控<br>Review Gating</strong></td>
+        <td>Google 政策自 2018 年禁止，<strong>2026 年 4 月更新明确禁止选择性索评并用 AI 主动检测，会回溯删除数月前收集的评价</strong><br>FTC《消费者评价与推荐规则》2024-10-21 生效，<strong>最高 $51,744/次</strong><br>加拿大 Bill C-59 自 2025-06-20 起允许私人向竞争法庭申请提起诉讼</td>
+        <td>产品里<strong>不存在</strong>「先问满意度再分流」的能力。索评发送对象只能按时间/交易全量筛选，不能按情绪。<br>营销材料中不得出现「只把满意客户导向 Google」这类表述。<br>⚠️ 部分白标工具（含 GHL 的某些模板）自带「负面反馈私下引流」功能，<strong>必须主动关掉</strong></td>
+      </tr>
+      <tr style="background:var(--amberbg)">
+        <td><strong>CASL<br>反垃圾邮件法</strong></td>
+        <td>短信需<strong>明示同意</strong>；邮件在既有商业关系下可默示同意（购买后 24 个月内 / 询价后 6 个月内）<br>退订须 10 个工作日内生效<br><strong>举证责任在发送方</strong></td>
+        <td>每条索评消息必须存：同意来源、时间戳、同意类型、退订状态。<br><strong>优先走微信</strong>——不属于 CEM 的典型形态，且转化更好。<br>短信通道默认关闭，客户明确提供明示同意名单才开启</td>
+      </tr>
+      <tr style="background:var(--redbg)">
+        <td><strong>批量自动编辑<br>触发封号</strong></td>
+        <td>2026 年 4 月、5 月两波大规模封号；<strong>「一连串快速编辑触发自动审核」是公认三大成因之一</strong>（另两个是店名塞关键词、地址/类目与其他记录不一致）<br>法律、医疗、HVAC、开锁、车库门等类目被重点审查<br>恢复周期 数天至 14–20 个工作日</td>
+        <td>见 4.3 的节流硬约束。另加：<br>· 新客户前 14 天只读<br>· 变更前全量快照<br>· 每日封号状态巡检（Voice of Merchant 通知）<br>· 合同写明「因 Google 政策变化导致的账号问题，我方协助申诉但不保证结果」</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>7.2 风险矩阵</h3>
+  <div class="tw">
+  <table class="compact">
+    <thead><tr><th style="width:180px">风险</th><th style="width:64px">概率</th><th style="width:64px">影响</th><th>应对</th></tr></thead>
+    <tbody>
+      <tr><td>客户 GBP 被封，归咎于我们</td><td><span class="tag warn">中</span></td><td><span class="tag no">致命</span></td><td>节流硬约束 + 变更快照 + 合同免责 + 主动购买「恢复代办」能力（这本身也是 $750 级别的收入项）</td></tr>
+      <tr><td>Merchynt 出中文版</td><td><span class="tag warn">中</span></td><td><span class="tag warn">高</span></td><td>护城河不能只是语言。<strong>本地人工服务 + 微信 + 华人社群口碑</strong>是它做不到的。趁早把前 20 个客户的口碑做实</td></tr>
+      <tr><td>GBP API 申请被拒或拖延</td><td><span class="tag warn">中</span></td><td><span class="tag warn">中</span></td><td>阶段一完全不依赖它。被拒后可换 GCP 项目重申，或长期停留在白标模式——<strong>收入不受影响，只是毛利低一些</strong></td></tr>
+      <tr><td>OAuth 验证被拒</td><td><span class="tag info">低</span></td><td><span class="tag warn">中</span></td><td>sensitive scope 验证要求明确（视频 + 隐私政策 + 域名），准备充分基本能过。被拒会给具体理由，可修改重提</td></tr>
+      <tr><td>business.manage 其实算 restricted</td><td><span class="tag info">低</span></td><td><span class="tag warn">中</span></td><td>成本增加 $500–4,500/年 + 年度复审。<strong>第 1 周就在 Cloud Console 里验证这一点</strong>，别等到开发完</td></tr>
+      <tr><td>AI 回复出现事实错误或不当措辞</td><td><span class="tag warn">中</span></td><td><span class="tag warn">中</span></td><td>1–3 星强制人审是主要防线。另存 prompt 版本与模型 ID 以便复盘。给客户配置「禁用词/必提词」</td></tr>
+      <tr><td>Google 改 API 或改政策</td><td><span class="tag warn">中</span></td><td><span class="tag warn">中</span></td><td>历史上 Google 停用过 Business Calls API 和旧 Insights。订阅官方弃用日程页，架构上把 Google 交互收敛到单一适配层</td></tr>
+      <tr><td>客户流失（三个月没看到排名变化）</td><td><span class="tag no">高</span></td><td><span class="tag warn">高</span></td><td><strong>最现实的风险。</strong>对策：签约时就把基线存档并说清「本地排名以季度计」；月报必须展示<strong>已完成的动作</strong>而不只是排名数字；网格热力图三期对比是最直观的进展证据</td></tr>
+      <tr><td>交付人力不够</td><td><span class="tag no">高</span></td><td><span class="tag warn">中</span></td><td>15 客户是单人极限。到 12 个客户时必须开始自研或招人，二选一</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════ 八 ═══════════ -->
+<section id="s8">
+  <h2><span class="num">八</span>路线图</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:104px">阶段</th><th style="width:120px">目标</th><th>做什么</th><th style="width:112px">判定标准</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>第 0–3 月<br>验证</strong></td>
+        <td>3 个付费客户<br>MRR ≈ CAD $900</td>
+        <td>
+          · W1 提交 GBP API 申请 + 在 Cloud Console 确认 scope 敏感级别<br>
+          · W1–2 搭 GoHighLevel Starter + Local Falcon Starter，跑通一个自己的 GBP<br>
+          · W2 做完免费简版诊断页 + $249 报告模板（中文）<br>
+          · W3–8 通过华人社群、商会、现有客户转介，出 10 份诊断报告<br>
+          · W4 第一个月费客户上线<br>
+          · <strong>全程手工记录每一步耗时</strong>——这是决定自研哪些模块的唯一依据
+        </td>
+        <td>3 个客户续到第 2 个月；单客户交付人力 ≤ 2 小时/月</td>
+      </tr>
+      <tr>
+        <td><strong>第 3–6 月<br>自研核心</strong></td>
+        <td>10 个客户<br>MRR ≈ CAD $3,000</td>
+        <td>
+          · 完成 OAuth 验证（视频 + 隐私政策）<br>
+          · 自研 MVP：评价闭环（Pub/Sub → AI 分级 → 人审队列 → 发布）+ 中文看板 + 中文月报生成器 + <strong>写操作队列与快照</strong><br>
+          · geo-grid 从 Local Falcon 切到 DataForSEO 自绘热力图<br>
+          · 微信触达链路打通（企业微信或服务号模板消息）<br>
+          · 存量客户逐个迁移到自研，<strong>一次迁一个，不批量</strong>
+        </td>
+        <td>10 个客户全部跑在自研上；单客户交付人力 ≤ 1 小时/月</td>
+      </tr>
+      <tr>
+        <td><strong>第 6–12 月<br>规模化</strong></td>
+        <td>30 个客户<br>MRR ≈ CAD $9,000</td>
+        <td>
+          · 索评自动化接入常见 POS / 预约系统<br>
+          · 竞品对标 + NAP 一致性（P2 上线）<br>
+          · AI 搜索可见性追踪（AI Overviews 已占 68% 本地搜索，此时应已成必备）<br>
+          · 招 1 名兼职做人审队列与客户沟通<br>
+          · <strong>评估</strong>是否开白标转售给其他华人小代理（B2B2B）
+        </td>
+        <td>毛利率 &gt; 90%；月流失率 &lt; 5%</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════ 九 ═══════════ -->
+<section id="s9">
+  <h2><span class="num">九</span>第一个月要做的 12 件事</h2>
+  <div class="card">
+  <ul class="checklist">
+    <li><div><span class="wk">W1</span> 在 Google Cloud Console 新建项目，把 <code>business.manage</code> 加进 OAuth 同意屏幕，<strong>确认界面标的是 sensitive 还是 restricted</strong>——这一步 10 分钟，但决定了要不要多花 $500–4,500/年</div></li>
+    <li><div><span class="wk">W1</span> 用自己（或第一个愿意配合的客户）已验证满 60 天的 GBP，以 owner 邮箱提交 Basic API Access 申请。<strong>描述写「自动化评论回复与每周发帖」，不写平台叙事</strong></div></li>
+    <li><div><span class="wk">W1</span> 开 GoHighLevel Starter（$97）+ Local Falcon Starter（$24.99），把自己的 GBP 接进去跑一遍全流程</div></li>
+    <li><div><span class="wk">W1</span> <strong>关掉 GHL 里所有「负面反馈私下引流」类模板</strong>——这是 review gating，会让客户的评价被回溯删除</div></li>
+    <li><div><span class="wk">W2</span> 做完免费简版诊断页（输店名 → 0–100 分 + 3 个问题），部署上线</div></li>
+    <li><div><span class="wk">W2</span> 写 CAD $249 完整诊断报告的中文模板：网格热力图 + 评价体检 + <strong>四项封号风险自查</strong> + 90 天路线图</div></li>
+    <li><div><span class="wk">W2</span> 做邀评物料包：桌卡二维码、小票模板、微信卡片图、双语短信/邮件模板。<strong>模板文案里内置合规措辞</strong>（不指定内容、不给星级暗示、不提激励）</div></li>
+    <li><div><span class="wk">W2</span> 起草服务合同：不含 HST、月付无合约、差评不可删、申诉不保证结果、不承诺排名数字、账号问题协助但不担保</div></li>
+    <li><div><span class="wk">W3</span> 从现有客户、华人商会、微信群里找 10 个商家做免费诊断，<strong>目标转化 3 份付费报告</strong></div></li>
+    <li><div><span class="wk">W3</span> 实测 Q&amp;A API 的写入能力——这一项目前状态未确认，影响功能承诺</div></li>
+    <li><div><span class="wk">W4</span> 第一个月费客户上线：权限体检 → 屏幕共享授权 → 基线快照 → 物料交付</div></li>
+    <li><div><span class="wk">全程</span> <strong>记录每个环节的实际耗时</strong>。三个月后决定自研哪些模块，唯一依据是这份记录，不是直觉</div></li>
+  </ul>
+  </div>
+</section>
+
+<!-- ═══════════ 十 ═══════════ -->
+<section id="s10">
+  <h2><span class="num">十</span>待验证问题</h2>
+  <p style="font-size:13px;color:var(--slate)">以下四项在本次调研中未取得确定结论，不影响启动，但影响后续功能承诺，需在第 1–3 周内实测确认。</p>
+  <div class="tw">
+  <table class="compact">
+    <thead><tr><th style="width:44px">#</th><th style="width:230px">问题</th><th>怎么验</th><th style="width:104px">影响</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>business.manage</code> 是 sensitive 还是 restricted？</td><td>Cloud Console OAuth 同意屏幕添加 scope 时看界面标注</td><td>$500–4,500/年 + 年度复审</td></tr>
+      <tr><td>2</td><td>Q&amp;A API 能否程序化提问与回答？限制是什么？</td><td>拿到 API 权限后用测试门店实际调 v4 <code>locations.questions</code></td><td>影响是否能承诺 Q&amp;A 维护</td></tr>
+      <tr><td>3</td><td>Google 对<strong>AI 生成的回复</strong>（非评价）的明确立场</td><td>查 Google 商家资料官方帮助文档；Google 自家 GBP 后台已提供 AI 建议回复，倾向于允许，但未找到明文</td><td>低——但营销措辞需谨慎</td></tr>
+      <tr><td>4</td><td>微信触达的合规实现路径（企业微信 / 服务号模板消息 / 小程序）</td><td>单独调研一次；涉及主体资质、模板审核、境外主体限制</td><td><strong>高</strong>——这是核心差异化，实现不了要换方案</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<footer>
+  <h3 style="font-size:14px;color:var(--forest);border:none;padding:0">信息来源</h3>
+  <p style="font-size:11.5px;margin-bottom:12px">Google 官方文档为一手来源；定价与竞品数据来自公开定价页与行业报告，可能随时变动，签约前请复核。GTA 本地价格基准沿用本仓库 <code>docs/20260805-数字营销竞品调研.md</code>。</p>
+  <div class="srcs">
+    <a href="https://developers.google.com/my-business/content/prereqs">Google — Business Profile API 前置条件</a>
+    <a href="https://developers.google.com/my-business/content/limits">Google — API 配额与限制</a>
+    <a href="https://developers.google.com/my-business/content/review-data">Google — 评价数据接口</a>
+    <a href="https://developers.google.com/my-business/reference/rest/v4/accounts.locations.reviews/updateReply">Google — reviews.updateReply</a>
+    <a href="https://developers.google.com/my-business/content/notification-setup">Google — Pub/Sub 实时通知配置</a>
+    <a href="https://developers.google.com/my-business/content/sunset-dates">Google — API 弃用日程</a>
+    <a href="https://developers.google.com/my-business/reference/rest/v4/accounts.locations.localPosts">Google — Local Posts API</a>
+    <a href="https://developers.google.com/my-business/content/upload-photos">Google — 媒体上传</a>
+    <a href="https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification">Google — 敏感权限验证</a>
+    <a href="https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification">Google — 受限权限验证与 CASA</a>
+    <a href="https://support.google.com/cloud/answer/15549945">Google — 应用受众与 100 用户上限</a>
+    <a href="https://cloud.google.com/maps-platform/terms/maps-service-terms">Google — Maps Platform 服务条款（缓存与禁止抓取）</a>
+    <a href="https://developers.google.com/maps/documentation/places/web-service/policies">Google — Places API 政策</a>
+    <a href="https://support.google.com/contributionpolicy/answer/7400114">Google — Maps 用户内容政策</a>
+    <a href="https://www.ftc.gov/news-events/news/press-releases/2024/08/federal-trade-commission-announces-final-rule-banning-fake-reviews-testimonials">FTC — 虚假评价最终规则</a>
+    <a href="https://www.ftc.gov/business-guidance/resources/consumer-reviews-testimonials-rule-questions-answers">FTC — 规则问答</a>
+    <a href="https://crtc.gc.ca/eng/com500/guide.htm">CRTC — CASL 默示同意指引</a>
+    <a href="https://www.canadianadvertisinglaw.com/2024-competition-act-amendments-bill-c-59-significantly-increased-penalties-and-enforcement-options-across-key-areas-of-canadian-competition-law/">加拿大竞争法 Bill C-59 修订</a>
+    <a href="https://whitespark.ca/local-search-ranking-factors/">Whitespark — 2026 本地搜索排名因素报告</a>
+    <a href="https://xovionlabs.com/blog/google-business-profile-api-hidden-gate/">Xovion Labs — GBP API 隐藏审批门槛实操</a>
+    <a href="https://www.localfalcon.com/pricing">Local Falcon — 定价</a>
+    <a href="https://dataforseo.com/apis/serp-api/pricing">DataForSEO — SERP API 定价</a>
+    <a href="https://www.brightlocal.com/pricing/">BrightLocal — 定价</a>
+    <a href="https://www.merchynt.com/paige">Merchynt — Paige AI Agent</a>
+    <a href="https://www.merchynt.com/post/google-my-business-management-pricing">Merchynt — GBP 管理定价指南</a>
+    <a href="https://www.truereview.co/post/birdeye-vs-podium-vs-nicejob-vs-truereview-an-honest-comparison">Birdeye / Podium / NiceJob 对比</a>
+    <a href="https://netpartners.marketing/gohighlevel-pricing-plans-explained-features-value-cost-comparison-2026/">GoHighLevel — 定价与 SaaS Mode</a>
+    <a href="https://www.reinstatelabs.com/blogs/google-business-profile-suspension-reasons">Reinstate Labs — GBP 封号成因</a>
+    <a href="https://digilatics.com/navigating-the-2026-google-business-profile-crisis-mass-suspensions-account-restrictions-and-how-to-recover/">2026 年 GBP 大规模封号事件</a>
+    <a href="https://searchlabdigital.com/blog/google-review-guidelines-2026-update/">Google 评价政策 2026 更新与评价门控</a>
+    <a href="https://firstrank.ca/how-much-does-seo-cost-in-toronto/">多伦多 SEO 定价 2026</a>
+    <a href="https://storytellermedia.ca/google-business-profile-management/">Storyteller Media — GBP 管理（加拿大）</a>
+    <a href="https://renewlocal.com/prices/">Renew Local — 定价</a>
+  </div>
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

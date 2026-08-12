@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>任务流水线 — 看板</title>
+<style>
+  :root { --bg:#f7f6f3; --card:#fff; --ink:#1a1a1a; --muted:#6b6b6b; --line:#e5e2dc; --accent:#24435f; --neg:#b3372f; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--ink); font:14px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; padding:28px 18px 60px; }
+  .wrap { max-width:1400px; margin:0 auto; }
+  h1 { font-size:21px; }
+  .sub { color:var(--muted); font-size:12.5px; margin:4px 0 18px; }
+  .alert { background:#fdf3f2; border:1px solid #ecc; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:13px; }
+  .board { display:grid; grid-template-columns:repeat(7,minmax(170px,1fr)); gap:10px; overflow-x:auto; }
+  .lane { background:#efede8; border-radius:10px; padding:10px; min-width:170px; }
+  .lane-head { font-weight:650; font-size:13.5px; color:var(--accent); }
+  .count { color:var(--muted); font-weight:400; font-size:12px; }
+  .lane-desc { color:var(--muted); font-size:11px; margin:2px 0 10px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:10px 11px; margin-bottom:8px; }
+  .card.blocked { opacity:.75; border-style:dashed; }
+  .chips { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px; }
+  .chip { font-size:10.5px; padding:1px 7px; border-radius:99px; background:#8a8a8a; color:#fff; }
+  .chip.block { background:var(--neg); }
+  .chip.sub { background:#b0885a; }
+  .title { font-size:13.5px; font-weight:600; line-height:1.4; }
+  .meta { font-size:11.5px; color:var(--muted); margin-top:5px; }
+  .blockmsg { color:var(--neg); }
+  .faint { color:#a5a19a; }
+  .empty { color:#a5a19a; font-size:12px; text-align:center; padding:8px 0; }
+  details { margin-top:14px; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:10px 14px; font-size:13px; }
+  summary { cursor:pointer; color:var(--muted); }
+  .parked-row { padding:6px 0; border-bottom:1px solid var(--line); }
+  .parked-row:last-child { border-bottom:none; }
+  footer { color:var(--muted); font-size:12px; margin-top:22px; line-height:1.8; }
+  @media (max-width:900px){ .board{ grid-template-columns:repeat(2,1fr);} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>任务流水线</h1>
+  <div class="sub">生成于 2026-08-12 05:47 UTC ・ 数据源 tasks/board.json ・ 本页为生成产物，不要手改 ・ 流转: 想法 → 判断 → 待办 → 拆解 → 开发 → 测试 → 上线 → 完成</div>
+  <div class="alert">🚫 <b>6 张卡阻塞中，等用户解锁：</b>「开通 GoHighLevel + Local Falcon 并跑通全流程」— 需用户：付款开通 GoHighLevel Starter（$97）与 Local Falcon Starter（$24.99）　「小红书自动笔记产线：纳入流水线管理，保持不断更（养账号）」— 需用户：小红书账号登录态、发什么内容、目标频率（产线代码位置本地可自查，已不再是阻塞项）　「课程选题与定位方案：盘点现有积累，提 2-3 个能做 100+ 集的方向」— 需用户：喜马拉雅账号现状（已有课程清单、播放/订阅/收入数据）　「产线 MVP：选题→脚本→TTS 音频的最小流程」— 任务性质需重定：产线 MVP 已存在于 businessskills/喜马拉雅（src+台账+2 期含 audio.mp3 的成品），不是从零建。待确认现有 TTS 方案与单期成本，再决定是接管自动化还是重做　「获客执行接入：账号与产线接入后按周运转」— 需用户：小红书账号与现有产线接入（与 c-a1bbf9 同一把锁）　「喜马拉雅账号现状接入：已有课程与被动收入数据入视野与财务台账」— 需用户：喜马拉雅账号、课程清单、收入数据（截图或后台导出）</div>
+  <div class="board">
+    <div class="lane">
+      <div class="lane-head">想法收件箱 <span class="count">0</span></div>
+      <div class="lane-desc">用户随口说的想法先进这里，等 CEO 判断</div>
+      <div class="empty">—</div>
+      
+    </div>
+<div class="lane">
+      <div class="lane-head">待办 <span class="count">15</span></div>
+      <div class="lane-desc">已立项：有验收标准，等调度提取</div>
+      <div class="card blocked">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        
+        
+        <span class="chip block">🚫 阻塞</span>
+      </div>
+      <div class="title">小红书自动笔记产线：纳入流水线管理，保持不断更（养账号）</div>
+      <div class="meta">验收: 产线接入云端可见；有断更检测与周产出记录；连续 4 周不断更</div>
+      <div class="meta blockmsg">等: 需用户：小红书账号登录态、发什么内容、目标频率（产线代码位置本地可自查，已不再是阻塞项）</div>
+      
+      
+      <div class="meta faint">c-a1bbf9 · 用户战略指示 2026-08-11 · 2026-08-11</div>
+    </div>
+<div class="card blocked">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        
+        
+        <span class="chip block">🚫 阻塞</span>
+      </div>
+      <div class="title">喜马拉雅账号现状接入：已有课程与被动收入数据入视野与财务台账</div>
+      <div class="meta">验收: 账号/课程清单在案；历史被动收入按月入财务台账；后续月度收入有固定入账动作</div>
+      <div class="meta blockmsg">等: 需用户：喜马拉雅账号、课程清单、收入数据（截图或后台导出）</div>
+      
+      
+      <div class="meta faint">c-ed1b6a · 战略v2纠偏 · 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">consulting</span>
+        
+        
+        
+      </div>
+      <div class="title">咨询式 demo 产线：小红书线索→行业/生意诊断→定制 demo，≤48h 交付</div>
+      <div class="meta">验收: 产线流程文档 + 可复用 demo 骨架（诊断结构+行业化模板）；首个真实线索实测 ≤48h 出 demo 且 AI 人时 ≤4h</div>
+      
+      
+      
+      <div class="meta faint">c-92fce4 · 战略v2（用户定义的差异化打法） · 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">consulting</span>
+        
+        
+        
+      </div>
+      <div class="title">CEO 工作台上线：任务看板+财务工作台部署到 Cloud Run，带鉴权</div>
+      <div class="meta">验收: 线上可访问看板与财务页；⛔ 财务数据必须有鉴权，不得 allow-unauthenticated 裸奔；页面数据与本地 board.json/ledger.jsonl 一致；走 GitHub Actions 部署，非 Cloud Build</div>
+      
+      
+      
+      <div class="meta faint">c-c56c6f · 用户 6 条指令第 2 条 · 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">喜马拉雅产线独立成库：从 businessskills 拆出，新目录+新 GitHub 仓库</div>
+      <div class="meta">验收: 新仓库含现有 src/data/output 与 git 历史交代；businessskills 下原目录处置有明确结论（迁走或保留指针），不留两份真相；调研文档随迁</div>
+      
+      
+      
+      <div class="meta faint">c-25cca7 · 用户 6 条指令第 3 条 · 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">小红书产线数据日监测：CEO 每日读产线数据并回写看板</div>
+      <div class="meta">验收: 每日产出一份数据快照入库（笔记数/曝光/互动/涨粉）；异常（断更、跑挂）当天在看板开卡；数据源与采集方式写清，不靠人工截图</div>
+      
+      
+      
+      <div class="meta faint">c-a05945 · 用户 6 条指令第 6 条 · 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">veggie 尾款入账：金额、收款条件、预计到账时间进财务台账应收</div>
+      <div class="meta">验收: 财务台账有一条应收记录（金额/客户/收款条件/预计到账）；收回后过账并反映到 MRR 之外的一次性收入</div>
+      
+      
+      
+      <div class="meta faint">c-943857 · 用户答复审计 §5 · 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">idearise</span>
+        
+        
+        
+      </div>
+      <div class="title">合并后 localrank 12 个功能模块的端到端回归（agent 明确声明未做）</div>
+      <div class="meta">验收: 12 个模块在合并分支上逐个走通增删改查；至少一次真人浏览器点击；失败项开卡</div>
+      
+      
+      
+      <div class="meta faint">c-b814f7 · 合并任务遗留 · 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">AI 公司员工体系 company/（花名册+秘书/会计岗位说明书+worklog+公司工作台页）</div>
+      <div class="meta">验收: roster+秘书/会计岗位说明书+worklog 机制+公司工作台页；秘书晨报试运行 3 天有产出</div>
+      
+      
+      
+      <div class="meta faint">c-3111b6 · docs/20260811-AI公司工作台调研与方案.md · 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">localrank</span>
+        
+        
+        
+      </div>
+      <div class="title">localrank 仓库接入云端（推 GitHub + 授权），云端员工才能碰产品代码</div>
+      <div class="meta">验收: 云端会话能 clone localrank 并跑通 build</div>
+      
+      
+      
+      <div class="meta faint">c-73a943 · CEO判断 · 2026-08-11</div>
+    </div>
+<div class="card blocked">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">localrank</span>
+        
+        
+        <span class="chip block">🚫 阻塞</span>
+      </div>
+      <div class="title">开通 GoHighLevel + Local Falcon 并跑通全流程</div>
+      <div class="meta">验收: 以原台账 T3 验收为准（本卡是指针，状态真相在原台账）</div>
+      <div class="meta blockmsg">等: 需用户：付款开通 GoHighLevel Starter（$97）与 Local Falcon Starter（$24.99）</div>
+      
+      <div class="meta">↗ docs/20260807-gbp-reviews-saas-tasks.md T3（状态真相在原台账）</div>
+      <div class="meta faint">c-3b5669 · SaaS台账 T3 · 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">「AI 当 CEO」账号：本公司 AI 运营全过程实录（资产线第三账号）</div>
+      <div class="meta">验收: 定位方案入 docs：目标听众、平台选择、更新节奏、首月 20 条选题、台账→内容的素材自动化设计；红线：数字必须取自台账，失败也发</div>
+      
+      
+      
+      <div class="meta faint">c-a0bb0a · 用户提方向、CEO 决策 2026-08-11 · 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">抢救未提交代码：supply/secondme/stockmate/beauty 共 1282 项无远端备份</div>
+      <div class="meta">验收: 四个项目各完成一次抢救提交并推到远端（beauty/supply 需先建 remote）；确认无独有代码后方可标记归档</div>
+      
+      
+      
+      <div class="meta faint">c-95a75f · 审计报告 §3 · 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">idearise</span>
+        
+        
+        
+      </div>
+      <div class="title">GTA 线的对外 demo 载体定在哪：idearise.ca 还是另起（现在行业样板在爱尔兰站 1688.ie）</div>
+      <div class="meta">验收: 明确 GTA 线的 demo 页归属（idearise.ca 增设行业样板 or 另起）；1688.ie 的爱尔兰定位与之划清，不混用</div>
+      
+      
+      
+      <div class="meta faint">c-2b64b3 · 审计 §7.2 附带发现 · 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">idearise</span>
+        
+        
+        
+      </div>
+      <div class="title">localrank 首页体检问卷挪到 /checkup 后成孤儿页：是否接进品牌站导航、是否做英文版</div>
+      <div class="meta">验收: 决定是否入导航并执行；若入导航则中英双语一致</div>
+      
+      
+      
+      <div class="meta faint">c-47a13f · 合并任务的产品决策 · 2026-08-12</div>
+    </div>
+      
+    </div>
+<div class="lane">
+      <div class="lane-head">已拆解 <span class="count">6</span></div>
+      <div class="lane-desc">拆成了可执行的子任务，等进开发</div>
+      <div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        
+        <span class="chip">0/3 子卡</span>
+        
+      </div>
+      <div class="title">喜马拉雅自动课程产线（3-6月养育，目标长期被动收入）</div>
+      <div class="meta">验收: v1 产线跑通选题→脚本→音频→上架，一门课出第一批节目并进入周更</div>
+      
+      
+      
+      <div class="meta faint">c-e44562 · 用户战略指示 2026-08-11 · 2026-08-11</div>
+    </div>
+<div class="card blocked">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        <span class="chip sub">子卡</span>
+        
+        <span class="chip block">🚫 阻塞</span>
+      </div>
+      <div class="title">课程选题与定位方案：盘点现有积累，提 2-3 个能做 100+ 集的方向</div>
+      <div class="meta">验收: 方案含选题、目标听众、变现假设、首门课前 10 集大纲</div>
+      <div class="meta blockmsg">等: 需用户：喜马拉雅账号现状（已有课程清单、播放/订阅/收入数据）</div>
+      
+      
+      <div class="meta faint">c-235e8a · 拆自 c-e44562 · 2026-08-11</div>
+    </div>
+<div class="card blocked">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        <span class="chip sub">子卡</span>
+        
+        <span class="chip block">🚫 阻塞</span>
+      </div>
+      <div class="title">产线 MVP：选题→脚本→TTS 音频的最小流程</div>
+      <div class="meta">验收: 产出 1 集可听样片，单集边际成本可算</div>
+      <div class="meta blockmsg">等: 任务性质需重定：产线 MVP 已存在于 businessskills/喜马拉雅（src+台账+2 期含 audio.mp3 的成品），不是从零建。待确认现有 TTS 方案与单期成本，再决定是接管自动化还是重做</div>
+      
+      
+      <div class="meta faint">c-9b358d · 拆自 c-e44562 · 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">consulting</span>
+        
+        <span class="chip">0/2 子卡</span>
+        
+      </div>
+      <div class="title">小红书获客产线：持续挖掘建站客户与系统（ERP）客户</div>
+      <div class="meta">验收: 线索台账建立且连续 4 周每周有新增线索记录</div>
+      
+      
+      
+      <div class="meta faint">c-29f67e · 用户战略指示 2026-08-11（不能停） · 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">consulting</span>
+        <span class="chip sub">子卡</span>
+        
+        
+      </div>
+      <div class="title">获客方案与线索台账：内容型引流+需求帖监测双路径、合规边界、线索表结构</div>
+      <div class="meta">验收: 方案文档 + 线索台账文件建立</div>
+      
+      
+      
+      <div class="meta faint">c-49beee · 拆自 c-29f67e · 2026-08-11</div>
+    </div>
+<div class="card blocked">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">consulting</span>
+        <span class="chip sub">子卡</span>
+        
+        <span class="chip block">🚫 阻塞</span>
+      </div>
+      <div class="title">获客执行接入：账号与产线接入后按周运转</div>
+      <div class="meta">验收: 连续 2 周线索台账有新增记录</div>
+      <div class="meta blockmsg">等: 需用户：小红书账号与现有产线接入（与 c-a1bbf9 同一把锁）</div>
+      
+      
+      <div class="meta faint">c-a9e980 · 拆自 c-29f67e · 2026-08-11</div>
+    </div>
+      
+    </div>
+<div class="lane">
+      <div class="lane-head">开发中 <span class="count">1/2</span></div>
+      <div class="lane-desc">正在做，WIP 上限 2</div>
+      <div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        <span class="chip sub">子卡</span>
+        
+        
+      </div>
+      <div class="title">喜马拉雅平台调研：课程/专辑变现路径、AI 生成内容政策、开号认证要求、对标账号</div>
+      <div class="meta">验收: 调研报告入 docs：已有账号的放大路径（扩容/完播/涨订阅）、课程变现门槛数字、AI 内容政策原文出处、3 个对标账号拆解</div>
+      
+      
+      
+      <div class="meta faint">c-2a2643 · 拆自 c-e44562 · 2026-08-11</div>
+    </div>
+      
+    </div>
+<div class="lane">
+      <div class="lane-head">测试中 <span class="count">0/2</span></div>
+      <div class="lane-desc">开发完成，验证验收标准</div>
+      <div class="empty">—</div>
+      
+    </div>
+<div class="lane">
+      <div class="lane-head">上线中 <span class="count">1</span></div>
+      <div class="lane-desc">部署/交付环节，通常需要用户提供凭据</div>
+      <div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">idearise</span>
+        
+        
+        
+      </div>
+      <div class="title">idearise 与 localrank 合并成一个项目（品牌站+SaaS 同域）</div>
+      <div class="meta">验收: 合并后一个项目同时提供品牌站与 SaaS；localrank 16 个 commit 历史可追溯；两者路由不冲突（next-intl 与 /app /api 分离）；原有 idearise.ca 线上服务不中断</div>
+      
+      
+      
+      <div class="meta faint">c-6a011f · 用户指令 · 2026-08-12</div>
+    </div>
+      
+    </div>
+<div class="lane">
+      <div class="lane-head">完成 <span class="count">14</span></div>
+      <div class="lane-desc">有产出物证据（commit hash / 文件路径）</div>
+      <div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">veerytee 夜间自动生成任务是否仍在扣费——唯一可能无声花钱的</div>
+      <div class="meta">验收: 确认夜间任务是否在跑；在跑则停掉或明确保留理由；实际月成本数字入财务台账周期项</div>
+      
+      <div class="meta">产出: launchctl list 无 veerytee/night 任务；pipeline/night_run.sh 硬编码 /Users/he/Desktop/eric-workspace 路径（另一台机器）；deploy-store.yml 无 schedule 段</div>
+      
+      <div class="meta faint">c-6eb43f · 审计报告 §4.2 · 2026-08-12 → 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">seomachine</span>
+        
+        
+        
+      </div>
+      <div class="title">调研：seomachine 提炼成独立 SEO 工具，月费模式可行性与定价</div>
+      <div class="meta">验收: 调研报告入 docs：① 现有能力盘点（哪些脚本可直接变功能）② 3-5 个同类 SEO 工具的定价与功能对标 ③ DataForSEO 成本结构与毛利测算 ④ 目标客户与最小可卖版本定义 ⑤ 明确「做/不做」建议及理由</div>
+      
+      <div class="meta">产出: docs/20260811-seomachine月费化调研.md</div>
+      
+      <div class="meta faint">c-d85059 · 用户指令 · 2026-08-12 → 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">veerytee</span>
+        
+        
+        
+      </div>
+      <div class="title">调研：veerytee 能否产品化卖给 T恤定制客户（首选 print-main 客户），做到什么程度、卖多少钱</div>
+      <div class="meta">验收: 调研报告入 docs：① veerytee 现有能力与可复用部分 ② T恤定制行业对该能力的真实需求验证 ③ 产品化程度的 2-3 档方案（各自工作量）④ 每档的定价建议与依据 ⑤ 向 print-main 客户提案的切入方式</div>
+      
+      <div class="meta">产出: docs/20260811-veerytee产品化调研.md</div>
+      
+      <div class="meta faint">c-cc157b · 用户指令 · 2026-08-12 → 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">veerytee</span>
+        
+        
+        
+      </div>
+      <div class="title">veerytee 上新托管提案页：客户可直接看的 demo（B 档）</div>
+      <div class="meta">验收: 页面可直接发客户：话术按客户认知写、价格锚定人力成本、独占写进承诺；⛔ 展示图必须是我方真实产出，不得用竞品参考图</div>
+      
+      <div class="meta">产出: veerytee@2addbed preview/20260812-上新托管提案.html</div>
+      
+      <div class="meta faint">c-0dc591 · 用户：做就完了 · 2026-08-12 → 2026-08-12</div>
+    </div>
+<div class="card blocked">
+      <div class="chips">
+        <span class="chip prio" style="background:#b3372f">P0</span>
+        <span class="chip">consulting</span>
+        
+        
+        <span class="chip block">🚫 阻塞</span>
+      </div>
+      <div class="title">CEO 生产环境站点：任务看板+财务工作台+文档中心，全部文档网页可点击查看</div>
+      <div class="meta">验收: 线上可访问：首页导航 + 任务看板 + 财务工作台 + 文档中心（docs/ 全部文档可点击阅读）；⛔ 财务数据必须有鉴权不得公开；走 GitHub Actions 部署非 Cloud Build；本地 commit 后能重新生成</div>
+      <div class="meta blockmsg">等: 需用户：① 确认 GCP Project ID（仓库现有值 supply-491510）② 定 Basic Auth 用户名与密码（≥12 位），我建 Secret Manager 的 ceo-site-user / ceo-site-pass ③ 确认 GCP_SA_KEY 这个 GitHub Secret 是否已配</div>
+      <div class="meta">产出: https://ceo-workbench-dfd7b2qpra-de.a.run.app ；commit 91dd23d；GHA run 31565936502</div>
+      
+      <div class="meta faint">c-445a28 · 用户指令 · 2026-08-12 → 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">财务记账工作台（账本+自动过账+封账冻结）</div>
+      <div class="meta">验收: 六命令可用；封账篡改可检测；工作台生成；全链路实测通过</div>
+      
+      <div class="meta">产出: commit 481cae5（finance/ + docs/20260811-记账工作台.md）</div>
+      
+      <div class="meta faint">c-a6c278 · CEO会话 2026-08-11 · 2026-08-11 → 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">SuperAICrew 调研与 AI 公司工作台方案</div>
+      <div class="meta">验收: 查证 SuperAICrew 真伪；给出不引入新框架的论证与替代方案</div>
+      
+      <div class="meta">产出: commit 7d5477a（docs/20260811-AI公司工作台调研与方案.md）</div>
+      
+      <div class="meta faint">c-dca70a · 用户想法（短视频） · 2026-08-11 → 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">全自动任务流水线（想法→判断→拆解→开发→测试→上线 看板）</div>
+      <div class="meta">验收: idea/judge/split/move/next/check/report 七命令可用且不变量守住；看板页面生成；定时调度 Routine 建立</div>
+      
+      <div class="meta">产出: commit c5d1e36（tasks/ + docs/20260811-任务流水线.md + Routine trig_01172hbByTX7ZjWRURNKRriJ）</div>
+      
+      <div class="meta faint">c-08f72f · 用户想法（Trello 模型） · 2026-08-11 → 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        
+        <span class="chip">2/2 子卡</span>
+        
+      </div>
+      <div class="title">AI Coding 工作目录全项目梳理：定 继续/暂停/归档</div>
+      <div class="meta">验收: 全项目清单入 docs：每个项目一行结论（继续/暂停/归档）+ 理由 + 维护成本</div>
+      
+      <div class="meta">产出: docs/20260811-项目审计报告.md</div>
+      
+      <div class="meta faint">c-fe3b70 · 用户指示 2026-08-11 · 2026-08-11 → 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        <span class="chip sub">子卡</span>
+        
+        
+      </div>
+      <div class="title">审计方法与本地会话指令</div>
+      <div class="meta">验收: 可直接粘贴进工作电脑 Claude Code 的完整指令文档，含产出模板与只读红线</div>
+      
+      <div class="meta">产出: docs/20260811-项目审计指令.md（含只读红线、产出模板、交回方式）</div>
+      
+      <div class="meta faint">c-a473ff · 拆自 c-fe3b70 · 2026-08-11 → 2026-08-11</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#24435f">P1</span>
+        <span class="chip">shared</span>
+        <span class="chip sub">子卡</span>
+        
+        
+      </div>
+      <div class="title">执行审计并出报告</div>
+      <div class="meta">验收: 全项目 继续/暂停/归档 结论清单入 docs</div>
+      
+      <div class="meta">产出: docs/20260811-项目审计报告.md</div>
+      
+      <div class="meta faint">c-1afbf6 · 拆自 c-fe3b70 · 2026-08-11 → 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#8a8a8a">P2</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">9 个项目归档执行完毕，工作目录降至 13 个活跃项目</div>
+      <div class="meta">验收: 9 个项目在 _archive/，审计报告 §3 有清单与风险说明</div>
+      
+      <div class="meta">产出: _archive/ 下 9 个项目；docs/20260811-项目审计报告.md §3</div>
+      
+      <div class="meta faint">c-75e674 · 用户指令 · 2026-08-12 → 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#8a8a8a">P2</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">training 已归档，活跃项目降至 12 个</div>
+      <div class="meta">验收: training 在 _archive/，审计 §7.3 有理由</div>
+      
+      <div class="meta">产出: _archive/training；docs/20260811-项目审计报告.md §7.3</div>
+      
+      <div class="meta faint">c-62a26c · 用户质疑归档判断 · 2026-08-12 → 2026-08-12</div>
+    </div>
+<div class="card ">
+      <div class="chips">
+        <span class="chip prio" style="background:#8a8a8a">P2</span>
+        <span class="chip">shared</span>
+        
+        
+        
+      </div>
+      <div class="title">IErepair 与 veerytee 已归档，chrome 重新归档（上次移动未生效）</div>
+      <div class="meta">验收: 三个项目在 _archive/；提案页已保留到 consulting/preview/</div>
+      
+      <div class="meta">产出: _archive/IErepair；consulting/preview/20260812-上新托管提案.html</div>
+      
+      <div class="meta faint">c-a7fc98 · 用户指令 · 2026-08-12 → 2026-08-12</div>
+    </div>
+      
+    </div>
+  </div>
+  <details><summary>冷藏（2）</summary><div class="parked-row"><b>生成第一批真实样品图：填充提案页，走 Codex CLI 免费额度优先</b> — 提案页没有真实样品就发不出去，这是唯一挡在第一单前面的东西 <span class="faint">c-bb762f</span></div><div class="parked-row"><b>localrank 与 Birdeye 调研迁入 1688ie 仓库</b> — localrank 与 Birdeye 调研同属本地商家数字营销线，1688ie 是该线的对外载体且已配好 GitHub Actions <span class="faint">c-3bf505</span></div></details>
+
+  <footer>
+    操作: 收想法 <code>npm run board -- idea "…"</code> ／ 判断 <code>judge</code> ／ 拆解 <code>split</code> ／ 流转 <code>move</code> ／ 调度 <code>next</code>。
+    完成卡两周后从看板隐藏，数据永久保留在 board.json。规则全文见 <code>docs/20260811-任务流水线.md</code>。
+  </footer>
+</div>
+</body>
+</html>

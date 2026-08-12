@@ -1,0 +1,19 @@
+{
+  "baseCurrency": "CAD",
+  "fx": {
+    "USD": 1.38,
+    "EUR": 1.6084
+  },
+  "fxNote": "汇率只用于折算展示与月度汇总，原币金额是唯一真相。汇率明显偏离市场时更新此处，历史封账月用的是封账时的汇率（已随封账文件冻结）",
+  "projects": ["1688", "businessskills", "consulting", "easetax", "idearise", "IErepair", "localrank", "print-main", "satgame", "seomachine", "training", "veerytee", "veggie", "shared"],
+  "categories": {
+    "income": ["月费订阅", "诊断报告", "咨询服务", "网站建设", "其他收入"],
+    "expense": ["工具订阅", "云服务", "域名", "广告获客", "法律合规", "支付手续费", "物料制作", "其他支出"]
+  },
+  "goals": {
+    "phase": "阶段一（0–3 月，验证期）",
+    "clientTarget": 3,
+    "mrrTarget": 900,
+    "note": "与 docs/20260807-gbp-reviews-saas-tasks.md 的阶段一判定一致：3 个付费客户续到第 2 个月，MRR ≈ CAD $900"
+  }
+}

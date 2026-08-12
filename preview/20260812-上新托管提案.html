@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每周自动上新 — 定制商品店铺的设计供给服务</title>
+<style>
+  :root{
+    --ink:#14110f; --paper:#faf8f5; --line:#e2ddd6;
+    --accent:#FF1F3D; --muted:#6b635c; --soft:#f3efea;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.7; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px}
+  section{padding:76px 0;border-bottom:1px solid var(--line)}
+  section:last-child{border-bottom:0}
+
+  /* Hero */
+  .hero{background:var(--ink);color:var(--paper);padding:92px 0 84px;border:0}
+  .hero .wrap{max-width:1040px}
+  .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#9a918a;margin-bottom:22px}
+  h1{font-size:clamp(34px,5.4vw,60px);line-height:1.14;letter-spacing:-.02em;font-weight:700}
+  h1 em{font-style:normal;color:var(--accent)}
+  .hero p{margin-top:26px;font-size:19px;color:#c9c2bb;max-width:640px}
+
+  h2{font-size:clamp(25px,3.4vw,34px);letter-spacing:-.01em;margin-bottom:14px;font-weight:700}
+  .lede{font-size:17px;color:var(--muted);max-width:660px;margin-bottom:40px}
+
+  /* 痛点 */
+  .pain{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .pain>div{padding:32px 30px}
+  .pain>div:first-child{background:var(--soft);border-right:1px solid var(--line)}
+  .pain h3{font-size:15px;letter-spacing:.04em;color:var(--muted);margin-bottom:16px;font-weight:600}
+  .pain ul{list-style:none}
+  .pain li{padding:9px 0 9px 26px;position:relative;font-size:16px}
+  .pain li::before{position:absolute;left:0;top:9px;font-size:15px}
+  .pain .now li::before{content:"○";color:#b5aca4}
+  .pain .after li::before{content:"●";color:var(--accent)}
+
+  /* 设计网格 */
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:8px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .card img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;display:block}
+  .card .cap{padding:11px 13px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)}
+  .slot{
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    aspect-ratio:1;background:repeating-linear-gradient(45deg,#f7f4f0,#f7f4f0 9px,#f1ece6 9px,#f1ece6 18px);
+    color:#9a918a;font-size:13px;padding:16px;line-height:1.6;
+  }
+
+  /* 流程 */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:12px}
+  .step{padding-top:20px;border-top:3px solid var(--ink)}
+  .step.you{border-top-color:var(--accent)}
+  .step .n{font-size:12px;letter-spacing:.14em;color:var(--muted);margin-bottom:9px}
+  .step h4{font-size:17px;margin-bottom:7px}
+  .step p{font-size:14.5px;color:var(--muted)}
+  .step .who{display:inline-block;margin-top:11px;font-size:11.5px;padding:3px 9px;border-radius:20px;background:var(--soft);color:var(--muted)}
+  .step.you .who{background:var(--accent);color:#fff}
+
+  /* 价格 */
+  .price-row{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:stretch;margin-top:8px}
+  .box{border:1px solid var(--line);border-radius:12px;padding:30px}
+  .box.dim{background:var(--soft)}
+  .box.pick{border:2px solid var(--ink);background:#fff;position:relative}
+  .tag{position:absolute;top:-12px;left:30px;background:var(--accent);color:#fff;font-size:12px;padding:4px 12px;border-radius:20px;letter-spacing:.03em}
+  .box .who{font-size:14px;color:var(--muted);margin-bottom:8px}
+  .amount{font-size:42px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .amount span{font-size:16px;font-weight:400;color:var(--muted)}
+  .box ul{list-style:none;margin-top:20px}
+  .box li{padding:7px 0 7px 24px;position:relative;font-size:15px}
+  .box li::before{content:"—";position:absolute;left:0;color:#b5aca4}
+  .note{margin-top:26px;font-size:14.5px;color:var(--muted)}
+
+  /* 承诺 */
+  .promise{background:var(--ink);color:var(--paper);border-radius:14px;padding:44px 40px}
+  .promise h2{color:#fff;margin-bottom:26px}
+  .promise .items{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .promise h4{font-size:16px;color:var(--accent);margin-bottom:9px}
+  .promise p{font-size:14.5px;color:#c9c2bb}
+
+  .cta{text-align:center;padding:82px 0}
+  .cta h2{margin-bottom:16px}
+  .cta p{font-size:17px;color:var(--muted);max-width:560px;margin:0 auto 32px}
+  .btn{display:inline-block;background:var(--ink);color:#fff;padding:15px 38px;border-radius:8px;font-size:16px;text-decoration:none}
+
+  footer{padding:34px 0;font-size:13px;color:#9a918a}
+
+  @media(max-width:860px){
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .flow{grid-template-columns:repeat(2,1fr)}
+    .pain,.price-row,.promise .items{grid-template-columns:1fr}
+    .pain>div:first-child{border-right:0;border-bottom:1px solid var(--line)}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">定制商品店铺 · 设计供给服务</div>
+    <h1>你的店已经建好了。<br><em>该往里放的东西，我们来供。</em></h1>
+    <p>每周稳定上新，设计独占，做好即可上架。你只需要看一眼，点通过。</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>上新这件事，卡在哪</h2>
+    <p class="lede">平台、支付、订单管理都跑通了。真正让店铺停下来的，是没有源源不断的新设计。</p>
+    <div class="pain">
+      <div class="now">
+        <h3>现在</h3>
+        <ul>
+          <li>想到一个点子，等设计师排期两周</li>
+          <li>素材站的图，同行也在用同一张</li>
+          <li>做完还要自己出效果图、写文案、上架</li>
+          <li>忙起来就断更，店铺一个月没有新品</li>
+        </ul>
+      </div>
+      <div class="after">
+        <h3>之后</h3>
+        <ul>
+          <li>每周一批新设计，按你的品类和当下热点选题</li>
+          <li>只给你一家，同城同品类不签第二家</li>
+          <li>印刷原稿、效果图、社媒素材一起交付</li>
+          <li>不休假、不断更，节奏由排期决定</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>你的第一批设计</h2>
+    <p class="lede">告诉我们品类，这里会换成针对你店铺现出的设计——印刷原稿、模特图、平铺图、社媒素材各一套。</p>
+    <div class="grid">
+      <div class="card"><div class="slot">设计 01<br>印刷原稿 + 4 张展示图</div></div>
+      <div class="card"><div class="slot">设计 02<br>印刷原稿 + 4 张展示图</div></div>
+      <div class="card"><div class="slot">设计 03<br>印刷原稿 + 4 张展示图</div></div>
+      <div class="card"><div class="slot">设计 04<br>印刷原稿 + 4 张展示图</div></div>
+      <div class="card"><div class="slot">设计 05<br>印刷原稿 + 4 张展示图</div></div>
+      <div class="card"><div class="slot">设计 06<br>印刷原稿 + 4 张展示图</div></div>
+      <div class="card"><div class="slot">设计 07<br>印刷原稿 + 4 张展示图</div></div>
+      <div class="card"><div class="slot">设计 08<br>印刷原稿 + 4 张展示图</div></div>
+    </div>
+    <p class="note" style="margin-top:26px"><!-- ⛔ 内部提醒（发送前删除本行）：此区块必须先跑一批真实样品填入。
+    绝不可放 pipeline/designs/ 下的图——那 8 张是 Etsy 竞品调研的原图（带第三方促销角标与水印），不是我方产出。 --></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>你只出现在第三步</h2>
+    <p class="lede">从选题到上架，中间的活我们做完。你花的时间是每周看一眼。</p>
+    <div class="flow">
+      <div class="step">
+        <div class="n">01</div>
+        <h4>选题</h4>
+        <p>盯你的品类与当下热点，出本周选题清单</p>
+        <span class="who">我们</span>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <h4>出设计</h4>
+        <p>每个选题出多版，内部筛过一轮再给你</p>
+        <span class="who">我们</span>
+      </div>
+      <div class="step you">
+        <div class="n">03</div>
+        <h4>你点通过</h4>
+        <p>看一眼，留下要的。约十分钟</p>
+        <span class="who">你</span>
+      </div>
+      <div class="step">
+        <div class="n">04</div>
+        <h4>上架</h4>
+        <p>印刷原稿与展示图直接进你的店</p>
+        <span class="who">我们</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>这件事值多少钱</h2>
+    <p class="lede">同样是让店铺每周有新品，两种做法的差别。</p>
+    <div class="price-row">
+      <div class="box dim">
+        <div class="who">雇一个兼职上新运营</div>
+        <div class="amount">$1,500<span> / 月起</span></div>
+        <ul>
+          <li>要招、要教、要管</li>
+          <li>会请假，会离职</li>
+          <li>设计还得另外找人或另外买</li>
+          <li>产出取决于个人状态</li>
+        </ul>
+      </div>
+      <div class="box pick">
+        <div class="tag">上新托管</div>
+        <div class="who">交给我们</div>
+        <div class="amount">$299<span> / 月</span></div>
+        <ul>
+          <li>每月约 60 个独占设计</li>
+          <li>印刷原稿 + 展示图 + 社媒素材</li>
+          <li>直接上架到你的店</li>
+          <li>不请假、不断更</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note"><strong>第一个月 $99 试跑。</strong>做出一批真实上新，你看数据再决定要不要继续。不满意就停，不绑约。</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="promise">
+      <h2>三件写进合同的事</h2>
+      <div class="items">
+        <div>
+          <h4>独占</h4>
+          <p>给你的设计只给你一家。同城同品类，我们不签第二家。</p>
+        </div>
+        <div>
+          <h4>商标先查</h4>
+          <p>热梗文案交付前过一遍商标检索，不让你替我们的疏忽买单。</p>
+        </div>
+        <div>
+          <h4>不满意不上架</h4>
+          <p>没通过你审核的设计，一张都不会出现在你的店里。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>先看样，再谈钱</h2>
+    <p>告诉我们你的品类，我们先出一批针对你店铺的设计。看完再决定要不要合作。</p>
+    <a class="btn" href="#">安排一次样品交付</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">图片为流水线真实产出。设计版权在交付后归客户所有。</div>
+</footer>
+
+</body>
+</html>
