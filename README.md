@@ -1,6 +1,11 @@
-# 建站线索发现器
+# 建站线索发现器（webproject）
 
 每天从小红书捞出「在找人做网站」的人，逐条判断值不值得联系、该做什么 demo、第一句话怎么说。
+
+**位置**：`AIcoding/webproject/`，独立仓库
+（2026-08-12 从 `businessskills/webproject/` 迁出）。
+本项目**自包含**——不读 businessskills 的任何文件，数据全在自己的 `data/`。
+代码注释里提到 businessskills 的地方，指的是从那边借鉴的做法，不是运行时依赖。
 
 ```
 搜索词 / 链接  →  scraper  →  SQLite  →  analyzer(AI)  →  每日 HTML 报告
@@ -11,7 +16,7 @@
 ## 快速开始
 
 ```bash
-cd webproject
+cd /Volumes/datacenter/04-eric/AIcoding/webproject
 npm install
 cp .env.example .env          # 全部留空也能跑，默认走订阅额度、零 API 费用
 
