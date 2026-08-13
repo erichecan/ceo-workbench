@@ -13,3 +13,6 @@ reports/*
 site/dist/
 
 .DS_Store
+
+# 诊断书是发给客户的，含对方昵称与生意判断，不入库
+data/diagnoses/
