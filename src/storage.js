@@ -16,13 +16,45 @@ import { DB_PATH, ensureDirs } from "./config.js";
 export const STATUSES = ["new", "contacted", "replied", "won", "dropped"];
 
 let db;
+let dbFile;
 
-export function open() {
-  if (db) return db;
+/** 传 customPath 可指向另一个库（测试用临时文件）。不传则用默认库。 */
+export function open(customPath = null) {
+  if (db && (!customPath || customPath === dbFile)) return db;
+  if (db) db.close();
   ensureDirs();
-  db = new Database(DB_PATH);
+  dbFile = customPath || DB_PATH;
+  db = new Database(dbFile);
   db.pragma("journal_mode = WAL");
-  db.exec(`
+  db.exec(SCHEMA);
+  migrate(db);
+  return db;
+}
+
+export function close() {
+  if (db) db.close();
+  db = undefined;
+  dbFile = undefined;
+}
+
+/**
+ * 给已存在的 leads 表补列。
+ *
+ * 用 ALTER TABLE ADD COLUMN 而不是重建表：库里已有真实线索和跟进状态，
+ * 重建会丢。SQLite 的 ADD COLUMN 是 O(1) 且不重写数据行。
+ * 列已存在时 better-sqlite3 会抛错，catch 掉即可 —— 比先查 PRAGMA 再判断短。
+ */
+function migrate(d) {
+  for (const col of ["author_user_id TEXT", "ip_location TEXT", "profile_url TEXT"]) {
+    try {
+      d.exec(`ALTER TABLE leads ADD COLUMN ${col}`);
+    } catch {
+      /* 列已存在 */
+    }
+  }
+}
+
+const SCHEMA = `
     CREATE TABLE IF NOT EXISTS leads (
       id            INTEGER PRIMARY KEY AUTOINCREMENT,
       dedupe_key    TEXT    NOT NULL UNIQUE,
@@ -40,7 +72,12 @@ export function open() {
       scraped_at    TEXT    NOT NULL,
       status        TEXT    NOT NULL DEFAULT 'new',
       follow_note   TEXT,
-      updated_at    TEXT
+      updated_at    TEXT,
+      -- 以下三列服务 L2：uid 是拉主页的钥匙，属地用于 L1 地域过滤。
+      -- 老库由 migrate() 补上，这里的定义只对新建库生效。
+      author_user_id TEXT,
+      ip_location    TEXT,
+      profile_url    TEXT
     );
     CREATE TABLE IF NOT EXISTS analysis (
       lead_id        INTEGER PRIMARY KEY REFERENCES leads(id) ON DELETE CASCADE,
@@ -56,12 +93,35 @@ export function open() {
       model          TEXT,
       analyzed_at    TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS profiles (
+      user_id       TEXT PRIMARY KEY,          -- opencli comments.userId
+      nickname      TEXT,                      -- opencli comments.author
+      recent_notes  TEXT,                      -- JSON 数组：opencli user 的标题
+      profile_url   TEXT,
+      status        TEXT NOT NULL,             -- ok | empty（无公开笔记）
+      fetched_at    TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS diagnoses (
+      lead_id       INTEGER PRIMARY KEY REFERENCES leads(id) ON DELETE CASCADE,
+      user_id       TEXT,
+      industry      TEXT,
+      business_size TEXT,
+      online_assets TEXT,
+      bottleneck    TEXT,
+      product_line  TEXT,
+      reason        TEXT,
+      is_heavy      INTEGER NOT NULL DEFAULT 0,
+      diag_html     TEXT,
+      diag_slug     TEXT UNIQUE,
+      dm_draft      TEXT,
+      model         TEXT,
+      diagnosed_at  TEXT NOT NULL
+    );
     CREATE INDEX IF NOT EXISTS idx_leads_status  ON leads(status);
     CREATE INDEX IF NOT EXISTS idx_leads_scraped ON leads(scraped_at);
     CREATE INDEX IF NOT EXISTS idx_analysis_score ON analysis(score DESC);
-  `);
-  return db;
-}
+    CREATE INDEX IF NOT EXISTS idx_diag_slug ON diagnoses(diag_slug);
+`;
 
 /** 评论抓不到稳定 ID（详情页 DOM 里没有），用正文哈希兜底去重。 */
 export function dedupeKey({ source, note_id, body }) {
@@ -78,14 +138,17 @@ export function insertLead(lead) {
     .prepare(
       `INSERT OR IGNORE INTO leads
        (dedupe_key, source, platform, keyword, note_id, url, title, author,
-        body, likes, published_at, screenshot, scraped_at, updated_at)
+        body, likes, published_at, screenshot, scraped_at, updated_at,
+        author_user_id, ip_location, profile_url)
        VALUES (@dedupe_key, @source, @platform, @keyword, @note_id, @url, @title,
-               @author, @body, @likes, @published_at, @screenshot, @scraped_at, @scraped_at)`
+               @author, @body, @likes, @published_at, @screenshot, @scraped_at, @scraped_at,
+               @author_user_id, @ip_location, @profile_url)`
     )
     .run({
       platform: "xhs",
       keyword: null, note_id: null, url: null, title: null, author: null,
       likes: null, published_at: null, screenshot: null,
+      author_user_id: null, ip_location: null, profile_url: null,
       ...lead,
       dedupe_key: key,
       scraped_at: lead.scraped_at || new Date().toISOString(),
@@ -154,6 +217,99 @@ export function setStatus(id, status, note = null) {
     .prepare(`UPDATE leads SET status=?, follow_note=COALESCE(?, follow_note), updated_at=? WHERE id=?`)
     .run(status, note, new Date().toISOString(), id);
   return r.changes > 0;
+}
+
+export function saveProfile(p) {
+  open()
+    .prepare(
+      `INSERT INTO profiles (user_id, nickname, recent_notes, profile_url, status, fetched_at)
+       VALUES (@user_id, @nickname, @recent_notes, @profile_url, @status, @fetched_at)
+       ON CONFLICT(user_id) DO UPDATE SET
+         nickname=excluded.nickname, recent_notes=excluded.recent_notes,
+         profile_url=excluded.profile_url, status=excluded.status,
+         fetched_at=excluded.fetched_at`
+    )
+    .run({
+      user_id: p.user_id,
+      nickname: p.nickname || null,
+      recent_notes: JSON.stringify(p.recent_notes || []),
+      profile_url: p.profile_url || null,
+      status: p.status || "ok",
+      fetched_at: new Date().toISOString(),
+    });
+}
+
+export function getProfile(userId) {
+  const r = open().prepare(`SELECT * FROM profiles WHERE user_id=?`).get(userId);
+  return r ? { ...r, recent_notes: JSON.parse(r.recent_notes || "[]") } : null;
+}
+
+/**
+ * 待抓主页的线索：值得深挖、在北美、有 uid、且还没抓过。
+ *
+ * 地域过滤写进 SQL 而不是拉出来再过滤 —— 非北美的线索连查都不查出来，
+ * L2 的主页配额不会被它们占掉。
+ */
+export function leadsNeedingProfile(limit = 8) {
+  return open()
+    .prepare(
+      `SELECT l.* FROM leads l
+       JOIN analysis a ON a.lead_id = l.id
+       LEFT JOIN profiles p ON p.user_id = l.author_user_id
+       WHERE a.is_lead = 1 AND l.author_user_id IS NOT NULL
+         AND p.user_id IS NULL
+         AND (l.ip_location IS NULL OR l.ip_location IN ('美国','加拿大'))
+       ORDER BY a.score DESC LIMIT ?`
+    )
+    .all(limit);
+}
+
+/** 主页已抓到内容（status=ok）、但还没做生意诊断的线索。扑空的不进。 */
+export function leadsNeedingDiagnosis(limit = 8) {
+  return open()
+    .prepare(
+      `SELECT l.* FROM leads l
+       JOIN analysis a ON a.lead_id = l.id
+       JOIN profiles p ON p.user_id = l.author_user_id AND p.status = 'ok'
+       LEFT JOIN diagnoses d ON d.lead_id = l.id
+       WHERE d.lead_id IS NULL ORDER BY a.score DESC LIMIT ?`
+    )
+    .all(limit);
+}
+
+export function saveDiagnosis(leadId, d) {
+  open()
+    .prepare(
+      `INSERT INTO diagnoses (lead_id, user_id, industry, business_size, online_assets,
+                              bottleneck, product_line, reason, is_heavy, diag_html,
+                              diag_slug, dm_draft, model, diagnosed_at)
+       VALUES (@lead_id, @user_id, @industry, @business_size, @online_assets,
+               @bottleneck, @product_line, @reason, @is_heavy, @diag_html,
+               @diag_slug, @dm_draft, @model, @diagnosed_at)
+       ON CONFLICT(lead_id) DO UPDATE SET
+         industry=excluded.industry, business_size=excluded.business_size,
+         online_assets=excluded.online_assets, bottleneck=excluded.bottleneck,
+         product_line=excluded.product_line, reason=excluded.reason,
+         is_heavy=excluded.is_heavy, diag_html=excluded.diag_html,
+         diag_slug=excluded.diag_slug, dm_draft=excluded.dm_draft,
+         model=excluded.model, diagnosed_at=excluded.diagnosed_at`
+    )
+    .run({
+      lead_id: leadId,
+      user_id: d.user_id || null,
+      industry: d.industry || null,
+      business_size: d.business_size || null,
+      online_assets: d.online_assets || null,
+      bottleneck: d.bottleneck || null,
+      product_line: d.product_line || null,
+      reason: d.reason || null,
+      is_heavy: d.is_heavy ? 1 : 0,
+      diag_html: d.diag_html || null,
+      diag_slug: d.diag_slug || null,
+      dm_draft: d.dm_draft || null,
+      model: d.model || null,
+      diagnosed_at: new Date().toISOString(),
+    });
 }
 
 export function stats() {
