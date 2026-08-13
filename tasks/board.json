@@ -713,7 +713,7 @@
   {
     "id": "c-92fce4",
     "title": "咨询式 demo 产线：小红书线索→行业/生意诊断→定制 demo，≤48h 交付",
-    "stage": "backlog",
+    "stage": "test",
     "project": "consulting",
     "priority": "P0",
     "source": "战略v2（用户定义的差异化打法）",
@@ -722,7 +722,7 @@
     "parent": null,
     "blockedOn": null,
     "ref": null,
-    "evidence": null,
+    "evidence": "831ab02",
     "verdictReason": "建站线的生死线：不做这个就退化成 299/499 模板店，与模板站和纯AI生成无差异；风险#2 要求产线化控制单件人时",
     "createdAt": "2026-08-11T19:24:59.082Z",
     "doneAt": null,
@@ -736,6 +736,21 @@
         "at": "2026-08-11T19:24:59.241Z",
         "action": "judge:accept",
         "note": "建站线的生死线：不做这个就退化成 299/499 模板店，与模板站和纯AI生成无差异；风险#2 要求产线化控制单件人时"
+      },
+      {
+        "at": "2026-08-13T03:51:52.980Z",
+        "action": "move:backlog->ready",
+        "note": "设计与实施计划已定稿并确认"
+      },
+      {
+        "at": "2026-08-13T03:51:53.155Z",
+        "action": "move:ready->dev",
+        "note": "T1-T9 逐任务 TDD 实施"
+      },
+      {
+        "at": "2026-08-13T03:51:53.325Z",
+        "action": "move:dev->test",
+        "note": "58 个单元测试通过，doctor 全绿，端到端验证中"
       }
     ]
   },
@@ -1492,6 +1507,30 @@
         "at": "2026-08-12T05:46:32.489Z",
         "action": "unblock",
         "note": "数据库已定 Neon，回归在 Postgres 上做"
+      }
+    ]
+  },
+  {
+    "id": "c-518b6c",
+    "title": "诊断书上线：生成的 data/diagnoses/<slug>.html 挂到 idearise.ca/d/<slug> 公开路由",
+    "stage": "inbox",
+    "project": "idearise",
+    "priority": "P0",
+    "source": "咨询式获客产线 design 第四节决策3（用户拍板）",
+    "note": "本仓库产出自包含静态 HTML，idearise 侧提供公开路由。两边接口是一个目录不是 API。动手前需确认：idearise 仓库位置、路由挂品牌站还是 localrank 侧、文件怎么同步过去。⛔ 部署走 GitHub Actions，不用 Cloud Build",
+    "acceptance": null,
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": null,
+    "createdAt": "2026-08-13T03:52:08.617Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-13T03:52:08.618Z",
+        "action": "idea",
+        "note": "本仓库产出自包含静态 HTML，idearise 侧提供公开路由。两边接口是一个目录不是 API。动手前需确认：idearise 仓库位置、路由挂品牌站还是 localrank 侧、文件怎么同步过去。⛔ 部署走 GitHub Actions，不用 Cloud Build"
       }
     ]
   }
