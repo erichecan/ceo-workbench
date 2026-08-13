@@ -223,6 +223,32 @@ export function saveAnalysis(leadId, a) {
     });
 }
 
+/**
+ * 把所有待分析的非北美线索一次性标记掉，返回处理条数。
+ *
+ * 地域过滤是集合操作，不该在 AI 循环里逐条穿越 —— 2026-08-13 实测：队列前面
+ * 积压了上百条上个渠道遗留的国内线索，analyze 每次都要一条条走过它们才够到
+ * 真正要分析的商家，limit 再怎么调都白搭。一条 SQL 秒级清完。
+ *
+ * ip_location IS NULL 的**不动**：商家模式没有属地字段，地域靠搜索词保证，
+ * 交给 L1 的模型判断。这里只处理明确不在北美的。
+ */
+export function skipNonTargetRegion(model = "") {
+  const r = open()
+    .prepare(
+      `INSERT INTO analysis (lead_id, score, is_lead, need_summary, product_line,
+                             demo_pitch, dm_angle, evidence, risk_flags, model, analyzed_at)
+       SELECT l.id, 25, 0, '属地 ' || l.ip_location || '，不在目标市场（北美）',
+              '官网', '', '', '', '["非目标地区"]', @model, @at
+       FROM leads l LEFT JOIN analysis a ON a.lead_id = l.id
+       WHERE a.lead_id IS NULL
+         AND l.ip_location IS NOT NULL
+         AND l.ip_location NOT IN ('美国','加拿大')`
+    )
+    .run({ model, at: new Date().toISOString() });
+  return r.changes;
+}
+
 /** 还没分析过的线索。 */
 export const pendingLeads = (limit = 20) =>
   open()

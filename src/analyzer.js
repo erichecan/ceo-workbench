@@ -17,7 +17,7 @@
 import { ask, parseJson } from "./ai.js";
 import { config, PRODUCT_LINES } from "./config.js";
 import { isTargetRegion } from "./geo.js";
-import { pendingLeads, saveAnalysis } from "./storage.js";
+import { pendingLeads, saveAnalysis, skipNonTargetRegion } from "./storage.js";
 
 /**
  * 地域过滤。放在 AI 调用之前，因为它免费而 score 要花一次调用 ——
@@ -173,34 +173,25 @@ export async function analyzeOne(lead) {
 }
 
 /**
- * 批量分析未处理的线索。
- * 撞周额度直接停整轮 —— 等到重置日才回来，继续跑只是空转。
+ * 批量分析未处理的线索。撞周额度直接停整轮 —— 等到重置日才回来，继续跑只是空转。
+ *
+ * limit 限制的是**真实 AI 调用数**。地域过滤不花 AI 调用，所以先用一条 SQL
+ * 整批清掉（skipNonTargetRegion），再把 limit 全部用在真正要判断的线索上。
+ * 2026-08-13 实测过反例：队列前面积压上百条国内线索时，逐条穿越会把配额耗光，
+ * `--limit 8` 一条真分析都跑不成。
  */
 export async function analyzePending(limit = 20) {
+  const model = `${config.provider}:${config.provider === "gemini" ? config.geminiModel : config.anthropicModel}`;
+  const skipped = skipNonTargetRegion(model);
+  if (skipped) console.log(`非目标地区批量跳过 ${skipped} 条（不花 AI 调用）`);
+
   const todo = pendingLeads(limit);
-  if (!todo.length) return { ok: 0, failed: 0, skipped: 0, total: 0 };
+  if (!todo.length) return { ok: 0, failed: 0, skipped, total: skipped };
 
   let ok = 0;
   let failed = 0;
-  let skipped = 0;
   for (const [i, lead] of todo.entries()) {
-    const label = `[${i + 1}/${todo.length}] ${(lead.author || "").slice(0, 14)} ${lead.body.slice(0, 24)}`;
-
-    // 免费的过滤先做。属地抓取时就在手里，score 要花一次 AI 调用。
-    if (shouldSkipByRegion(lead)) {
-      saveAnalysis(
-        lead.id,
-        normalize({
-          score: 25,
-          is_lead: false,
-          need_summary: `属地 ${lead.ip_location}，不在目标市场（北美）`,
-          risk_flags: ["非目标地区"],
-        })
-      );
-      skipped++;
-      continue;
-    }
-
+    const label = `[${i + 1}/${todo.length}] @${(lead.author || "").slice(0, 16)}`;
     try {
       const result = await analyzeOne(lead);
       if (!result) {
@@ -221,5 +212,5 @@ export async function analyzePending(limit = 20) {
       console.log(`${label} → ⚠️ ${e.message.slice(0, 120)}`);
     }
   }
-  return { ok, failed, skipped, total: todo.length };
+  return { ok, failed, skipped, total: ok + failed + skipped };
 }
