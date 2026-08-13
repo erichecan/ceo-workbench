@@ -42,6 +42,21 @@ test("只有相对时间没有属地", () => {
   assert.deepEqual(parseCommentTime("昨天"), { date: null, ip_location: null });
 });
 
+// 2026-08-13 实测：当天发的评论显示 HH:MM 而不是 MM-DD，出现「04:26广东」。
+// 这是同一个坑第二次踩到 —— 时间前缀写法不止一种。
+test("当天评论用时刻，同样要剥掉", () => {
+  assert.deepEqual(parseCommentTime("04:26广东"), { date: null, ip_location: "广东" });
+  assert.deepEqual(parseCommentTime("4:26美国"), { date: null, ip_location: "美国" });
+  assert.deepEqual(parseCommentTime("23:59加拿大"), { date: null, ip_location: "加拿大" });
+  assert.deepEqual(parseCommentTime("04:26"), { date: null, ip_location: null });
+});
+
+test("三种时间写法剥完，北美都要能过地域过滤", () => {
+  for (const raw of ["03-02美国", "5天前美国", "04:26美国", "美国"]) {
+    assert.equal(isTargetRegion(parseCommentTime(raw).ip_location), true, raw);
+  }
+});
+
 test("北美是目标市场，中国各省不是", () => {
   assert.equal(isTargetRegion("美国"), true);
   assert.equal(isTargetRegion("加拿大"), true);

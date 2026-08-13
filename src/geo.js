@@ -8,12 +8,19 @@
 
 const DATE_RE = /^((?:\d{4}-)?\d{2}-\d{2})/;
 
-// 近期评论用相对时间，不是日期。2026-08-12 实测同一轮里出现了「5天前安徽」
-// 「7天前广东」——不剥掉这个前缀，属地就会连着前缀一起存，于是「5天前美国」
-// 判不出是美国，直接漏掉一个真客户。
+/**
+ * 时间前缀有三种写法，属地跟在后面。三种都得剥，否则属地判不出来。
+ *
+ * 实测踩到两次，都是同一个形状的坑：
+ *   2026-08-12  「5天前安徽」「7天前广东」—— 相对时间
+ *   2026-08-13  「04:26广东」           —— 当天评论显示 HH:MM 而非 MM-DD
+ * 漏掉任何一种，对应的「…美国」就判不出是北美，直接丢掉一个真客户。
+ * 加新格式时先想清楚：漏判的代价是静默的，报表上只会少一条，不会报错。
+ */
 const RELATIVE_RE = /^(刚刚|今天|昨天|前天|\d+\s*(?:分钟|小时|天|周|个月)前)/;
+const CLOCK_RE = /^(\d{1,2}:\d{2})/;
 
-/** 「03-02美国」→ { date: "03-02", ip_location: "美国" }；相对时间同样剥离。 */
+/** 「03-02美国」→ { date: "03-02", ip_location: "美国" }；相对时间与时刻同样剥离。 */
 export function parseCommentTime(raw) {
   const s = String(raw ?? "").trim();
   if (!s) return { date: null, ip_location: null };
@@ -21,8 +28,11 @@ export function parseCommentTime(raw) {
   const abs = s.match(DATE_RE);
   if (abs) return { date: abs[1], ip_location: s.slice(abs[1].length).trim() || null };
 
-  const rel = s.match(RELATIVE_RE);
-  if (rel) return { date: null, ip_location: s.slice(rel[1].length).trim() || null };
+  // 当天的评论没有日期，只有时刻 —— date 留 null，日期信息本来就不在这串里。
+  for (const re of [RELATIVE_RE, CLOCK_RE]) {
+    const m = s.match(re);
+    if (m) return { date: null, ip_location: s.slice(m[1].length).trim() || null };
+  }
 
   return { date: null, ip_location: s };
 }
