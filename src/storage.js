@@ -249,14 +249,18 @@ export function skipNonTargetRegion(model = "") {
   return r.changes;
 }
 
-/** 还没分析过的线索。 */
-export const pendingLeads = (limit = 20) =>
+/**
+ * 还没分析过的线索。keyword 传入时只取该搜索词带出来的
+ * —— 队列按 id 排，新抓的品类排在积压后面，想针对性验证某个品类就得能挑。
+ */
+export const pendingLeads = (limit = 20, keyword = null) =>
   open()
     .prepare(
       `SELECT l.* FROM leads l LEFT JOIN analysis a ON a.lead_id = l.id
-       WHERE a.lead_id IS NULL ORDER BY l.id LIMIT ?`
+       WHERE a.lead_id IS NULL AND (? IS NULL OR l.keyword = ?)
+       ORDER BY l.id LIMIT ?`
     )
-    .all(limit);
+    .all(keyword, keyword, limit);
 
 /** 已分析的线索，按分数降序。since 传 'YYYY-MM-DD' 只取当天及以后。 */
 export function analyzedLeads({ since = null, minScore = 0 } = {}) {

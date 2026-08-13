@@ -118,7 +118,7 @@ async function cmdScrape(flags) {
 }
 
 async function cmdAnalyze(flags) {
-  const r = await analyzePending(flags.limit || 20);
+  const r = await analyzePending(flags.limit || 20, flags.keyword[0] || null);
   if (!r.total) {
     console.log("没有待分析的线索。先跑 npm run scrape。");
     return 0;
@@ -240,7 +240,8 @@ const HELP = `咨询式获客产线 —— 找北美华人商家，判断生意�
   npm run scrape   [-- --keyword "多伦多 美甲" --demand --url "https://..."]
                    # 默认：搜生意品类词，搜索结果里的商家就是线索
                    # --demand：守株待兔线（需求词 + 评论区），产量低只占小份预算
-  npm run analyze  [-- --limit 20]     # L1 粗筛：这是不是一门在北美的真生意
+  npm run analyze  [-- --limit 20 --keyword "多伦多 地产经纪"]
+                   # L1 粗筛：这是不是一门在北美的真生意；--keyword 只分析该品类
   npm run profiles [-- --limit 8]      # 拉商家主页（风控成本最高，有硬上限）
   npm run diagnose [-- --limit 8]      # L2 生意诊断 + 出诊断书
   npm run report   [-- --today --min-score 50]

@@ -180,12 +180,12 @@ export async function analyzeOne(lead) {
  * 2026-08-13 实测过反例：队列前面积压上百条国内线索时，逐条穿越会把配额耗光，
  * `--limit 8` 一条真分析都跑不成。
  */
-export async function analyzePending(limit = 20) {
+export async function analyzePending(limit = 20, keyword = null) {
   const model = `${config.provider}:${config.provider === "gemini" ? config.geminiModel : config.anthropicModel}`;
   const skipped = skipNonTargetRegion(model);
   if (skipped) console.log(`非目标地区批量跳过 ${skipped} 条（不花 AI 调用）`);
 
-  const todo = pendingLeads(limit);
+  const todo = pendingLeads(limit, keyword);
   if (!todo.length) return { ok: 0, failed: 0, skipped, total: skipped };
 
   let ok = 0;
