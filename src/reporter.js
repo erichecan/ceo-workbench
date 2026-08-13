@@ -27,7 +27,7 @@ function card(l) {
     <div class="head">
       <h3>${esc(l.title || "(无标题)")}</h3>
       <div class="meta">
-        <span class="track">${esc(l.demo_track)}</span>
+        <span class="track">${esc(l.product_line)}</span>
         <span>${l.source === "note" ? "笔记" : "评论"}</span>
         ${l.author ? `<span>@${esc(l.author)}</span>` : ""}
         ${l.likes != null ? `<span>${l.likes} 赞</span>` : ""}
@@ -41,7 +41,6 @@ function card(l) {
   <blockquote>${esc((l.body || "").slice(0, 260))}${(l.body || "").length > 260 ? "…" : ""}</blockquote>
   ${line("需求", l.need_summary)}
   ${line("做什么 demo", l.demo_pitch)}
-  ${line("首评草稿", l.first_comment)}
   ${line("私信切入", l.dm_angle)}
   ${l.evidence ? `<div class="row"><span class="k">原文证据</span><p class="ev">「${esc(l.evidence)}」</p></div>` : ""}
   <footer>id ${l.id} · 抓取 ${esc((l.scraped_at || "").slice(0, 16).replace("T", " "))}</footer>
@@ -118,7 +117,7 @@ function buildMarkdown(leads, day) {
     .filter((l) => l.is_lead)
     .map(
       (l) =>
-        `| ${l.score} | ${(l.title || l.body).slice(0, 20).replace(/\|/g, "/")} | ${l.demo_track} | ${
+        `| ${l.score} | ${(l.title || l.body).slice(0, 20).replace(/\|/g, "/")} | ${l.product_line} | ${
           l.url ? `[打开](${l.url})` : "—"
         } |`
     );
@@ -126,7 +125,7 @@ function buildMarkdown(leads, day) {
 
 共 ${leads.length} 条，其中值得联系 ${rows.length} 条。
 
-| 分 | 线索 | demo 方向 | 链接 |
+| 分 | 线索 | 产品线 | 链接 |
 |---|---|---|---|
 ${rows.join("\n") || "| — | 今天没有值得联系的线索 | — | — |"}
 

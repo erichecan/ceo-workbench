@@ -52,6 +52,21 @@ function migrate(d) {
       /* 列已存在 */
     }
   }
+  // demo_track（十个站型）→ product_line（四条产品线）。老库的列名要跟着改，
+  // CREATE TABLE IF NOT EXISTS 不会动已存在的表。
+  // 历史行里的旧值不做映射：它们是旧口径的产物，混进新报告只会误导。
+  try {
+    d.exec(`ALTER TABLE analysis RENAME COLUMN demo_track TO product_line`);
+  } catch {
+    /* 已改过名，或是新建库 */
+  }
+  // 公开评论草稿这条路彻底不走了（线索全来自同行评论区，在那儿留评论既是
+  // 挖墙脚也撞禁令）。列留着就还是一个能装草稿的地方，一并删掉。
+  try {
+    d.exec(`ALTER TABLE analysis DROP COLUMN first_comment`);
+  } catch {
+    /* 已删过，或 SQLite 版本不支持 DROP COLUMN —— 不影响功能 */
+  }
 }
 
 const SCHEMA = `
@@ -84,9 +99,8 @@ const SCHEMA = `
       score          INTEGER NOT NULL,
       is_lead        INTEGER NOT NULL,
       need_summary   TEXT,
-      demo_track     TEXT,
+      product_line   TEXT,
       demo_pitch     TEXT,
-      first_comment  TEXT,
       dm_angle       TEXT,
       evidence       TEXT,
       risk_flags     TEXT,                     -- JSON 数组：同行/招聘/广告/信息不足
@@ -160,14 +174,14 @@ export function saveAnalysis(leadId, a) {
   open()
     .prepare(
       `INSERT INTO analysis
-       (lead_id, score, is_lead, need_summary, demo_track, demo_pitch,
-        first_comment, dm_angle, evidence, risk_flags, model, analyzed_at)
-       VALUES (@lead_id, @score, @is_lead, @need_summary, @demo_track, @demo_pitch,
-               @first_comment, @dm_angle, @evidence, @risk_flags, @model, @analyzed_at)
+       (lead_id, score, is_lead, need_summary, product_line, demo_pitch,
+        dm_angle, evidence, risk_flags, model, analyzed_at)
+       VALUES (@lead_id, @score, @is_lead, @need_summary, @product_line, @demo_pitch,
+               @dm_angle, @evidence, @risk_flags, @model, @analyzed_at)
        ON CONFLICT(lead_id) DO UPDATE SET
          score=excluded.score, is_lead=excluded.is_lead,
-         need_summary=excluded.need_summary, demo_track=excluded.demo_track,
-         demo_pitch=excluded.demo_pitch, first_comment=excluded.first_comment,
+         need_summary=excluded.need_summary, product_line=excluded.product_line,
+         demo_pitch=excluded.demo_pitch,
          dm_angle=excluded.dm_angle, evidence=excluded.evidence,
          risk_flags=excluded.risk_flags, model=excluded.model,
          analyzed_at=excluded.analyzed_at`
@@ -177,9 +191,8 @@ export function saveAnalysis(leadId, a) {
       score: a.score ?? 0,
       is_lead: a.is_lead ? 1 : 0,
       need_summary: a.need_summary || "",
-      demo_track: a.demo_track || "其他",
+      product_line: a.product_line || "官网",
       demo_pitch: a.demo_pitch || "",
-      first_comment: a.first_comment || "",
       dm_angle: a.dm_angle || "",
       evidence: a.evidence || "",
       risk_flags: JSON.stringify(a.risk_flags || []),
@@ -201,8 +214,8 @@ export const pendingLeads = (limit = 20) =>
 export function analyzedLeads({ since = null, minScore = 0 } = {}) {
   const rows = open()
     .prepare(
-      `SELECT l.*, a.score, a.is_lead, a.need_summary, a.demo_track, a.demo_pitch,
-              a.first_comment, a.dm_angle, a.evidence, a.risk_flags, a.analyzed_at
+      `SELECT l.*, a.score, a.is_lead, a.need_summary, a.product_line, a.demo_pitch,
+              a.dm_angle, a.evidence, a.risk_flags, a.analyzed_at
        FROM leads l JOIN analysis a ON a.lead_id = l.id
        WHERE a.score >= ? AND (? IS NULL OR l.scraped_at >= ?)
        ORDER BY a.score DESC, l.likes DESC`

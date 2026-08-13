@@ -15,17 +15,28 @@
  *    是同一个形状。
  */
 import { ask, parseJson } from "./ai.js";
-import { config, DEMO_TRACKS } from "./config.js";
+import { config, PRODUCT_LINES } from "./config.js";
+import { isTargetRegion } from "./geo.js";
 import { pendingLeads, saveAnalysis } from "./storage.js";
+
+/**
+ * 地域过滤。放在 AI 调用之前，因为它免费而 score 要花一次调用 ——
+ * 属地来自评论的 time 字段，抓取时就已经在手里了。
+ */
+export const shouldSkipByRegion = (lead) => !isTargetRegion(lead.ip_location);
 
 const SCORING_RULE = `评分规则（严格执行，不要自由发挥）：
 
-90-100  本人明确在找人做网站，且给了可落地的细节（行业 / 预算 / 时间 / 参考站点）
-70-89   本人明确表达了建站需求或对现有网站不满，但细节不全
-50-69   有相关需求的苗头（在问怎么做、比较工具、抱怨没有官网），但没说要外包
-30-49   话题相关，本人没有需求（在分享经验、看热闹、替别人问）
-15-29   招聘帖 / 求职帖 / 课程广告 —— 话题撞上了，但不是买方
-0-14    同行或建站服务商的自我推广（在拉客、晒案例、发报价）—— 这是竞争对手不是客户
+这条评论来自**同行建站服务商的推广笔记下面**。也就是说：能在那儿留言的人，
+购买意向已经默认存在，而且多半正在比价。所以不要再问「他想不想做网站」——
+要问的是「**他在做什么生意，那门生意缺什么**」。
+
+90-100  能看出具体生意（行业 + 大致规模），且明确在问价 / 问周期 / 问能不能做
+70-89   能看出具体生意，表达了需求但没谈到细节
+50-69   有需求信号但看不出做什么生意（只说「我也想要一个」这类）
+30-49   围观、评价同行、替别人问 —— 本人不是买方
+15-29   招聘帖 / 求职帖 / 课程广告
+0-14    另一个同行在下面抢客 —— 竞争对手不是客户
 
 硬约束：
 - is_lead 只有 score >= 50 时才能是 true。
@@ -36,10 +47,13 @@ const SCORING_RULE = `评分规则（严格执行，不要自由发挥）：
 
 const FOLLOWUP_RULE = `跟进话术的硬要求：
 
-first_comment 是**公开评论区的第一句话**，由本人手动发送（本工具绝不代发）。
-dm_angle 是**私信第一句的切入角度**，同样由本人发送。
+dm_angle 是**私信第一句的切入角度**，由本人手动发送（本工具绝不代发）。
 
-两者都必须：
+⛔ 不产出公开评论草稿。本产线的线索全部来自同行笔记的评论区，
+在那儿留评论既是挖墙脚，又撞在小红书禁止「评论区配合」的规定上。
+只走私信这一条路。
+
+dm_angle 必须：
 - 先具体回应对方说的那件事（引一个他提到的细节），不许通用到换个帖子也能用
 - ≤ 50 字，口语，像人随手回的
 - 不承诺结果（「保证」「一定能」「包过」），不报价，不留联系方式
@@ -47,21 +61,24 @@ dm_angle 是**私信第一句的切入角度**，同样由本人发送。
 - 不伪装成普通用户、不假装自己也遇到了同样的问题 —— 说话的人就是服务提供者本人`;
 
 function buildPrompt(lead) {
-  const kind = lead.source === "note" ? "一篇小红书笔记" : "小红书笔记下的一条评论";
-  return `你是给独立建站服务商做线索筛选的分析员。目标客户是**在北美、需要做网站的人**
-（华人商家、留学生创业者、本地服务商、想开独立站的卖家等）。
+  return `你是给独立建站/系统服务商做线索筛选的分析员。目标客户是**在北美做生意的人**
+（华人商家、本地服务商、留学生创业者、想开独立站的卖家等）。
 
-下面是${kind}。判断发这段话的人是不是潜在客户，只输出 JSON。
+下面是一条小红书评论，来自同行服务商的推广笔记下面。只输出 JSON。
 
 ${SCORING_RULE}
 
-demo_track 必须从这个列表里选一个，不许自创：
-${DEMO_TRACKS.map((t) => `- ${t}`).join("\n")}
+product_line 必须从这个列表里选一个，不许自创：
+${PRODUCT_LINES.map((t) => `- ${t}`).join("\n")}
 
-选 demo_track 时**要看作者昵称**。小红书商家号的昵称经常直接写明行业
-（「XX Fitness」是健身房、「XX 甲油胶」是美甲、「XX 地产」是经纪），
-正文没提行业时，昵称往往是唯一的线索。但昵称只是线索不是确证：
-昵称看不出行业、或与正文明显冲突时，才选「其他」。
+  官网      —— 只需要一个能被搜到、能展示的站
+  预约系统  —— 生意靠排期（健身、美业、诊所、教育、上门服务）
+  会员积分  —— 生意靠回头客（餐饮、零售、美业）
+  重线索    —— 明显需要 CRM / ERP / 对接现有流程，48 小时做不出 demo
+
+选的时候**要看作者昵称**。小红书商家号的昵称经常直接写明行业
+（「XX Fitness」是健身房、「XX 甲油胶」是美甲、「XX 地产」是经纪）。
+但昵称只是线索不是确证 —— 这一层拿不准很正常，主页数据会在下一层补上。
 
 ${FOLLOWUP_RULE}
 
@@ -69,34 +86,32 @@ ${FOLLOWUP_RULE}
 {
   "score": <0-100 整数>,
   "is_lead": <true|false>,
-  "need_summary": "<一段话说清这个人要什么、卡在哪。没有需求就写「无建站需求」>",
-  "demo_track": "<从上面列表里选一个>",
-  "demo_pitch": "<针对这个人做什么样的 demo 最能打动他：做哪几个页面、突出什么。两三句话。is_lead 为 false 时留空>",
-  "first_comment": "<公开评论区第一句的草稿。is_lead 为 false 时留空>",
+  "need_summary": "<一段话说清这个人在做什么生意、缺什么。看不出生意就写「看不出做什么生意」>",
+  "product_line": "<从上面列表里选一个>",
+  "demo_pitch": "<针对这门生意做什么样的 demo 最能打动他。两三句话。is_lead 为 false 时留空>",
   "dm_angle": "<私信第一句的切入角度。is_lead 为 false 时留空>",
   "evidence": "<逐字引用原文里最能支撑这个判断的一句话>",
-  "risk_flags": [<可选，从 "同行" "招聘" "广告" "信息不足" "疑似过期" 里挑，没有就空数组>]
+  "risk_flags": [<可选，从 "同行" "招聘" "广告" "信息不足" "非目标地区" 里挑，没有就空数组>]
 }
 
 ---
-${lead.author ? `作者昵称：${lead.author}\n` : ""}${lead.title ? `所在笔记标题：${lead.title}\n` : ""}${
-    lead.keyword ? `搜索词：${lead.keyword}\n` : ""
-  }${lead.likes != null ? `点赞：${lead.likes}\n` : ""}${
-    lead.published_at ? `发布日期：${lead.published_at}\n` : ""
-  }
-正文：
+${lead.author ? `作者昵称：${lead.author}\n` : ""}${lead.ip_location ? `IP 属地：${lead.ip_location}\n` : ""}${
+    lead.title ? `他留言的那篇同行笔记：${lead.title}\n` : ""
+  }${lead.likes != null ? `这条评论的点赞：${lead.likes}\n` : ""}
+他说的话：
 ${(lead.body || "").slice(0, 3000)}`;
 }
 
-function normalize(raw) {
+export function normalize(raw) {
   const score = Math.max(0, Math.min(100, Math.round(Number(raw.score) || 0)));
-  const track = DEMO_TRACKS.includes(raw.demo_track) ? raw.demo_track : "其他";
+  // 不在枚举内就落到「官网」而不是让模型编一个：自由发挥的分类没法聚合成看板。
+  const line = PRODUCT_LINES.includes(raw.product_line) ? raw.product_line : "官网";
   // is_lead 由分数兜底判定 —— 模型偶尔会给 30 分却标 true，
   // 让它自相矛盾地流进报告，等于让人去联系一个已经被判低分的人。
   return {
     ...raw,
     score,
-    demo_track: track,
+    product_line: line,
     is_lead: score >= 50 && raw.is_lead !== false,
     risk_flags: Array.isArray(raw.risk_flags) ? raw.risk_flags : [],
     model: `${config.provider}:${config.provider === "gemini" ? config.geminiModel : config.anthropicModel}`,
@@ -117,12 +132,29 @@ export async function analyzeOne(lead) {
  */
 export async function analyzePending(limit = 20) {
   const todo = pendingLeads(limit);
-  if (!todo.length) return { ok: 0, failed: 0, total: 0 };
+  if (!todo.length) return { ok: 0, failed: 0, skipped: 0, total: 0 };
 
   let ok = 0;
   let failed = 0;
+  let skipped = 0;
   for (const [i, lead] of todo.entries()) {
-    const label = `[${i + 1}/${todo.length}] ${(lead.title || lead.body).slice(0, 28)}`;
+    const label = `[${i + 1}/${todo.length}] ${(lead.author || "").slice(0, 14)} ${lead.body.slice(0, 24)}`;
+
+    // 免费的过滤先做。属地抓取时就在手里，score 要花一次 AI 调用。
+    if (shouldSkipByRegion(lead)) {
+      saveAnalysis(
+        lead.id,
+        normalize({
+          score: 25,
+          is_lead: false,
+          need_summary: `属地 ${lead.ip_location}，不在目标市场（北美）`,
+          risk_flags: ["非目标地区"],
+        })
+      );
+      skipped++;
+      continue;
+    }
+
     try {
       const result = await analyzeOne(lead);
       if (!result) {
@@ -133,7 +165,7 @@ export async function analyzePending(limit = 20) {
       saveAnalysis(lead.id, result);
       ok++;
       const mark = result.is_lead ? "✅" : "·";
-      console.log(`${label} → ${mark} ${result.score} 分 | ${result.demo_track}`);
+      console.log(`${label} → ${mark} ${result.score} 分 | ${result.product_line}`);
     } catch (e) {
       failed++;
       if (e.limit === "weekly") {
@@ -143,5 +175,5 @@ export async function analyzePending(limit = 20) {
       console.log(`${label} → ⚠️ ${e.message.slice(0, 120)}`);
     }
   }
-  return { ok, failed, total: todo.length };
+  return { ok, failed, skipped, total: todo.length };
 }
