@@ -14,6 +14,7 @@
     "daily": "node src/cli.js daily",
     "list": "node src/cli.js list",
     "doctor": "node src/cli.js doctor",
+    "test": "node --test \"test/**/*.test.js\"",
     "board": "node tasks/scripts/board.mjs",
     "ledger": "node finance/scripts/ledger.mjs",
     "site": "node site/build.mjs",
