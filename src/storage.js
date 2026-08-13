@@ -215,8 +215,11 @@ export function analyzedLeads({ since = null, minScore = 0 } = {}) {
   const rows = open()
     .prepare(
       `SELECT l.*, a.score, a.is_lead, a.need_summary, a.product_line, a.demo_pitch,
-              a.dm_angle, a.evidence, a.risk_flags, a.analyzed_at
+              a.dm_angle, a.evidence, a.risk_flags, a.analyzed_at,
+              d.industry, d.business_size, d.online_assets, d.bottleneck,
+              d.reason, d.is_heavy, d.diag_slug, d.dm_draft
        FROM leads l JOIN analysis a ON a.lead_id = l.id
+       LEFT JOIN diagnoses d ON d.lead_id = l.id
        WHERE a.score >= ? AND (? IS NULL OR l.scraped_at >= ?)
        ORDER BY a.score DESC, l.likes DESC`
     )

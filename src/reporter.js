@@ -30,6 +30,8 @@ function card(l) {
         <span class="track">${esc(l.product_line)}</span>
         <span>${l.source === "note" ? "笔记" : "评论"}</span>
         ${l.author ? `<span>@${esc(l.author)}</span>` : ""}
+        ${l.ip_location ? `<span>${esc(l.ip_location)}</span>` : ""}
+        ${l.is_heavy ? `<span class="heavy">重线索·走人工</span>` : ""}
         ${l.likes != null ? `<span>${l.likes} 赞</span>` : ""}
         ${l.keyword ? `<span>词：${esc(l.keyword)}</span>` : ""}
         <span class="status s-${esc(l.status)}">${esc(l.status)}</span>
@@ -39,9 +41,12 @@ function card(l) {
     ${l.url ? `<a class="open" href="${esc(l.url)}" target="_blank" rel="noreferrer">打开 ↗</a>` : ""}
   </header>
   <blockquote>${esc((l.body || "").slice(0, 260))}${(l.body || "").length > 260 ? "…" : ""}</blockquote>
-  ${line("需求", l.need_summary)}
+  ${line("生意", [l.industry, l.business_size].filter(Boolean).join(" · ") || l.need_summary)}
+  ${l.bottleneck ? `<div class="row"><span class="k">真正的瓶颈</span><p class="bn">${esc(l.bottleneck)}</p></div>` : ""}
+  ${line("建议方案", [l.product_line, l.reason].filter(Boolean).join(" —— "))}
   ${line("做什么 demo", l.demo_pitch)}
-  ${line("私信切入", l.dm_angle)}
+  ${line("私信草稿", l.dm_draft || l.dm_angle)}
+  ${l.diag_slug ? `<div class="row"><span class="k">诊断书</span><p>${esc(l.diag_slug)}.html</p></div>` : ""}
   ${l.evidence ? `<div class="row"><span class="k">原文证据</span><p class="ev">「${esc(l.evidence)}」</p></div>` : ""}
   <footer>id ${l.id} · 抓取 ${esc((l.scraped_at || "").slice(0, 16).replace("T", " "))}</footer>
 </article>`;
@@ -86,6 +91,8 @@ blockquote{margin:.8rem 0;padding:.55rem .8rem;background:var(--bg);border-radiu
 .k{color:var(--dim);font-size:.78rem;min-width:5.2rem;padding-top:.15rem;flex-shrink:0}
 .row p{margin:0;word-break:break-word}
 .ev{font-style:italic;color:var(--dim)}
+.bn{font-weight:600}
+.heavy{color:var(--warm)!important;border-color:var(--warm)!important}
 footer{margin-top:.8rem;padding-top:.6rem;border-top:1px solid var(--line);
        color:var(--dim);font-size:.72rem}
 .note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--warm);
@@ -97,6 +104,7 @@ export function buildHtml(leads, s, day) {
   const tally = [
     ["今日线索", leads.length],
     ["值得联系", leads.filter((l) => l.is_lead).length],
+    ["已出诊断书", leads.filter((l) => l.diag_slug).length],
     ["高分(≥70)", hot],
     ["库内累计", s.leads],
   ];
@@ -106,8 +114,9 @@ export function buildHtml(leads, s, day) {
 <h1>建站线索日报</h1>
 <p class="sub">${day} · 按潜在价值排序，从上往下联系</p>
 <div class="tally">${tally.map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join("")}</div>
-<div class="note">首评和私信都是<b>草稿</b>。小红书禁止 AI 托管账号与自动化互动，
-发送这一步必须由你本人手动完成 —— 本工具不代发，也不该代发。</div>
+<div class="note">私信全是<b>草稿</b>。小红书禁止 AI 托管账号与自动化互动，
+发送这一步必须由你本人手动完成 —— 本工具不代发，也不该代发。<br>
+线索来自同行笔记的评论区，<b>不要在那些笔记下留评论</b>，只走私信。</div>
 ${leads.length ? leads.map(card).join("\n") : '<p class="empty">今天没有线索。先跑 scrape 和 analyze。</p>'}
 </div></body></html>`;
 }

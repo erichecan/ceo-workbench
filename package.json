@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "建站线索发现器 + CEO 工作台（任务看板 · 财务账本 · 文档中心）",
+  "description": "咨询式获客产线（挖同行评论区→生意诊断→诊断书） + CEO 工作台（任务看板 · 财务账本 · 文档中心）",
   "bin": {
     "leads": "./src/cli.js"
   },
   "scripts": {
     "scrape": "node src/cli.js scrape",
     "analyze": "node src/cli.js analyze",
+    "profiles": "node src/cli.js profiles",
+    "diagnose": "node src/cli.js diagnose",
     "report": "node src/cli.js report",
     "daily": "node src/cli.js daily",
     "list": "node src/cli.js list",
