@@ -8,14 +8,23 @@
 
 const DATE_RE = /^((?:\d{4}-)?\d{2}-\d{2})/;
 
-/** 「03-02美国」→ { date: "03-02", ip_location: "美国" }。 */
+// 近期评论用相对时间，不是日期。2026-08-12 实测同一轮里出现了「5天前安徽」
+// 「7天前广东」——不剥掉这个前缀，属地就会连着前缀一起存，于是「5天前美国」
+// 判不出是美国，直接漏掉一个真客户。
+const RELATIVE_RE = /^(刚刚|今天|昨天|前天|\d+\s*(?:分钟|小时|天|周|个月)前)/;
+
+/** 「03-02美国」→ { date: "03-02", ip_location: "美国" }；相对时间同样剥离。 */
 export function parseCommentTime(raw) {
   const s = String(raw ?? "").trim();
   if (!s) return { date: null, ip_location: null };
-  const m = s.match(DATE_RE);
-  if (!m) return { date: null, ip_location: s };
-  const rest = s.slice(m[1].length).trim();
-  return { date: m[1], ip_location: rest || null };
+
+  const abs = s.match(DATE_RE);
+  if (abs) return { date: abs[1], ip_location: s.slice(abs[1].length).trim() || null };
+
+  const rel = s.match(RELATIVE_RE);
+  if (rel) return { date: null, ip_location: s.slice(rel[1].length).trim() || null };
+
+  return { date: null, ip_location: s };
 }
 
 /**

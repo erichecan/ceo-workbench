@@ -23,8 +23,23 @@ test("空值不炸", () => {
   assert.deepEqual(parseCommentTime(undefined), { date: null, ip_location: null });
 });
 
-test("相对时间没有日期但可能有属地", () => {
-  assert.deepEqual(parseCommentTime("昨天美国"), { date: null, ip_location: "昨天美国" });
+// 2026-08-12 实测：同一轮抓取里出现了「5天前安徽」「7天前广东」。
+// 不剥这个前缀，「5天前美国」就判不出是美国，会漏掉真客户。
+test("相对时间前缀要剥掉，否则属地判不出来", () => {
+  assert.deepEqual(parseCommentTime("5天前安徽"), { date: null, ip_location: "安徽" });
+  assert.deepEqual(parseCommentTime("7天前广东"), { date: null, ip_location: "广东" });
+  assert.deepEqual(parseCommentTime("昨天美国"), { date: null, ip_location: "美国" });
+  assert.deepEqual(parseCommentTime("刚刚加拿大"), { date: null, ip_location: "加拿大" });
+  assert.deepEqual(parseCommentTime("3小时前美国"), { date: null, ip_location: "美国" });
+});
+
+test("相对时间剥完是北美的，必须能过地域过滤", () => {
+  assert.equal(isTargetRegion(parseCommentTime("5天前美国").ip_location), true);
+  assert.equal(isTargetRegion(parseCommentTime("5天前安徽").ip_location), false);
+});
+
+test("只有相对时间没有属地", () => {
+  assert.deepEqual(parseCommentTime("昨天"), { date: null, ip_location: null });
 });
 
 test("北美是目标市场，中国各省不是", () => {

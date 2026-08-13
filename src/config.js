@@ -43,49 +43,51 @@ export const config = {
   geminiKey: process.env.GEMINI_API_KEY || "",
   geminiModel: process.env.GEMINI_MODEL || "gemini-2.5-pro",
 
-  proxy: process.env.CDP_PROXY || "http://localhost:3456",
-  captureScreenshot: process.env.CAPTURE_SCREENSHOT === "1",
-
-  // ⛔ 反封控参数。抄自 scripts/xhs-probe/probe.py 的实测值，不是拍脑袋定的：
-  //    单轮 5 个词、词间随机停 45–90 秒、每词只点开 3 篇笔记。
-  //    probe.py 的记录显示，触发「安全验证」后正确做法是立刻停整轮，
-  //    不重试、不换词硬撑 —— 硬撑会把账号推向封禁。
+  // ⛔ 反封控参数。走 opencli 后浏览器节奏由适配器管理，但**命令调用频率
+  //    仍然是我们的责任** —— 而且这个账号是本人日常在用的那个，不是小号。
+  //    触发「安全验证」时正确做法是立刻停整轮，不重试、不换词硬撑。
   maxKeywordsPerRun: num("MAX_KEYWORDS_PER_RUN", 5),
   notesPerKeyword: num("NOTES_PER_KEYWORD", 3),
+  commentsPerNote: num("COMMENTS_PER_NOTE", 30),
+  // 超过这个赞数的不是同行推广帖，是爆款讨论帖 —— 评论区没有客户。
+  // 实测推广帖 6–36 赞，混进来的噪音帖 250–4597 赞，200 这条线中间很空。
+  maxNoteLikes: num("MAX_NOTE_LIKES", 200),
   delayBetweenKeywords: [
     num("DELAY_BETWEEN_KEYWORDS_MIN", 45) * 1000,
     num("DELAY_BETWEEN_KEYWORDS_MAX", 90) * 1000,
   ],
-  delayInPage: [2000, 5000],
-  pageLoadWait: 4000,
-  maxCommentsPerNote: 30,
+  delayBetweenCalls: [
+    num("DELAY_BETWEEN_CALLS_MIN", 20) * 1000,
+    num("DELAY_BETWEEN_CALLS_MAX", 45) * 1000,
+  ],
+  // 主页访问是整条链路里风控成本最高的动作，单独立一个更紧的上限。
+  maxProfilesPerRun: num("MAX_PROFILES_PER_RUN", 8),
 };
 
-/** 默认搜索词。用 `--keyword` 可覆盖，长期维护建议直接改这里。 */
+/**
+ * 默认搜索词 = **同行推广词**，不是需求词。
+ *
+ * 转向的理由：在同行推广帖下留言的人，购买意向已经默认存在，而且多半
+ * 正在比价 —— 比满世界找「我想做网站」这种零散喊话精准得多。
+ * 旧口径（需求词）的实测命中率：31 条线索里只有 2 条值得联系，6%。
+ * 2026-08-12 实测「帮客户做网站」搜索结果前 3 条全是同行推广帖。
+ */
 export const DEFAULT_KEYWORDS = [
-  "帮北美客户做网站",
   "帮客户做网站",
-  "需要做网站",
-  "求推荐做网站",
-  "找人做网站",
-  "独立站搭建",
-  "北美 建站",
-  "海外 官网 制作",
+  "北美 建站服务",
+  "海外华人 建站",
+  "帮商家做网站",
+  "独立站搭建服务",
 ];
 
-/** demo 方向枚举。analyzer 必须从这里选，自由发挥的分类没法聚合成看板。 */
-export const DEMO_TRACKS = [
-  "餐饮门店官网",
-  "电商独立站",
-  "个人作品集",
-  "本地服务商官网(装修/搬家/清洁)",
-  "专业服务官网(律师/会计/诊所)",
-  "SaaS/产品落地页",
-  "预约系统",
-  "品牌展示站",
-  "多语言站点",
-  "其他",
-];
+/**
+ * 产品线枚举。模型必须从这里选 —— 自由发挥的分类没法聚合成看板。
+ * 行业不做枚举（长尾，聚合不了也没必要），由模型自由填。
+ *
+ * 「重线索」= CRM/ERP/定制系统：客单价最高，但要对接对方现有流程，
+ * 48 小时出不了 demo，所以标记出来单独排队，不走 48h 产线。
+ */
+export const PRODUCT_LINES = ["官网", "预约系统", "会员积分", "重线索"];
 
 export function ensureDirs() {
   for (const d of [DATA_DIR, REPORTS_DIR, RAW_DIR, SHOT_DIR]) {
