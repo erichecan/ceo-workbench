@@ -46,7 +46,13 @@ export const config = {
   // ⛔ 反封控参数。走 opencli 后浏览器节奏由适配器管理，但**命令调用频率
   //    仍然是我们的责任** —— 而且这个账号是本人日常在用的那个，不是小号。
   //    触发「安全验证」时正确做法是立刻停整轮，不重试、不换词硬撑。
+  // 词数上限分两套，因为**风控的真实度量是调用次数，不是词数**：
+  //   评论区模式 1 个词 = 1 次 search + N 次 comments（N=notesPerKeyword，默认 3）
+  //   商家模式   1 个词 = 1 次 search
+  // 商家模式跑 12 个词（12 次调用）仍低于评论区模式跑 5 个词（20 次调用）。
+  // 而商家模式的产量正是来自铺开品类 × 城市 —— 单个词挖更深要翻页，那是高风控动作。
   maxKeywordsPerRun: num("MAX_KEYWORDS_PER_RUN", 5),
+  maxBusinessKeywordsPerRun: num("MAX_BUSINESS_KEYWORDS_PER_RUN", 12),
   notesPerKeyword: num("NOTES_PER_KEYWORD", 3),
   commentsPerNote: num("COMMENTS_PER_NOTE", 30),
   // 超过这个赞数的不是同行推广帖，是爆款讨论帖 —— 评论区没有客户。

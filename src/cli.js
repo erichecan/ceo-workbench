@@ -53,9 +53,10 @@ async function cmdScrape(flags) {
   const wordlist = flags.demand ? DEMAND_KEYWORDS : DEFAULT_KEYWORDS;
   const byComments = flags.demand || flags.comments;
   let keywords = flags.keyword.length ? flags.keyword : urls.length ? [] : wordlist;
-  if (keywords.length > config.maxKeywordsPerRun) {
-    console.log(`单轮上限 ${config.maxKeywordsPerRun} 个词（反封控），截断`);
-    keywords = keywords.slice(0, config.maxKeywordsPerRun);
+  const wordCap = byComments ? config.maxKeywordsPerRun : config.maxBusinessKeywordsPerRun;
+  if (keywords.length > wordCap) {
+    console.log(`单轮上限 ${wordCap} 个词（反封控），截断`);
+    keywords = keywords.slice(0, wordCap);
   }
 
   let fresh = 0;
