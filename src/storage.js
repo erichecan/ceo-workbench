@@ -45,7 +45,17 @@ export function close() {
  * 列已存在时 better-sqlite3 会抛错，catch 掉即可 —— 比先查 PRAGMA 再判断短。
  */
 function migrate(d) {
-  for (const col of ["author_user_id TEXT", "ip_location TEXT", "profile_url TEXT"]) {
+  // ⚠️ better-sqlite3 对多余的命名参数是**静默容忍**的：insertLead 传了
+  //    SQL 里没有的字段不会报错，字段直接消失。2026-08-13 因此发现 is_reply
+  //    从加上那天起就没存进去过，测试也照过（测的是函数返回值，不是库）。
+  //    加新字段时，这里和 insertLead 的 SQL 必须同时改。
+  for (const col of [
+    "author_user_id TEXT",
+    "ip_location TEXT",
+    "profile_url TEXT",
+    "is_reply INTEGER",
+    "note_count INTEGER",
+  ]) {
     try {
       d.exec(`ALTER TABLE leads ADD COLUMN ${col}`);
     } catch {
@@ -92,7 +102,9 @@ const SCHEMA = `
       -- 老库由 migrate() 补上，这里的定义只对新建库生效。
       author_user_id TEXT,
       ip_location    TEXT,
-      profile_url    TEXT
+      profile_url    TEXT,
+      is_reply       INTEGER,      -- 评论模式：是不是楼中楼回复
+      note_count     INTEGER       -- 商家模式：他在搜索结果里出现了几篇笔记
     );
     CREATE TABLE IF NOT EXISTS analysis (
       lead_id        INTEGER PRIMARY KEY REFERENCES leads(id) ON DELETE CASCADE,
@@ -137,8 +149,17 @@ const SCHEMA = `
     CREATE INDEX IF NOT EXISTS idx_diag_slug ON diagnoses(diag_slug);
 `;
 
-/** 评论抓不到稳定 ID（详情页 DOM 里没有），用正文哈希兜底去重。 */
-export function dedupeKey({ source, note_id, body }) {
+/**
+ * 去重键。三种线索三种口径：
+ *
+ *   author  —— 商家模式。**一个商家一条线索**，跨关键词也不重复：
+ *              同一家美甲店可能同时出现在「多伦多 美甲」和「多伦多 美睫」里，
+ *              重复建线索等于对同一个人做两次诊断、发两次私信。
+ *   note    —— 笔记本体，note_id 天然唯一。
+ *   comment —— 评论抓不到稳定 ID，用正文哈希兜底。
+ */
+export function dedupeKey({ source, note_id, body, author_user_id }) {
+  if (source === "author" && author_user_id) return `author:${author_user_id}`;
   if (source === "note" && note_id) return `note:${note_id}`;
   const hash = crypto.createHash("sha1").update(body || "").digest("hex").slice(0, 16);
   return `comment:${note_id || "?"}:${hash}`;
@@ -153,16 +174,17 @@ export function insertLead(lead) {
       `INSERT OR IGNORE INTO leads
        (dedupe_key, source, platform, keyword, note_id, url, title, author,
         body, likes, published_at, screenshot, scraped_at, updated_at,
-        author_user_id, ip_location, profile_url)
+        author_user_id, ip_location, profile_url, is_reply, note_count)
        VALUES (@dedupe_key, @source, @platform, @keyword, @note_id, @url, @title,
                @author, @body, @likes, @published_at, @screenshot, @scraped_at, @scraped_at,
-               @author_user_id, @ip_location, @profile_url)`
+               @author_user_id, @ip_location, @profile_url, @is_reply, @note_count)`
     )
     .run({
       platform: "xhs",
       keyword: null, note_id: null, url: null, title: null, author: null,
       likes: null, published_at: null, screenshot: null,
       author_user_id: null, ip_location: null, profile_url: null,
+      is_reply: 0, note_count: null,
       ...lead,
       dedupe_key: key,
       scraped_at: lead.scraped_at || new Date().toISOString(),

@@ -36,7 +36,68 @@ export function parseLikes(raw) {
   return /^\d+$/.test(s) ? Number(s) : null;
 }
 
-/** 搜同行推广词，返回前排笔记。url 带 xsec_token，可直接喂给 comments。 */
+const USER_ID_RE = /\/user\/profile\/([0-9a-zA-Z]+)/;
+
+/** 从 author_url 里取 uid。search 不单独返回 userId，只能从链接里抠。 */
+export function extractUserId(authorUrl) {
+  return (String(authorUrl || "").match(USER_ID_RE) || [])[1] || null;
+}
+
+/**
+ * 商家模式：**搜索结果里的笔记作者本身就是线索**，不再抓评论区。
+ *
+ * 这是 2026-08-13 转向后的主力路径。北美华人商家不会在小红书上讨论建站，
+ * 但她们在小红书上做生意 —— 搜「多伦多 美甲」出来的作者就是一个个真商家。
+ *
+ * 同一个商家常在搜索结果里出现多篇笔记，按 uid 合并成一条线索：
+ * 一个商家一条，body 是她笔记标题的合集 —— 那正是判断她做什么生意的依据。
+ *
+ * ⚠️ search 的返回**没有 IP 属地**（属地只在 comments 里有），所以地域
+ * 完全靠搜索词保证。keyword 因此不只是元数据，是这条线索唯一的地域凭据。
+ */
+export function notesToBusinessLeads(notes, keyword) {
+  const byUser = new Map();
+  for (const n of notes || []) {
+    const uid = extractUserId(n.author_url);
+    if (!uid) continue; // 没有 uid 就进不了 L2，留着只是噪音
+    const cur = byUser.get(uid);
+    if (cur) {
+      cur.titles.push(n.title);
+      cur.likes = Math.max(cur.likes ?? 0, n.likes ?? 0);
+      cur.published_at = [cur.published_at, n.published_at].filter(Boolean).sort().pop();
+    } else {
+      byUser.set(uid, {
+        uid,
+        author: n.author || null,
+        titles: [n.title],
+        likes: n.likes ?? null,
+        published_at: n.published_at || null,
+        url: n.url || null,
+        note_id: n.note_id || null,
+      });
+    }
+  }
+
+  return [...byUser.values()].map((b) => ({
+    source: "author",
+    keyword,
+    note_id: b.note_id,
+    url: b.url,
+    title: b.titles[0] || null,
+    author: b.author,
+    author_user_id: b.uid,
+    profile_url: `https://www.xiaohongshu.com/user/profile/${b.uid}`,
+    ip_location: null, // search 不给属地，靠 keyword 里的地名兜底
+    body: b.titles.filter(Boolean).join("\n"),
+    likes: b.likes,
+    published_at: b.published_at,
+    note_count: b.titles.length,
+    is_reply: 0,
+    screenshot: null,
+  }));
+}
+
+/** 搜一个词，返回前排笔记。url 带 xsec_token，可直接喂给 comments。 */
 export async function searchNotes(keyword) {
   const rows = await opencli.run("search", [keyword, "--limit", 20]);
   return rows
@@ -92,7 +153,19 @@ const commentArgs = (url) => [
   "--with-replies",
 ];
 
-/** 搜一个同行推广词，抓其前 N 篇笔记的评论区。 */
+/**
+ * 商家模式（主力）：搜一个生意品类词，把搜索结果里的作者变成线索。
+ *
+ * 只花 **1 次** opencli 调用 —— 比评论区模式（1 次搜索 + N 次 comments）
+ * 便宜得多，风控预算能铺到更多品类和城市上。
+ * 产量来自「铺开品类 × 城市」，不是靠单个词挖更深（翻页是高风控动作）。
+ */
+export async function byBusiness(keyword) {
+  const notes = await searchNotes(keyword);
+  return { keyword, leads: notesToBusinessLeads(notes, keyword), notes: notes.length };
+}
+
+/** 评论区模式：搜一个同行推广词，抓其前 N 篇笔记的评论区。 */
 export async function byKeyword(keyword) {
   const notes = (await searchNotes(keyword))
     .filter((n) => n.note_id)

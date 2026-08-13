@@ -25,6 +25,34 @@ import { pendingLeads, saveAnalysis } from "./storage.js";
  */
 export const shouldSkipByRegion = (lead) => !isTargetRegion(lead.ip_location);
 
+const BUSINESS_RULE = `评分规则（严格执行，不要自由发挥）：
+
+下面是一个小红书账号和他发的笔记标题。这些标题是从**生意品类搜索**里捞出来的
+（例如「多伦多 美甲」），所以你要判断的**不是他想不想做网站** ——
+他从没提过网站，八成也没想过。要判断的是：
+
+  **这是不是一门真生意？如果是，这门生意缺什么？**
+
+这就是这条产线的全部价值：同行等客户开口，我们看生意本身。
+
+90-100  明确是在北美经营的实体生意，且能看出经营方式（接单/排期/到店/回头客）
+70-89   明确是一门生意，但经营细节看不全
+50-69   像在做生意但不确定（可能是个人爱好、代购、兼职）
+30-49   个人分享号 / 探店号 / 测评号 —— 他在推荐别人的生意，自己没有生意
+15-29   МCN、广告号、课程号、招聘
+0-14    同行（建站/营销/软件服务商）—— 竞争对手不是客户
+
+⛔ 地域：这批线索**没有 IP 属地字段**，地域只能靠搜索词和内容判断。
+搜索词里的地名是主要依据。若笔记内容明显显示在中国大陆经营
+（写人民币价格、提国内城市地址、说微信小程序），score 不得高于 25，
+并在 risk_flags 里写 "非目标地区"。
+
+⛔ 判断依据必须能在昵称或笔记标题里找到。evidence 必须逐字引用其中一条，
+不许改写。找不到可引用的原句，score 不得高于 40。
+
+⛔ 不许因为「拿不准」就给中间分。拿不准时按更低的那一档给，并在
+risk_flags 里写 "信息不足"。`;
+
 const SCORING_RULE = `评分规则（严格执行，不要自由发挥）：
 
 这条评论来自**同行建站服务商的推广笔记下面**。也就是说：能在那儿留言的人，
@@ -61,12 +89,20 @@ dm_angle 必须：
 - 不伪装成普通用户、不假装自己也遇到了同样的问题 —— 说话的人就是服务提供者本人`;
 
 function buildPrompt(lead) {
-  return `你是给独立建站/系统服务商做线索筛选的分析员。目标客户是**在北美做生意的人**
+  const isBusiness = lead.source === "author";
+  const head = isBusiness
+    ? `你是给独立建站/系统服务商做线索筛选的分析员。目标客户是**在北美做生意的华人商家**
+（美甲美容、餐饮、私教、诊所、装修搬家、地产经纪、律师会计等本地服务商）。
+
+下面是一个小红书账号和他最近发的笔记标题。只输出 JSON。`
+    : `你是给独立建站/系统服务商做线索筛选的分析员。目标客户是**在北美做生意的人**
 （华人商家、本地服务商、留学生创业者、想开独立站的卖家等）。
 
-下面是一条小红书评论，来自同行服务商的推广笔记下面。只输出 JSON。
+下面是一条小红书评论，来自同行服务商的推广笔记下面。只输出 JSON。`;
 
-${SCORING_RULE}
+  return `${head}
+
+${isBusiness ? BUSINESS_RULE : SCORING_RULE}
 
 product_line 必须从这个列表里选一个，不许自创：
 ${PRODUCT_LINES.map((t) => `- ${t}`).join("\n")}
@@ -95,11 +131,21 @@ ${FOLLOWUP_RULE}
 }
 
 ---
-${lead.author ? `作者昵称：${lead.author}\n` : ""}${lead.ip_location ? `IP 属地：${lead.ip_location}\n` : ""}${
-    lead.title ? `他留言的那篇同行笔记：${lead.title}\n` : ""
-  }${lead.likes != null ? `这条评论的点赞：${lead.likes}\n` : ""}
+${
+  isBusiness
+    ? `账号昵称：${lead.author || "(无)"}
+搜索词（地域依据）：${lead.keyword || "(无)"}
+在搜索结果里的笔记数：${lead.note_count ?? 1}
+最高赞：${lead.likes ?? "?"}
+
+他发的笔记标题：
+${(lead.body || "").slice(0, 3000)}`
+    : `${lead.author ? `作者昵称：${lead.author}\n` : ""}${lead.ip_location ? `IP 属地：${lead.ip_location}\n` : ""}${
+        lead.title ? `他留言的那篇同行笔记：${lead.title}\n` : ""
+      }${lead.likes != null ? `这条评论的点赞：${lead.likes}\n` : ""}
 他说的话：
-${(lead.body || "").slice(0, 3000)}`;
+${(lead.body || "").slice(0, 3000)}`
+}`;
 }
 
 export function normalize(raw) {

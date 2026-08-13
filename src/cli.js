@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * 入口。子命令：
- *   scrape    搜同行推广词，抓其评论区（--keyword / --url 可多次）
- *   analyze   L1 粗筛：地域过滤 + 这个人在做什么生意（--limit N）
+ *   scrape    默认搜生意品类词，搜索结果里的商家即线索（--keyword / --url 可多次）
+ *             --demand 切到守株待兔线（需求词 + 评论区模式）
+ *   analyze   L1 粗筛：这是不是一门在北美的真生意（--limit N）
  *   profiles  拉评论者主页笔记标题（--limit N，风控成本最高，有硬上限）
  *   diagnose  L2 生意诊断 + 生成诊断书（--limit N）
  *   report    生成日报（--since YYYY-MM-DD，--min-score N）
@@ -12,7 +13,7 @@
  *   doctor    自检：opencli 通不通、登录态是否真的有效、provider、库存量
  */
 import { analyzePending } from "./analyzer.js";
-import { config, DEFAULT_KEYWORDS, ensureDirs, jitter, today } from "./config.js";
+import { config, DEFAULT_KEYWORDS, DEMAND_KEYWORDS, ensureDirs, jitter, today } from "./config.js";
 import { DIAG_DIR, writeDiagCards } from "./diagcard.js";
 import { diagnosePending } from "./diagnose.js";
 import * as opencli from "./opencli.js";
@@ -33,6 +34,8 @@ function parseArgs(argv) {
     else if (a === "--since") flags.since = argv[++i];
     else if (a === "--status") flags.status = argv[++i];
     else if (a === "--today") flags.since = today();
+    else if (a === "--demand") flags.demand = true;
+    else if (a === "--comments") flags.comments = true;
     else rest.push(a);
   }
   return { flags, rest };
@@ -46,7 +49,10 @@ async function cmdScrape(flags) {
   }
 
   const urls = flags.url;
-  let keywords = flags.keyword.length ? flags.keyword : urls.length ? [] : DEFAULT_KEYWORDS;
+  // --demand 走守株待兔那条线（需求词 + 评论区模式），产量低，只占小份预算。
+  const wordlist = flags.demand ? DEMAND_KEYWORDS : DEFAULT_KEYWORDS;
+  const byComments = flags.demand || flags.comments;
+  let keywords = flags.keyword.length ? flags.keyword : urls.length ? [] : wordlist;
   if (keywords.length > config.maxKeywordsPerRun) {
     console.log(`单轮上限 ${config.maxKeywordsPerRun} 个词（反封控），截断`);
     keywords = keywords.slice(0, config.maxKeywordsPerRun);
@@ -80,13 +86,17 @@ async function cmdScrape(flags) {
   for (const [i, kw] of keywords.entries()) {
     console.log(`[词 ${i + 1}/${keywords.length}] ${kw}`);
     try {
-      const r = await scraper.byKeyword(kw);
+      const r = byComments ? await scraper.byKeyword(kw) : await scraper.byBusiness(kw);
       raw.push(r);
       for (const l of r.leads) {
         if (insertLead(l)) fresh++;
         else seen++;
       }
-      console.log(`   → ${r.notes} 篇同行笔记，${r.leads.length} 条线索`);
+      console.log(
+        byComments
+          ? `   → ${r.notes} 篇同行笔记，${r.leads.length} 条评论线索`
+          : `   → ${r.notes} 篇笔记 → ${r.leads.length} 个商家`
+      );
     } catch (e) {
       if (e.risk) {
         console.error(`\n⛔ ${e.message}，本轮立即终止（不重试、不换词硬撑）。`);
@@ -95,7 +105,10 @@ async function cmdScrape(flags) {
       }
       console.log(`   ⛔ ${e.message}`);
     }
-    if (i < keywords.length - 1) await jitter(config.delayBetweenKeywords);
+    // 商家模式一个词只有 1 次 opencli 调用，评论区模式是 1+N 次 —— 后者更需要缓。
+    if (i < keywords.length - 1) {
+      await jitter(byComments ? config.delayBetweenKeywords : config.delayBetweenCalls);
+    }
   }
 
   if (raw.length) console.log(`原始数据已存 ${scraper.dumpRaw("scrape", raw)}`);
@@ -221,12 +234,13 @@ async function cmdDoctor() {
   return cliOk ? 0 : 1;
 }
 
-const HELP = `咨询式获客产线 —— 挖同行评论区，判断生意缺什么，出诊断书
+const HELP = `咨询式获客产线 —— 找北美华人商家，判断生意缺什么，出诊断书
 
-  npm run scrape   [-- --keyword "帮客户做网站" --url "https://..."]
-                   # 搜同行推广词，抓其评论区
-  npm run analyze  [-- --limit 20]     # L1 粗筛：地域过滤 + 是什么生意
-  npm run profiles [-- --limit 8]      # 拉评论者主页（风控成本最高，有硬上限）
+  npm run scrape   [-- --keyword "多伦多 美甲" --demand --url "https://..."]
+                   # 默认：搜生意品类词，搜索结果里的商家就是线索
+                   # --demand：守株待兔线（需求词 + 评论区），产量低只占小份预算
+  npm run analyze  [-- --limit 20]     # L1 粗筛：这是不是一门在北美的真生意
+  npm run profiles [-- --limit 8]      # 拉商家主页（风控成本最高，有硬上限）
   npm run diagnose [-- --limit 8]      # L2 生意诊断 + 出诊断书
   npm run report   [-- --today --min-score 50]
   npm run daily                        # 五步一条龙
