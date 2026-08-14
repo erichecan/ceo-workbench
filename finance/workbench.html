@@ -46,14 +46,14 @@
 <div class="wrap">
   <header>
     <h1>财务工作台</h1>
-    <div class="sub">生成于 2026-08-12 05:18 UTC ・ 数据源 finance/ledger.jsonl ・ 本页为生成产物，不要手改</div>
+    <div class="sub">生成于 2026-08-14 11:24 UTC ・ 数据源 finance/ledger.jsonl ・ 本页为生成产物，不要手改</div>
   </header>
 
   <div class="cards">
     <div class="card">
       <div class="label">本月净现金流（CAD）</div>
-      <div class="value pos">+0.00</div>
-      <div class="hint">收入 +0.00 ／ 支出 −0.00</div>
+      <div class="value neg">−150.00</div>
+      <div class="hint">收入 +0.00 ／ 支出 −150.00</div>
     </div>
     <div class="card">
       <div class="label">MRR / 阶段一目标</div>
@@ -69,7 +69,7 @@
     </div>
     <div class="card">
       <div class="label">月度订阅支出（burn）</div>
-      <div class="value neg">−0.00</div>
+      <div class="value neg">−150.00</div>
       <div class="hint">启用中的支出类周期项合计（CAD/月）</div>
     </div>
     <div class="card">
@@ -79,8 +79,8 @@
     </div>
     <div class="card">
       <div class="label">历史累计净额（CAD）</div>
-      <div class="value pos">+0.00</div>
-      <div class="hint">收入 +0.00 ／ 支出 −0.00</div>
+      <div class="value neg">−150.00</div>
+      <div class="hint">收入 +0.00 ／ 支出 −150.00</div>
     </div>
   </div>
 
@@ -93,6 +93,12 @@
       <td class="num pos">+0.00</td>
       <td class="num neg">−0.00</td>
       <td class="num pos">+0.00</td>
+    </tr>
+<tr>
+      <td>shared</td>
+      <td class="num pos">+0.00</td>
+      <td class="num neg">−150.00</td>
+      <td class="num neg">−150.00</td>
     </tr></tbody>
     </table>
   </section>
@@ -104,9 +110,9 @@
       <tbody><tr>
       <td>2026-08</td>
       <td class="num pos">+0.00</td>
-      <td class="num neg">−0.00</td>
-      <td class="num pos">+0.00</td>
-      <td class="num">1</td>
+      <td class="num neg">−150.00</td>
+      <td class="num neg">−150.00</td>
+      <td class="num">2</td>
     </tr></tbody>
     </table>
   </section>
@@ -132,6 +138,15 @@
       <td class="num">24.99 USD/月</td>
       <td class="num">≈ 34.49</td>
       <td class="note">T3 开通后启用，同上</td>
+    </tr>
+<tr class="">
+      <td><span class="dot on"></span>启用</td>
+      <td>基础设施与工具月订阅（合计）</td>
+      <td>支出</td>
+      <td>shared</td>
+      <td class="num">150.00 CAD/月</td>
+      <td class="num">≈ 150.00</td>
+      <td class="note">用户 20260814 提供的月固定支出总额。明细未拆，拆开后改成逐项并把本条停用</td>
     </tr></tbody>
     </table>
   </section>
@@ -148,7 +163,17 @@
         <td class="num">1700.00 EUR</td>
         <td class="num">2734.28</td>
         <td>veggie 客户</td>
-        <td class="note">项目尾款，需做完才能收回（金额与币种由用户 2026-08-12 提供）</td>
+        <td class="note">项目尾款净额。合同总额 €9,800（首期 €3,000 已收），第二期 €6,800 中 €5,100 付销售分成与还款，本方净得 €1,700。收款条件：甲方签署《项目验收单》后 5 个工作日（用户 20260814 澄清）</td>
+      </tr>
+<tr class="expense">
+        <td>2026-08-01</td>
+        <td>支出</td>
+        <td>shared</td>
+        <td>云服务</td>
+        <td class="num">−150.00 CAD</td>
+        <td class="num">−150.00</td>
+        <td>合计</td>
+        <td class="note">[自动] 基础设施与工具月订阅（合计）</td>
       </tr></tbody>
     </table>
   </section>

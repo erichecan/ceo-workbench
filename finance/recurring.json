@@ -24,5 +24,18 @@
     "active": false,
     "startDate": null,
     "note": "T3 开通后启用，同上"
+  },
+  {
+    "id": "infra-monthly",
+    "name": "基础设施与工具月订阅（合计）",
+    "type": "expense",
+    "project": "shared",
+    "category": "云服务",
+    "amount": 150,
+    "currency": "CAD",
+    "counterparty": "合计",
+    "active": true,
+    "startDate": "2026-08-01",
+    "note": "用户 20260814 提供的月固定支出总额。明细未拆，拆开后改成逐项并把本条停用"
   }
 ]

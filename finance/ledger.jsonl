@@ -1,1 +1,2 @@
-{"id":"tx-6b402864","date":"2026-08-12","type":"receivable","project":"veggie","category":"网站建设","amount":1700,"currency":"EUR","counterparty":"veggie 客户","note":"项目尾款，需做完才能收回（金额与币种由用户 2026-08-12 提供）","source":"manual"}
+{"id":"tx-6b402864","date":"2026-08-12","type":"receivable","project":"veggie","category":"网站建设","amount":1700,"currency":"EUR","counterparty":"veggie 客户","note":"项目尾款净额。合同总额 €9,800（首期 €3,000 已收），第二期 €6,800 中 €5,100 付销售分成与还款，本方净得 €1,700。收款条件：甲方签署《项目验收单》后 5 个工作日（用户 20260814 澄清）","source":"manual"}
+{"id":"auto-infra-monthly-2026-08","date":"2026-08-01","type":"expense","project":"shared","category":"云服务","amount":150,"currency":"CAD","counterparty":"合计","note":"[自动] 基础设施与工具月订阅（合计）","source":"auto:recurring"}

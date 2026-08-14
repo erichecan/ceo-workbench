@@ -1616,5 +1616,63 @@
         "note": "需用户：① veggie 尾款到底是 €1700 还是合同的 €6800、首期 €3000 是否已收 ② print-main 有无月费及金额 ③ 喜马拉雅上月收入 ④ 每月订阅支出总额"
       }
     ]
+  },
+  {
+    "id": "c-0470d1",
+    "title": "print-main 月费定下来：已签客户 + 已在无偿维护（上月 29 提交），是最便宜的 MRR",
+    "stage": "backlog",
+    "project": "print-main",
+    "priority": "P0",
+    "source": "20260814 CEO 复盘",
+    "note": "",
+    "acceptance": "① 出一份月费方案（含服务范围/响应时效/价格档位）② 用户与客户谈定 ③ 金额进 finance/recurring.json 且 ledger status 的 MRR 不再为 0",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "转化已有客户的成本远低于获取新客户；且现状是在无偿交付维护，不定月费等于持续亏时间",
+    "createdAt": "2026-08-14T11:24:40.840Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-14T11:24:40.841Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-14T11:24:52.590Z",
+        "action": "judge:accept",
+        "note": "转化已有客户的成本远低于获取新客户；且现状是在无偿交付维护，不定月费等于持续亏时间"
+      }
+    ]
+  },
+  {
+    "id": "c-7f4717",
+    "title": "veggie 缺口清单转 Phase 2 报价单：合同自称 Phase 1，G1-G9 本就是 Phase 2 范围，豁免书与报价单是同一张纸的两面",
+    "stage": "backlog",
+    "project": "veggie",
+    "priority": "P1",
+    "source": "20260814 CEO 复盘",
+    "note": "",
+    "acceptance": "一份文档同时含：Phase 1 豁免条目表 + Phase 2 报价单（分模块定价），交用户对外使用",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "缺口本身就是 Phase 2 的需求清单，把负债变成报价单；且能让甲方在豁免的同时看到升级路径",
+    "createdAt": "2026-08-14T11:24:40.945Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-14T11:24:40.946Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-14T11:24:52.707Z",
+        "action": "judge:accept",
+        "note": "缺口本身就是 Phase 2 的需求清单，把负债变成报价单；且能让甲方在豁免的同时看到升级路径"
+      }
+    ]
   }
 ]
