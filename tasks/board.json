@@ -475,7 +475,7 @@
   {
     "id": "c-29f67e",
     "title": "小红书获客产线：持续挖掘建站客户与系统（ERP）客户",
-    "stage": "dev",
+    "stage": "backlog",
     "project": "consulting",
     "priority": "P0",
     "source": "用户战略指示 2026-08-11（不能停）",
@@ -508,6 +508,11 @@
         "at": "2026-08-13T04:54:05.894Z",
         "action": "move:ready->dev",
         "note": "渠道转向完成：从挖同行评论区改为直接找北美商家。一轮 77 个商家，L1 命中率 83%，5 份诊断书产出"
+      },
+      {
+        "at": "2026-08-14T04:32:37.007Z",
+        "action": "move:dev->backlog",
+        "note": "冻结：漏斗上游已到 83% 命中率，但下游（私信/demo/报价/收款）全断。在拿到私信回复数据之前不再优化抓取、评分、词表"
       }
     ]
   },
@@ -725,7 +730,7 @@
     "note": "",
     "acceptance": "产线流程文档 + 可复用 demo 骨架（诊断结构+行业化模板）；首个真实线索实测 ≤48h 出 demo 且 AI 人时 ≤4h",
     "parent": null,
-    "blockedOn": null,
+    "blockedOn": "等 5 份已产出的诊断书发出私信后的回复数据。回复率决定这条线加倍还是降级",
     "ref": null,
     "evidence": "831ab02",
     "verdictReason": "建站线的生死线：不做这个就退化成 299/499 模板店，与模板站和纯AI生成无差异；风险#2 要求产线化控制单件人时",
@@ -756,6 +761,11 @@
         "at": "2026-08-13T03:51:53.325Z",
         "action": "move:dev->test",
         "note": "58 个单元测试通过，doctor 全绿，端到端验证中"
+      },
+      {
+        "at": "2026-08-14T04:32:37.121Z",
+        "action": "block",
+        "note": "等 5 份已产出的诊断书发出私信后的回复数据。回复率决定这条线加倍还是降级"
       }
     ]
   },
@@ -1536,6 +1546,74 @@
         "at": "2026-08-13T03:52:08.618Z",
         "action": "idea",
         "note": "本仓库产出自包含静态 HTML，idearise 侧提供公开路由。两边接口是一个目录不是 API。动手前需确认：idearise 仓库位置、路由挂品牌站还是 localrank 侧、文件怎么同步过去。⛔ 部署走 GitHub Actions，不用 Cloud Build"
+      }
+    ]
+  },
+  {
+    "id": "c-91a2d9",
+    "title": "veggie 尾款验收收口：按合同口径清缺口 → 提交《项目验收单》申请 → 收 €6800",
+    "stage": "dev",
+    "project": "veggie",
+    "priority": "P0",
+    "source": "20260814 CEO 复盘",
+    "note": "缺口分析见 docs/20260814-veggie尾款验收缺口.md",
+    "acceptance": "① X1-X6 六条生产缺陷全部关闭 ② 合同验收标准②的业务闭环有一次连贯走查记录 ③ G1-G9 缺口分三类（补/谈/举证）成草案交用户 ④ 《项目验收单》申请材料就绪（用户执行提交）",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "全公司 ROI 最高的一笔：已签约 €6800，且缺口分析显示三条'未完成'并非合同义务，真实差距比纸面小",
+    "createdAt": "2026-08-14T04:32:43.498Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-14T04:32:43.499Z",
+        "action": "idea",
+        "note": "缺口分析见 docs/20260814-veggie尾款验收缺口.md"
+      },
+      {
+        "at": "2026-08-14T04:33:03.060Z",
+        "action": "judge:accept",
+        "note": "全公司 ROI 最高的一笔：已签约 €6800，且缺口分析显示三条'未完成'并非合同义务，真实差距比纸面小"
+      },
+      {
+        "at": "2026-08-14T04:33:09.413Z",
+        "action": "move:backlog->dev",
+        "note": "从 X1-X6 生产缺陷开始；缺口分析已落盘"
+      }
+    ]
+  },
+  {
+    "id": "c-69f97c",
+    "title": "账本补成真的：veggie 尾款金额/首期是否已收、print-main 有无月费、喜马拉雅上月收入、月订阅 burn",
+    "stage": "backlog",
+    "project": "shared",
+    "priority": "P0",
+    "source": "20260814 CEO 复盘",
+    "note": "账本累计收入 $0 但已知有三处真实收入，仪表盘是坏的",
+    "acceptance": "四个数字全部入 finance/ledger.jsonl 或 recurring.json，ledger status 输出的 MRR/burn/应收不再与已知事实矛盾",
+    "parent": null,
+    "blockedOn": "需用户：① veggie 尾款到底是 €1700 还是合同的 €6800、首期 €3000 是否已收 ② print-main 有无月费及金额 ③ 喜马拉雅上月收入 ④ 每月订阅支出总额",
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "账本累计收入 $0 与已知的三处真实收入矛盾，仪表盘坏掉时所有优先级都是猜的",
+    "createdAt": "2026-08-14T04:32:45.777Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-14T04:32:45.777Z",
+        "action": "idea",
+        "note": "账本累计收入 $0 但已知有三处真实收入，仪表盘是坏的"
+      },
+      {
+        "at": "2026-08-14T04:33:03.186Z",
+        "action": "judge:accept",
+        "note": "账本累计收入 $0 与已知的三处真实收入矛盾，仪表盘坏掉时所有优先级都是猜的"
+      },
+      {
+        "at": "2026-08-14T04:33:09.285Z",
+        "action": "block",
+        "note": "需用户：① veggie 尾款到底是 €1700 还是合同的 €6800、首期 €3000 是否已收 ② print-main 有无月费及金额 ③ 喜马拉雅上月收入 ④ 每月订阅支出总额"
       }
     ]
   }
