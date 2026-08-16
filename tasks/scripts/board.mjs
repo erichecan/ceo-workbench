@@ -226,8 +226,18 @@ function cmdMove(flags) {
     card.stage = to;
     console.log(`✓ ${id}「${card.title}」→ ${cfg.stages[to].name}`);
   } else {
+    // 阶段没变但有进展 —— 必须留痕。
+    // ⛔ 这里原本直接 writeBoard 走人，--note / --evidence 悄悄丢掉：
+    //    一张卡在「开发中」待三天，中间做了什么在看板上完全看不出来。
+    //    而「每周期回写状态」正是长任务协议要求落盘的东西。
+    if (flags.note || flags.evidence) {
+      if (flags.evidence) card.evidence = flags.evidence;
+      pushHistory(card, 'progress', flags.note || '');
+      console.log(`✓ ${id}「${card.title}」记下一条进展（仍在${cfg.stages[card.stage].name}）`);
+    } else {
+      console.log(`✓ ${id} 状态已更新（阶段未变）`);
+    }
     writeBoard(cards);
-    console.log(`✓ ${id} 状态已更新（阶段未变）`);
     runCheck({ silent: true }); cmdReport({ silent: true });
     return;
   }

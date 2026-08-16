@@ -1561,7 +1561,7 @@
     "parent": null,
     "blockedOn": null,
     "ref": null,
-    "evidence": null,
+    "evidence": "veggie 7d71d6e + 471a601",
     "verdictReason": "全公司 ROI 最高的一笔：已签约 €6800，且缺口分析显示三条'未完成'并非合同义务，真实差距比纸面小",
     "createdAt": "2026-08-14T04:32:43.498Z",
     "doneAt": null,
@@ -1580,6 +1580,11 @@
         "at": "2026-08-14T04:33:09.413Z",
         "action": "move:backlog->dev",
         "note": "从 X1-X6 生产缺陷开始；缺口分析已落盘"
+      },
+      {
+        "at": "2026-08-16T13:28:56.164Z",
+        "action": "progress",
+        "note": "X10 完成（行动顺序第 1 步的一半）：密码/账号状态变更统一作废 token。查出根因比工单宽——withAuth 全程不查 isActive 而 token 有效期 7 天，停用账号只挡下次登录。顺带修掉两个导航栏改密入口的死链（发 oldPassword、接口读 currentPassword，100% 失败）。下一步：X8（审计脚本在生产跑不起来，需单独一轮）"
       }
     ]
   },
