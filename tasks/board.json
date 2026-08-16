@@ -319,7 +319,7 @@
   {
     "id": "c-2a2643",
     "title": "喜马拉雅平台调研：课程/专辑变现路径、AI 生成内容政策、开号认证要求、对标账号",
-    "stage": "dev",
+    "stage": "backlog",
     "project": "shared",
     "priority": "P0",
     "source": "拆自 c-e44562",
@@ -357,6 +357,11 @@
         "at": "2026-08-11T22:23:04.211Z",
         "action": "unblock",
         "note": "运营迁至本地会话：喜马拉雅可直连抓取，不再受云端出口屏蔽"
+      },
+      {
+        "at": "2026-08-16T16:23:50.127Z",
+        "action": "move:dev->backlog",
+        "note": "CEO 20260816 排产调整：资产线降级为「待验证」——「已有少量被动收入」零一手证据，两次立卡两次未答。在拿到后台收益数字之前，继续投工程人时回报很低（产线已建完，边际成本≈0）。腾出 dev 位给已确认的数据泄露处置"
       }
     ]
   },
@@ -1779,6 +1784,40 @@
         "at": "2026-08-16T16:06:34.967Z",
         "action": "judge:accept",
         "note": "v2 与同一天的项目审计报告互相矛盾：审计把 print-main 和 1688 都判为「现金流线」，战略里两者 grep 零命中——而资源分配用的是漏掉它们的那份。此外 v2 的三条前提均已被证伪或降级：「已有少量被动收入」无一手证据、「评价闭环已开发完」实为 mock（MODEL=local-stub）、「Google 审批暂停中」实为我方从未提交。战略是判断闸门的依据（tasks/config.json 引用它），依据错了下游全错"
+      }
+    ]
+  },
+  {
+    "id": "c-d17237",
+    "title": "⛔ 数据泄露处置：veggie 公开仓库含真实客户 PII（res.partner.csv 表头含 email/phone/street/city/name，1327 行/203 电话；备份版 1467 行/612 电话；sale.order 25494 行/2914 电话），仓库 GitHub PUBLIC 已确认",
+    "stage": "dev",
+    "project": "veggie",
+    "priority": "P0",
+    "source": "20260816 合规审查员排查 + CEO 亲自复核",
+    "note": "",
+    "acceptance": "① 仓库转 private（止血，但不消除已发生的暴露）② 从 git 历史中彻底移除 PII 文件并 force-push，且确认 GitHub 上的 fork/PR/缓存副本已处理 ③ 出一份事实时间线（何时提交、公开多久、涉及哪些字段与数量）交用户，由用户通知客户 ④ 全仓库加 .gitignore 与 pre-commit 防再犯 ⑤ 排查其余公开仓库（print/seomachine/easetax/satgame/businessskills）有无同类问题",
+    "parent": null,
+    "blockedOn": null,
+    "ref": null,
+    "evidence": null,
+    "verdictReason": "已确认的个人数据泄露，不是风险是既成事实：gh repo view 返回 visibility=PUBLIC，git show origin/main 取得文件内容并计数成功。客户 Johnstone Bros 是数据控制者、我方是处理者，GDPR Art.28(3)(f)/Art.33(2) 要求处理者知悉后「不得不当迟延」通知控制者；控制者对监管机关的 72 小时时钟由其自行起算。此事压过一切收入线工作",
+    "createdAt": "2026-08-16T16:23:23.918Z",
+    "doneAt": null,
+    "history": [
+      {
+        "at": "2026-08-16T16:23:23.919Z",
+        "action": "idea",
+        "note": ""
+      },
+      {
+        "at": "2026-08-16T16:23:37.362Z",
+        "action": "judge:accept",
+        "note": "已确认的个人数据泄露，不是风险是既成事实：gh repo view 返回 visibility=PUBLIC，git show origin/main 取得文件内容并计数成功。客户 Johnstone Bros 是数据控制者、我方是处理者，GDPR Art.28(3)(f)/Art.33(2) 要求处理者知悉后「不得不当迟延」通知控制者；控制者对监管机关的 72 小时时钟由其自行起算。此事压过一切收入线工作"
+      },
+      {
+        "at": "2026-08-16T16:23:50.234Z",
+        "action": "move:backlog->dev",
+        "note": "CEO 亲自复核确认：gh repo view veggie → PUBLIC；pic/res.partner.csv 表头含 email,phone,street,city,name。已排查 12 个仓库公开性，泄露仅 veggie 一处（print 的敏感 xlsx 不在远端）"
       }
     ]
   }
