@@ -1630,16 +1630,16 @@
   {
     "id": "c-0470d1",
     "title": "print-main 月费定下来：已签客户 + 已在无偿维护（上月 29 提交），是最便宜的 MRR",
-    "stage": "backlog",
+    "stage": "ready",
     "project": "print-main",
     "priority": "P0",
     "source": "20260814 CEO 复盘",
     "note": "",
     "acceptance": "① 出一份月费方案（含服务范围/响应时效/价格档位）② 用户与客户谈定 ③ 金额进 finance/recurring.json 且 ledger status 的 MRR 不再为 0",
     "parent": null,
-    "blockedOn": null,
+    "blockedOn": "CEO 未答 16 项：仓库内找不到任何 print-main 合同文件（全盘 pdf/docx 搜索 0 命中），原合同是否含免费维护期决定服务起算日；托管实际账单未从 GCP 结算页拉取",
     "ref": null,
-    "evidence": null,
+    "evidence": "print-main git log --since=2026-02-01: 263 commits / 52 提交日 / 最近30中27为 offline-orders; gcloud run services list print-482914 返回 print-main-frontend+backend; scheduler daily-db-backup + neon-backup-evening 均 ENABLED; xlsx 汇总页 Mia 270单 43069.04 + Thea 256单 91222.40 = 526单 134291",
     "verdictReason": "转化已有客户的成本远低于获取新客户；且现状是在无偿交付维护，不定月费等于持续亏时间",
     "createdAt": "2026-08-14T11:24:40.840Z",
     "doneAt": null,
@@ -1653,6 +1653,16 @@
         "at": "2026-08-14T11:24:52.590Z",
         "action": "judge:accept",
         "note": "转化已有客户的成本远低于获取新客户；且现状是在无偿交付维护，不定月费等于持续亏时间"
+      },
+      {
+        "at": "2026-08-16T16:14:53.607Z",
+        "action": "block",
+        "note": "CEO 未答 16 项：仓库内找不到任何 print-main 合同文件（全盘 pdf/docx 搜索 0 命中），原合同是否含免费维护期决定服务起算日；托管实际账单未从 GCP 结算页拉取"
+      },
+      {
+        "at": "2026-08-16T16:14:53.608Z",
+        "action": "move:backlog->ready",
+        "note": "收款官 20260816：验收①完成。方案草案 docs/20260816-print-main-维护托管服务方案.md（三档 CAD S1 450 / S2 950 / S3 2200 每月，托管代垫单列）+ docs/20260816-print-main-待CEO确认.md（16 项待答）。⛔ 未发送。②③ 待用户与客户谈定后回写 recurring.json。"
       }
     ]
   },
