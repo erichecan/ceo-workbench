@@ -1856,7 +1856,7 @@
   {
     "id": "c-406195",
     "title": "公司战略 v3 重写：v2 漏掉了 print-main（唯一有真实用户的系统）与 1688（唯一现成的销售管道），且「已有被动收入」无证据、月费线交付层全是 mock",
-    "stage": "backlog",
+    "stage": "ready",
     "project": "shared",
     "priority": "P0",
     "source": "20260816 家底盘点：四份报告合并结论",
@@ -1865,7 +1865,7 @@
     "parent": null,
     "blockedOn": null,
     "ref": null,
-    "evidence": null,
+    "evidence": "docs/20260811-公司战略.md（v3，2026-08-20）：验收①②③④已核对，全文见变更记录",
     "verdictReason": "v2 与同一天的项目审计报告互相矛盾：审计把 print-main 和 1688 都判为「现金流线」，战略里两者 grep 零命中——而资源分配用的是漏掉它们的那份。此外 v2 的三条前提均已被证伪或降级：「已有少量被动收入」无一手证据、「评价闭环已开发完」实为 mock（MODEL=local-stub）、「Google 审批暂停中」实为我方从未提交。战略是判断闸门的依据（tasks/config.json 引用它），依据错了下游全错",
     "createdAt": "2026-08-16T16:06:20.766Z",
     "doneAt": null,
@@ -1879,6 +1879,16 @@
         "at": "2026-08-16T16:06:34.967Z",
         "action": "judge:accept",
         "note": "v2 与同一天的项目审计报告互相矛盾：审计把 print-main 和 1688 都判为「现金流线」，战略里两者 grep 零命中——而资源分配用的是漏掉它们的那份。此外 v2 的三条前提均已被证伪或降级：「已有少量被动收入」无一手证据、「评价闭环已开发完」实为 mock（MODEL=local-stub）、「Google 审批暂停中」实为我方从未提交。战略是判断闸门的依据（tasks/config.json 引用它），依据错了下游全错"
+      },
+      {
+        "at": "2026-08-20T12:39:49.555Z",
+        "action": "move:backlog->ready",
+        "note": "跳过拆解，单人时任务"
+      },
+      {
+        "at": "2026-08-20T12:40:03.093Z",
+        "action": "progress",
+        "note": "内容已撰写完成，等 dev WIP 槽位释放（c-91a2d9 即将收口）后正式过 dev/test 关闭"
       }
     ]
   },
