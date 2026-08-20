@@ -37,5 +37,18 @@
     "active": true,
     "startDate": "2026-08-01",
     "note": "用户 20260814 提供的月固定支出总额。明细未拆，拆开后改成逐项并把本条停用"
+  },
+  {
+    "id": "printmain-hosting",
+    "name": "print-main 生产系统托管代垫（Cloud Run×2 + Neon + GCS）",
+    "type": "expense",
+    "project": "print-main",
+    "category": "云服务",
+    "amount": 77.5,
+    "currency": "CAD",
+    "counterparty": "Google Cloud + Neon",
+    "active": false,
+    "startDate": null,
+    "note": "2026-08 已用一笔手动 manual 交易（tx-36aeb618）记入，本条先设 inactive 避免 roll 时对 8 月重复计数。金额取自 docs/20260816-print-main-维护托管服务方案.md §7.2 估算区间 CAD $60–95/月的中值，非 GCP 结算页实际账单核实。启用步骤：① 从 GCP 结算页拿到实际月账单替换 amount ② active 改 true、startDate 填 2026-09-01（9 月起），避免与 8 月的手动分录重复"
   }
 ]

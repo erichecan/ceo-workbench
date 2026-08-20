@@ -665,16 +665,16 @@
   {
     "id": "c-ed1b6a",
     "title": "喜马拉雅账号现状接入：已有课程与被动收入数据入视野与财务台账",
-    "stage": "backlog",
+    "stage": "ready",
     "project": "shared",
     "priority": "P0",
     "source": "战略v2纠偏",
     "note": "",
     "acceptance": "账号/课程清单在案；历史被动收入按月入财务台账；后续月度收入有固定入账动作",
     "parent": null,
-    "blockedOn": "需用户：喜马拉雅账号、课程清单、收入数据（截图或后台导出）",
+    "blockedOn": null,
     "ref": null,
-    "evidence": null,
+    "evidence": "用户20260818消息第3条：\"喜马拉雅现在每个月只有10加币左右,还不固定,但是已经跑通了链路...\"",
     "verdictReason": "三个不能停账号目前一个都不在视野内（战略v2风险#4）；被动收入必须入账",
     "createdAt": "2026-08-11T19:24:58.393Z",
     "doneAt": null,
@@ -693,6 +693,21 @@
         "at": "2026-08-11T19:24:58.721Z",
         "action": "block",
         "note": "需用户：喜马拉雅账号、课程清单、收入数据（截图或后台导出）"
+      },
+      {
+        "at": "2026-08-20T02:16:40.726Z",
+        "action": "unblock",
+        "note": "Eric 20260818回复：喜马拉雅现在每月约10加币左右且不固定，但链路已跑通；策略是继续深耕、尤其往产品经理/AI转型方向，慢慢变好。派finance-officer把这个数字实际写入 finance/ledger.jsonl，不再等\"更完整的截图\"——数量级已经够用于决策。"
+      },
+      {
+        "at": "2026-08-20T02:16:40.727Z",
+        "action": "move:backlog->ready",
+        "note": "Eric 20260818回复：喜马拉雅现在每月约10加币左右且不固定，但链路已跑通；策略是继续深耕、尤其往产品经理/AI转型方向，慢慢变好。派finance-officer把这个数字实际写入 finance/ledger.jsonl，不再等\"更完整的截图\"——数量级已经够用于决策。"
+      },
+      {
+        "at": "2026-08-20T02:24:04.116Z",
+        "action": "progress",
+        "note": "finance-officer 20260819：喜马拉雅~CAD$10/月(不固定)已作为 tx-ba553293 写入 finance/ledger.jsonl（project=businessskills, category=其他收入），来源标注为 Eric 20260818 口述、非后台截图核实。验收标准三项中：①账号/课程清单在案——未做，仍无实际课程列表/URL/播放数据 ②历史被动收入按月入账——只有当前一笔数量级估计，非按月历史流水 ③后续月度收入固定入账动作——未建立，因金额不固定不宜设为 recurring 自动过账，需人工每月手动核实后记账。三项均未完全满足，故不推进到 done。且当前 dev 阶段 WIP 已满(2/2: c-91a2d9, c-d17237)，即便判定可推进也无法 move 到 dev。暂留 ready，等 dev 有空位或补齐课程清单证据。"
       }
     ]
   },
@@ -1196,7 +1211,7 @@
   {
     "id": "c-bb762f",
     "title": "生成第一批真实样品图：填充提案页，走 Codex CLI 免费额度优先",
-    "stage": "icebox",
+    "stage": "dev",
     "project": "veerytee",
     "priority": "P0",
     "source": "提案页阻塞项",
@@ -1205,7 +1220,7 @@
     "parent": null,
     "blockedOn": null,
     "ref": null,
-    "evidence": null,
+    "evidence": "dev WIP 2/2，槽位释放自 c-d17237",
     "verdictReason": "提案页没有真实样品就发不出去，这是唯一挡在第一单前面的东西",
     "createdAt": "2026-08-12T04:11:13.633Z",
     "doneAt": null,
@@ -1234,6 +1249,21 @@
         "at": "2026-08-12T05:46:32.016Z",
         "action": "move:backlog->icebox",
         "note": "veerytee 已归档，不再推进；提案页与调研结论已留存在 consulting/preview 与 docs，将来要卖再取回"
+      },
+      {
+        "at": "2026-08-20T02:16:14.955Z",
+        "action": "move:icebox->backlog",
+        "note": "Eric 20260818拍板：\"如果我有精力，把veerytee产品做出来，如果他(print-main)要就定价卖，不要就算了\"——从icebox激活。发现该项目已被移到 /Volumes/datacenter/04-eric/AIcoding/_archive/veerytee，且该仓库有未提交的删除(SOP.md/pipeline/DESIGN-ANALYSIS.md等)，需先查清这批删除是什么再决定是否迁回。本轮派人核实。"
+      },
+      {
+        "at": "2026-08-20T02:23:44.657Z",
+        "action": "progress",
+        "note": "核实结果(20260819)：_archive/veerytee 那批未提交删除已核实安全——14个删除里13个是文档，逐字节比对与 docs/ 目录下已存在的整理版完全一致(去重，零内容损失)，唯一非文档的是一个指向失效/tmp路径的过期双击启动脚本，不影响核心逻辑。四个核心生图脚本(night_auto.ts/batch_generate.py/review_designs.ts/generate_images.ts)完整无损。结论：可以立即开始生成真实样品图，不需要先处理这批删除。当前开发中WIP已满(2/2)，本卡暂留backlog候补，WIP腾出空位后优先转dev执行：挑一个print-main客户品类出5-10个设计+模特图，Codex CLI优先(公司铁律)。"
+      },
+      {
+        "at": "2026-08-20T02:53:02.595Z",
+        "action": "move:backlog->dev",
+        "note": "c-d17237 完成后 dev 槽位空出，按 20260819 worklog『下一轮从这里开始』第 2 条排入。"
       }
     ]
   },
@@ -1596,14 +1626,14 @@
   {
     "id": "c-69f97c",
     "title": "账本补成真的：veggie 尾款金额/首期是否已收、print-main 有无月费、喜马拉雅上月收入、月订阅 burn",
-    "stage": "backlog",
+    "stage": "ready",
     "project": "shared",
     "priority": "P0",
     "source": "20260814 CEO 复盘",
     "note": "账本累计收入 $0 但已知有三处真实收入，仪表盘是坏的",
     "acceptance": "四个数字全部入 finance/ledger.jsonl 或 recurring.json，ledger status 输出的 MRR/burn/应收不再与已知事实矛盾",
     "parent": null,
-    "blockedOn": "需用户：① veggie 尾款到底是 €1700 还是合同的 €6800、首期 €3000 是否已收 ② print-main 有无月费及金额 ③ 喜马拉雅上月收入 ④ 每月订阅支出总额",
+    "blockedOn": "仍缺 2/4：① 尾款口径与首期已收其实已在账本里(tx-6b402864, 20260812记/20260814澄清)：合同总额€9,800，首期€3,000已收，第二期€6,800中€5,100付销售分成与还款，净得€1,700——真正没确认的窄化为：这笔€1,700尾款是否已经实际到账（账本仍标记为 receivable 未 settle，需要银行/客户验收单实据才能 settle）④ 月订阅支出总额未核实到账单级别：ledger status 显示 burn=$150(仅 infra-monthly 一项 active)，未把新增的 print-main 托管 $77.5(inactive,未激活)算进 burn 展示，且 $150 本身被 20260816 家底盘点标注'肯定低估'、未逐项拆开，实际总 burn 可能明显高于 $150",
     "ref": null,
     "evidence": null,
     "verdictReason": "账本累计收入 $0 与已知的三处真实收入矛盾，仪表盘坏掉时所有优先级都是猜的",
@@ -1629,22 +1659,47 @@
         "at": "2026-08-16T16:06:35.119Z",
         "action": "progress",
         "note": "20260816 家底盘点为这张卡补了硬证据，问题比原描述大：① print-main 是已签客户且我方在自费替其托管生产系统（GCP print-482914 + Neon + GCS），账本零记录 ② 一个从未使用的 Cloud SQL 实例空转约 $4379/月，3月烧到4月11日才删，4月账单约 $1460，账本上完全没有 ③ 喜马拉雅「已有被动收入」两次立卡两次未答，无任何一手证据。三个数字全不可信"
+      },
+      {
+        "at": "2026-08-20T02:16:40.796Z",
+        "action": "move:backlog->ready",
+        "note": "四项里两项已有Eric口述数据：②print-main月费=0(降级为潜在客户，见c-0470d1) ③喜马拉雅上月收入≈10加币/月不固定。仍缺：①veggie尾款€1700 vs €6800/首期是否已收 ④月订阅burn总额。派finance-officer先把已知两项入账，其余两项标注待补。"
+      },
+      {
+        "at": "2026-08-20T02:24:14.421Z",
+        "action": "block",
+        "note": "仍缺 2/4：① veggie 尾款到底是 €1700 还是合同的 €6800、首期 €3000 是否已收——本次未获新数据，账本仍按 20260812 的 €1700 净额口径挂应收，未核实 ④ 每月订阅支出总额——仍是估算非账单核实（现有 CAD $150 聚合项本身被 20260816 家底盘点标注肯定低估，未逐项拆清，可能还有未入账支出）"
+      },
+      {
+        "at": "2026-08-20T02:24:14.422Z",
+        "action": "progress",
+        "note": "finance-officer 20260819：4 项中 2 项本次补齐——②print-main 月费=$0 已确认(Eric 20260818口述：'反正我现在也没继续维护,就当成一个潜在客户')，其自费托管GCP生产环境成本已作为 tx-36aeb618 入账 CAD $77.5/月(估算区间$60-95中值,来源 docs/20260816-print-main-维护托管服务方案.md §7.2,非账单核实) ③喜马拉雅上月收入~CAD$10/月(不固定)已作为 tx-ba553293 入账。仍缺①veggie尾款口径②月订阅burn总额核实(见 blockedOn)。仪表盘 MRR/burn 已不再是$0(现$10收入/$227.5支出)，但验收标准要求四个数字全部入账，2项未达标不算完成，不 move 到 done。"
+      },
+      {
+        "at": "2026-08-20T02:29:34.392Z",
+        "action": "block",
+        "note": "仍缺 2/4：① 尾款口径与首期已收其实已在账本里(tx-6b402864, 20260812记/20260814澄清)：合同总额€9,800，首期€3,000已收，第二期€6,800中€5,100付销售分成与还款，净得€1,700——真正没确认的窄化为：这笔€1,700尾款是否已经实际到账（账本仍标记为 receivable 未 settle，需要银行/客户验收单实据才能 settle）④ 月订阅支出总额未核实到账单级别：ledger status 显示 burn=$150(仅 infra-monthly 一项 active)，未把新增的 print-main 托管 $77.5(inactive,未激活)算进 burn 展示，且 $150 本身被 20260816 家底盘点标注'肯定低估'、未逐项拆开，实际总 burn 可能明显高于 $150"
+      },
+      {
+        "at": "2026-08-20T02:29:34.393Z",
+        "action": "progress",
+        "note": "finance-officer 20260819 修正：上一条 progress note 误判①为'本次未获新数据'，实际该项在 tx-6b402864 里已有明确澄清（首期已收+净额口径），只是未被此卡片识别/引用，现已在 blockedOn 里更正为更精确的窄口径缺口（是否已 settle）。②③已完结记账（tx-ba553293喜马拉雅、tx-36aeb618 print-main托管）。仍不满足验收标准'四个数字全部入账且 status 不矛盾'，不 move 到 done。"
       }
     ]
   },
   {
     "id": "c-0470d1",
     "title": "print-main 月费定下来：已签客户 + 已在无偿维护（上月 29 提交），是最便宜的 MRR",
-    "stage": "ready",
+    "stage": "backlog",
     "project": "print-main",
     "priority": "P0",
     "source": "20260814 CEO 复盘",
     "note": "",
     "acceptance": "① 出一份月费方案（含服务范围/响应时效/价格档位）② 用户与客户谈定 ③ 金额进 finance/recurring.json 且 ledger status 的 MRR 不再为 0",
     "parent": null,
-    "blockedOn": "CEO 未答 16 项：仓库内找不到任何 print-main 合同文件（全盘 pdf/docx 搜索 0 命中），原合同是否含免费维护期决定服务起算日；托管实际账单未从 GCP 结算页拉取",
+    "blockedOn": "客户店铺装修中，项目暂停，Eric 已联系报价但对方暂无法推进，本周无 MRR 可推。等对方装修完成后重新触达，不强推",
     "ref": null,
-    "evidence": "print-main git log --since=2026-02-01: 263 commits / 52 提交日 / 最近30中27为 offline-orders; gcloud run services list print-482914 返回 print-main-frontend+backend; scheduler daily-db-backup + neon-backup-evening 均 ENABLED; xlsx 汇总页 Mia 270单 43069.04 + Thea 256单 91222.40 = 526单 134291",
+    "evidence": "用户20260818消息第2条",
     "verdictReason": "转化已有客户的成本远低于获取新客户；且现状是在无偿交付维护，不定月费等于持续亏时间",
     "createdAt": "2026-08-14T11:24:40.840Z",
     "doneAt": null,
@@ -1668,6 +1723,26 @@
         "at": "2026-08-16T16:14:53.608Z",
         "action": "move:backlog->ready",
         "note": "收款官 20260816：验收①完成。方案草案 docs/20260816-print-main-维护托管服务方案.md（三档 CAD S1 450 / S2 950 / S3 2200 每月，托管代垫单列）+ docs/20260816-print-main-待CEO确认.md（16 项待答）。⛔ 未发送。②③ 待用户与客户谈定后回写 recurring.json。"
+      },
+      {
+        "at": "2026-08-20T02:19:16.747Z",
+        "action": "unblock",
+        "note": "CEO 20260819判断：Eric 20260818原话「print就先不用管了,反正我现在也没继续维护,就当成一个潜在客户」——16项确认清单与月费谈判就此搁置，不再是本周优先级。改道 c-bb762f(veerytee 样品图→B档上新托管提案)：用新产品加卖换新收入，而不是追讨旧合同费用。此卡留在待办，若后续 print-main 主动联系再捡回来谈。"
+      },
+      {
+        "at": "2026-08-20T02:19:16.749Z",
+        "action": "move:ready->backlog",
+        "note": "CEO 20260819判断：Eric 20260818原话「print就先不用管了,反正我现在也没继续维护,就当成一个潜在客户」——16项确认清单与月费谈判就此搁置，不再是本周优先级。改道 c-bb762f(veerytee 样品图→B档上新托管提案)：用新产品加卖换新收入，而不是追讨旧合同费用。此卡留在待办，若后续 print-main 主动联系再捡回来谈。"
+      },
+      {
+        "at": "2026-08-20T02:52:33.482Z",
+        "action": "block",
+        "note": "客户店铺装修中，项目暂停，Eric 已联系报价但对方暂无法推进，本周无 MRR 可推。等对方装修完成后重新触达，不强推"
+      },
+      {
+        "at": "2026-08-20T02:52:33.482Z",
+        "action": "progress",
+        "note": "Eric 20260819 反馈：已发月费报价给 print-main，对方店铺正在装修，项目暂停，当前没有 MRR。不是拒绝，是时机未到——转为等待重新触达，不作为本周可推进的定价决策。"
       }
     ]
   },
@@ -1790,7 +1865,7 @@
   {
     "id": "c-d17237",
     "title": "⛔ 数据泄露处置：veggie 公开仓库含真实客户 PII（res.partner.csv 表头含 email/phone/street/city/name，1327 行/203 电话；备份版 1467 行/612 电话；sale.order 25494 行/2914 电话），仓库 GitHub PUBLIC 已确认",
-    "stage": "dev",
+    "stage": "done",
     "project": "veggie",
     "priority": "P0",
     "source": "20260816 合规审查员排查 + CEO 亲自复核",
@@ -1799,10 +1874,10 @@
     "parent": null,
     "blockedOn": null,
     "ref": null,
-    "evidence": null,
+    "evidence": "GitHub 独立验证 clone：0 命中",
     "verdictReason": "已确认的个人数据泄露，不是风险是既成事实：gh repo view 返回 visibility=PUBLIC，git show origin/main 取得文件内容并计数成功。客户 Johnstone Bros 是数据控制者、我方是处理者，GDPR Art.28(3)(f)/Art.33(2) 要求处理者知悉后「不得不当迟延」通知控制者；控制者对监管机关的 72 小时时钟由其自行起算。此事压过一切收入线工作",
     "createdAt": "2026-08-16T16:23:23.918Z",
-    "doneAt": null,
+    "doneAt": "2026-08-20T02:52:58.332Z",
     "history": [
       {
         "at": "2026-08-16T16:23:23.919Z",
@@ -1818,6 +1893,31 @@
         "at": "2026-08-16T16:23:50.234Z",
         "action": "move:backlog->dev",
         "note": "CEO 亲自复核确认：gh repo view veggie → PUBLIC；pic/res.partner.csv 表头含 email,phone,street,city,name。已排查 12 个仓库公开性，泄露仅 veggie 一处（print 的敏感 xlsx 不在远端）"
+      },
+      {
+        "at": "2026-08-20T02:16:14.914Z",
+        "action": "progress",
+        "note": "①仓库转private已确认完成（gh repo view veggie → visibility:PRIVATE，非本轮操作，此前某个时点已执行，此前台账未记录）。②③④⑤仍未做，本轮派 compliance-officer 继续推进：git历史PII清除方案（暂不force-push，先查fork/PR情况）、事实时间线草稿、.gitignore+pre-commit、其余仓库排查。"
+      },
+      {
+        "at": "2026-08-20T02:28:20.901Z",
+        "action": "progress",
+        "note": "合规审查员本轮完成②③④⑤调查与部分处置：④已直接落地（.gitignore 新增/pic/ 规则 + 仓库级 pre-commit hook via core.hooksPath，防未来误提交）；②发现比原判更严重——PII文件当前仍在HEAD被跟踪（非仅历史遗留），新增发现发票PDF暴露；已完成fork/PR/协作者取证（均为0/仅owner）及GitHub 14天clone窗口取证（73次clone/9 unique cloner，8/16出现8个unique cloner峰值，与发现日同天，无法排除是本次排查自身）；已出具可执行但未执行的filter-repo历史清除命令+git rm --cached前置方案，需Eric授权；③已产出事实时间线草稿，公开→私有确切转换时刻标注为'无法核实'；⑤已排查print/seomachine/easetax/satgame/businessskills，仅businessskills发现抓取型内容（非客户PII，风险类别不同）。详见 docs/20260819-veggie-PII处置方案.md"
+      },
+      {
+        "at": "2026-08-20T02:33:38.639Z",
+        "action": "progress",
+        "note": "止血动作已执行完毕(20260819)：①veggie main + feature分支均已提交.gitignore规则+pre-commit hook（阻断pic/下csv/xlsx/xls/sql/pdf再次入库），main分支已git push origin确认生效(d2a4cc8)。②8个PII文件(res.partner.csv/sale.order(1).csv/crm.team.csv/product.pricelist.csv/product.product.csv+3个backup-20260715子目录文件)已git rm --cached并push到origin/main(014ccd8)——本地磁盘文件保留，仅停止跟踪，新clone不会再拿到。此操作可逆(新提交，未改写历史，未force-push)。③仍未处理、且不应由我代为决定的两件事，需Eric拍板：(a)git filter-repo清除历史中的PII+force-push——不可逆操作，影响远程共享历史；(b)是否需要按GDPR向res.partner中的客户逐一发通知，以及是否需要单独联系发票PDF(Sales-Order-D120827)对应的那个客户——涉及真实客户关系与法律判断，非我可代签。详见docs/20260819-veggie-PII处置方案.md。"
+      },
+      {
+        "at": "2026-08-20T02:52:53.568Z",
+        "action": "move:dev->test",
+        "note": "filter-repo 历史清除已执行并验证完毕：① 在隔离的 --mirror 临时克隆上执行 git filter-repo --invert-paths，清除 9 个含真实客户 PII 的历史路径（含新找到的发票 PDF pic/发票的 PDF 格式Sales-Order-D120827.pdf）；执行前用 git bundle 打了全量备份 ② force-push 到 origin 两个曾经 public 过的分支：main 014ccd8→d0d8c27（649 commits），feat/dispatch-print-lock 170d9d4→0f77bb4（167 commits）③ 独立验证：从 GitHub 重新全新 clone（非本地 mirror）逐一搜索 9 个路径，历史命中数=0 ④ 本地工作仓库（该分支上有另一会话未提交的 12 个文件改动）只 force 移动了 main/feat/dispatch-print-lock 分支指针到新 history，未 checkout、未碰工作区，前后核对一致，未受影响 ⑤ 通知客户问题已由 Eric 20260819 拍板：不通知，走内部止血即可，不再是开放问题。⚠️ 遗留但非本卡范围的限制（已写入报告）：force-push 只控制此刻之后新 clone 的历史；改写前已 clone/fork 过本仓库的第三方本地仍保留含 PII 的旧历史，GitHub 内部缓存/备份保留期不受我方控制。"
+      },
+      {
+        "at": "2026-08-20T02:52:58.332Z",
+        "action": "move:test->done",
+        "note": "验证已完成（独立 fresh clone 复核 9 个路径历史命中=0，见上一条 progress），事件闭环，转完成。"
       }
     ]
   }

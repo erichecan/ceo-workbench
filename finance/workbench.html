@@ -46,14 +46,14 @@
 <div class="wrap">
   <header>
     <h1>财务工作台</h1>
-    <div class="sub">生成于 2026-08-14 11:24 UTC ・ 数据源 finance/ledger.jsonl ・ 本页为生成产物，不要手改</div>
+    <div class="sub">生成于 2026-08-20 02:22 UTC ・ 数据源 finance/ledger.jsonl ・ 本页为生成产物，不要手改</div>
   </header>
 
   <div class="cards">
     <div class="card">
       <div class="label">本月净现金流（CAD）</div>
-      <div class="value neg">−150.00</div>
-      <div class="hint">收入 +0.00 ／ 支出 −150.00</div>
+      <div class="value neg">−217.50</div>
+      <div class="hint">收入 +10.00 ／ 支出 −227.50</div>
     </div>
     <div class="card">
       <div class="label">MRR / 阶段一目标</div>
@@ -79,8 +79,8 @@
     </div>
     <div class="card">
       <div class="label">历史累计净额（CAD）</div>
-      <div class="value neg">−150.00</div>
-      <div class="hint">收入 +0.00 ／ 支出 −150.00</div>
+      <div class="value neg">−217.50</div>
+      <div class="hint">收入 +10.00 ／ 支出 −227.50</div>
     </div>
   </div>
 
@@ -89,6 +89,18 @@
     <table>
       <thead><tr><th>项目</th><th class="num">收入</th><th class="num">支出</th><th class="num">净额</th></tr></thead>
       <tbody><tr>
+      <td>businessskills</td>
+      <td class="num pos">+10.00</td>
+      <td class="num neg">−0.00</td>
+      <td class="num pos">+10.00</td>
+    </tr>
+<tr>
+      <td>print-main</td>
+      <td class="num pos">+0.00</td>
+      <td class="num neg">−77.50</td>
+      <td class="num neg">−77.50</td>
+    </tr>
+<tr>
       <td>veggie</td>
       <td class="num pos">+0.00</td>
       <td class="num neg">−0.00</td>
@@ -109,10 +121,10 @@
       <thead><tr><th>月份</th><th class="num">收入</th><th class="num">支出</th><th class="num">净额</th><th class="num">笔数</th></tr></thead>
       <tbody><tr>
       <td>2026-08</td>
-      <td class="num pos">+0.00</td>
-      <td class="num neg">−150.00</td>
-      <td class="num neg">−150.00</td>
-      <td class="num">2</td>
+      <td class="num pos">+10.00</td>
+      <td class="num neg">−227.50</td>
+      <td class="num neg">−217.50</td>
+      <td class="num">4</td>
     </tr></tbody>
     </table>
   </section>
@@ -155,7 +167,27 @@
     <h2>全部流水（新在前）</h2>
     <table>
       <thead><tr><th>日期</th><th>方向</th><th>项目</th><th>类目</th><th class="num">原币金额</th><th class="num">折 CAD</th><th>对方</th><th>备注</th></tr></thead>
-      <tbody><tr class="receivable">
+      <tbody><tr class="income">
+        <td>2026-08-19</td>
+        <td>收入</td>
+        <td>businessskills</td>
+        <td>其他收入</td>
+        <td class="num">+10.00 CAD</td>
+        <td class="num">+10.00</td>
+        <td>喜马拉雅平台</td>
+        <td class="note">喜马拉雅课程被动收入，当前月流水量级约 CAD $10/月且不固定。数据来源：Eric 2026-08-18 口述（喜马拉雅现在每个月只有10加币左右,还不固定,但是已经跑通了链路），非后台截图/账单核实，是数量级估计不是具体某笔到账记录。链路已跑通（课程已上架、有实际付费用户），策略是继续投入、往产品经理/AI转型方向深耕。后续应替换为后台实际月流水导出数据。</td>
+      </tr>
+<tr class="expense">
+        <td>2026-08-19</td>
+        <td>支出</td>
+        <td>print-main</td>
+        <td>云服务</td>
+        <td class="num">−77.50 CAD</td>
+        <td class="num">−77.50</td>
+        <td>Google Cloud + Neon</td>
+        <td class="note">print-main（suvernire plus/printngoplus）生产系统托管代垫成本，GCP项目print-482914：Cloud Run前台+后台×2、Neon PostgreSQL、GCS备份。当前MRR=$0（Eric 2026-08-18口述确认：&quot;就先不用管了,反正我现在也没继续维护,就当成一个潜在客户&quot;，降级为潜在客户，见c-0470d1），公司仍在自费托管=负收入项目。金额取自docs/20260816-print-main-维护托管服务方案.md §7.2估算区间CAD$60-95/月的中值$77.5，非GCP结算页实际账单核实，待用实际账单替换。此前该成本完全未入账（见20260816家底盘点）。</td>
+      </tr>
+<tr class="receivable">
         <td>2026-08-12</td>
         <td>应收</td>
         <td>veggie</td>
