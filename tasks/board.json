@@ -1827,7 +1827,7 @@
   {
     "id": "c-3dab95",
     "title": "月费线二选一决策：转售白标（GoHighLevel+Local Falcon，月付~$122 USD）还是移植 seomachine 计费层自研——选之前往任一仓库投人时都可能白投",
-    "stage": "backlog",
+    "stage": "ready",
     "project": "localrank",
     "priority": "P0",
     "source": "20260816 家底盘点：月费线分析师",
@@ -1836,7 +1836,7 @@
     "parent": null,
     "blockedOn": null,
     "ref": null,
-    "evidence": null,
+    "evidence": "docs/20260811-公司战略.md#八、月费线二选一：已决策，走白标（EmbedMyReviews）",
     "verdictReason": "两条路的第 2 步完全不相交：白标路径绕开全部三个仓库（转售别人已获批的资质，人工交付），自研路径要移植 seomachine 的 LemonSqueezy 计费层并补 User/Subscription 表。在这个选择做出之前，往 idearise/localrank 投的任何人时都可能白投。这是决策卡不是开发卡",
     "createdAt": "2026-08-16T16:06:10.572Z",
     "doneAt": null,
@@ -1850,6 +1850,11 @@
         "at": "2026-08-16T16:06:20.479Z",
         "action": "judge:accept",
         "note": "两条路的第 2 步完全不相交：白标路径绕开全部三个仓库（转售别人已获批的资质，人工交付），自研路径要移植 seomachine 的 LemonSqueezy 计费层并补 User/Subscription 表。在这个选择做出之前，往 idearise/localrank 投的任何人时都可能白投。这是决策卡不是开发卡"
+      },
+      {
+        "at": "2026-08-21T02:43:26.391Z",
+        "action": "move:backlog->ready",
+        "note": "Eric 条件指令「自研可能更好，除非找到更便宜白标」已用真实市场调研回答：EmbedMyReviews $99 USD/月（含评价管理+本地排名网格+客户子计费/Stripe），比基线 GoHighLevel+Local Falcon $122 USD/月便宜且功能更宽，14天免费试用不绑卡。决策落地：白标胜出，自研（seomachine 计费层）冷藏留档不删。结论已写入 docs/20260811-公司战略.md 第八节。剩一处未验证缺口：定价页未显式确认 Google Business Profile 评价监控/请求，需开免费试用实测验证——这是唯一挡在'正式接入'前的事，dev WIP 两槽位（c-91a2d9/c-bb762f）满时不占位，等验证完成、槽位空出再排 dev。"
       }
     ]
   },
