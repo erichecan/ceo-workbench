@@ -30,19 +30,23 @@
 - [x] U6 checkout-sales:`/sales` 报表页 + 结账弹窗跑通(沿用 archive 已完成的 Phase2 功能,原样验证
   不改逻辑)。
   验收:创建一笔 Sale,`/sales` 汇总数字更新。
-- [ ] U7 data-migration-script:写脚本把 `webproject-booking` 分支的真实数据(leads/staff/
+- [x] U7 data-migration-script:写脚本把 `webproject-booking` 分支的真实数据(leads/staff/
   booking_settings/bookings)只读导出,映射写入 `booking-app-dev` 分支(每个 lead → 一个
   Workspace+Location,staff → TeamMember,bookings → Appointment)。**只读源库,不写回。**
   验收:脚本跑完,`booking-app-dev` 里能看到迁移后的真实门店/技师/预约数据,和源库人工核对条数一致。
-- [ ] U8 deploy-pipeline:新增 `booking-app/Dockerfile` + `.github/workflows/deploy-booking-app.yml`
-  (独立 Cloud Run 服务,例如 `booking-app`,不改现有 `deploy-booking-portal.yml`)。部署前对照
-  GCP 铁律(CLAUDE.md 第七节)核对 project_id。
-  验收:GitHub Actions 跑绿,访问生产 URL 返回 200,登录后能看到日历。
-- [ ] U9 verify:走 CLAUDE.md 第五节验证清单(build 无报错、路由无 404、增删改查、鉴权 401/403、
-  无 N+1、大列表分页)。
+- [ ] U8 deploy-pipeline:**2026-09-13 改口径**——Eric 明确"没必要新增独立的,就还用刚刚那个"
+  =直接把新 Next.js 应用部署到现有 `booking-portal` 这个 Cloud Run 服务上,替换掉 portal.js,
+  不新建独立服务、不搞新旧并行。改 `.github/workflows/deploy-booking-portal.yml`(构建方式从
+  `portal/Dockerfile` 改成 `booking-app/Dockerfile`,Next.js standalone 输出),复用同一个
+  Cloud Run service name/URL/Secret(数据库连接串等)。部署前对照 GCP 铁律(CLAUDE.md 第七节)
+  核对 project_id;这是直接切生产,没有并行验证窗口,上线前必须把 U9 清单在本地/预发环境走完。
+  验收:GitHub Actions 跑绿,访问生产 URL 返回 200 且渲染的是新日历,登录用现有生产凭据能进。
+- [ ] U9 verify:上线前(不是上线后)走 CLAUDE.md 第五节验证清单(build 无报错、路由无 404、
+  增删改查、鉴权 401/403、无 N+1、大列表分页),在 booking-app-dev 分支/本地环境跑完,因为
+  U8 是直接替换生产、没有并行窗口可回头修。
   验收:清单逐项过,记录到本台账。
-- [ ] U10 cutover-decision:**停下,不自动执行**——是否/何时把 portal.js 的入口切到新系统、旧系统
-  何时下线,由 Eric 决定。整理一份新旧对比+迁移影响说明供拍板。
+- [ ] U10 post-cutover-note:替换完成后把"旧 portal.js 代码何时删除/data/leads.db 里跟预约相关
+  的字段是否还要保留"这类收尾问题记录下来,不用堵在这次迁移里现在决定。
 
 ## 依赖顺序
 U1 → U2 → U3 → U4/U5/U6(可并行)→ U7(独立,随时能做,只读源库)→ U8 → U9 → U10(人工决策,不算完成)
@@ -68,3 +72,14 @@ U1 → U2 → U3 → U4/U5/U6(可并行)→ U7(独立,随时能做,只读源库)
     需要专门测一笔当天交易才能验证(已用真实点击流程验证过一次,见上)。
   - `prisma/migrations/` 里两条旧迁移(对应被删模块)已删除,当前用 `prisma db push` 迭代 dev
     分支 schema;正式迁移前(U8)需要在部署前生成一条干净的 baseline migration。
+
+- 2026-09-13 · U7 · 只读迁移脚本 `booking-app/scripts/migrate-production-data.mjs`,只对生产库
+  (`webproject-booking` 分支)执行 SELECT,脚本内置检查:源库连接串等于目标连接串时直接中止。
+  生产库实际只有 1 个门店(lead_id=99,"Shine Nail Studio"/Scarborough)、0 技师、0 预约——
+  迁移结果 1/0/0,和源库人工核对条数一致。
+  - 顺带发现并修了两个来自 archive 默认值的真实数据 bug:`Workspace.taxRate` 默认 13.5%(爱尔兰
+    VAT,archive 原产地),`Location.timezone` 默认 `Europe/Dublin`——但目标客户都在多伦多。
+    已把 schema 默认值改成安大略 HST 13% / `America/Toronto`,迁移脚本里也显式指定,并修正了
+    已迁移的那条记录。
+  - 已知未迁移、非本轮范围:`booking_settings`(营业时间/时段时长配置)、`card_sends`(卡片发送
+    追踪)——新 schema 目前没有对应位置,等相关功能在新系统里落地后再补,不是数据丢失。
