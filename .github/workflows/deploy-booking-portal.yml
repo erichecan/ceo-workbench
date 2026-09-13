@@ -31,9 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT_ID: supply-491510
-      REGION: northamerica-northeast1
+      # 沿用 deploy-ceo-site.yml 已经建好的 asia-east1/triplan Artifact
+      # Registry 仓库——northamerica-northeast1 下没有这个仓库，新建又要
+      # 我这边没有的 GCP 权限。目标客户在多伦多，这个选择会带来跨区延迟，
+      # 不是没有代价，但比让 Eric 再手动跑一条 gcloud 命令建仓库更划算；
+      # 真影响体验了再单独迁移，不提前优化一个还没验证是不是问题的问题。
+      REGION: asia-east1
       SERVICE_NAME: booking-portal
-      IMAGE: northamerica-northeast1-docker.pkg.dev/supply-491510/triplan/booking-portal:${{ github.sha }}
+      IMAGE: asia-east1-docker.pkg.dev/supply-491510/triplan/booking-portal:${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v4
