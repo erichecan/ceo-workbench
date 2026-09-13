@@ -62,6 +62,21 @@ function migrate(d) {
       /* 列已存在 */
     }
   }
+  // bookings 补「完整预约记录」需要的五列——staff 表由 SCHEMA 里的
+  // CREATE TABLE IF NOT EXISTS 保证在这一步之前已经存在。
+  for (const col of [
+    "customer_name TEXT",
+    "phone TEXT",
+    "service_item TEXT",
+    "channel TEXT NOT NULL DEFAULT 'xiaohongshu'",
+    "staff_id INTEGER REFERENCES staff(id) ON DELETE SET NULL",
+  ]) {
+    try {
+      d.exec(`ALTER TABLE bookings ADD COLUMN ${col}`);
+    } catch {
+      /* 列已存在 */
+    }
+  }
   // demo_track（十个站型）→ product_line（四条产品线）。老库的列名要跟着改，
   // CREATE TABLE IF NOT EXISTS 不会动已存在的表。
   // 历史行里的旧值不做映射：它们是旧口径的产物，混进新报告只会误导。
@@ -143,10 +158,66 @@ const SCHEMA = `
       model         TEXT,
       diagnosed_at  TEXT NOT NULL
     );
+    -- 以下两张表服务「预约卡」：卡片上的空闲时段不是编的，是从这里算出来的。
+    CREATE TABLE IF NOT EXISTS booking_settings (
+      lead_id       INTEGER PRIMARY KEY REFERENCES leads(id) ON DELETE CASCADE,
+      slot_minutes  INTEGER NOT NULL DEFAULT 90,
+      hours_json    TEXT    NOT NULL,   -- {"1":["10:00","19:00"], ...} 0=周日..6=周六，缺的键=当天不营业
+      updated_at    TEXT    NOT NULL
+    );
+    -- 技师：可选维度。单人店不建任何记录——这时预约按「店铺整体」占用，行为
+    -- 跟没有这张表之前完全一样。多技师店才需要建，预约才谈得上「该派谁」。
+    CREATE TABLE IF NOT EXISTS staff (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      lead_id     INTEGER NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+      name        TEXT    NOT NULL,
+      active      INTEGER NOT NULL DEFAULT 1,
+      sort_order  INTEGER NOT NULL DEFAULT 0,
+      created_at  TEXT    NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS bookings (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      lead_id       INTEGER NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+      date          TEXT    NOT NULL,   -- YYYY-MM-DD
+      start_time    TEXT    NOT NULL,   -- HH:MM
+      end_time      TEXT    NOT NULL,   -- HH:MM
+      status        TEXT    NOT NULL DEFAULT 'booked',  -- booked | cancelled
+      created_at    TEXT    NOT NULL,
+      -- 以下五列撑起「一条完整预约记录」：谁要来、约的什么、从哪来的、谁接的。
+      -- 老库由 migrate() 补上，这里的定义只对新建库生效。
+      customer_name TEXT,
+      phone         TEXT,
+      service_item  TEXT,
+      channel       TEXT    NOT NULL DEFAULT 'xiaohongshu',  -- xiaohongshu | phone | walk_in | other
+      staff_id      INTEGER REFERENCES staff(id) ON DELETE SET NULL
+    );
+    -- 卡片上「店名/地区/风格标签/用哪张底图」——展示信息，未来随时可换，
+    -- 跟诊断产出的事实字段（industry/bottleneck）分开存，互不干扰。
+    CREATE TABLE IF NOT EXISTS card_meta (
+      lead_id         INTEGER PRIMARY KEY REFERENCES leads(id) ON DELETE CASCADE,
+      brand_name      TEXT,
+      region_label    TEXT,
+      style_tags      TEXT,
+      background_file TEXT NOT NULL,
+      updated_at      TEXT NOT NULL
+    );
+    -- 卡片是静态图，发出去之后系统管不着那份拷贝。这张表记「发出那一刻卡上
+    -- 显示的空位」，用来在新预约撞上同一时段时提醒店主——启发式提醒，不强控。
+    CREATE TABLE IF NOT EXISTS card_sends (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      lead_id     INTEGER NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+      slots_json  TEXT    NOT NULL,
+      note        TEXT,
+      sent_at     TEXT    NOT NULL,
+      status      TEXT    NOT NULL DEFAULT 'active'  -- active | resolved
+    );
     CREATE INDEX IF NOT EXISTS idx_leads_status  ON leads(status);
     CREATE INDEX IF NOT EXISTS idx_leads_scraped ON leads(scraped_at);
     CREATE INDEX IF NOT EXISTS idx_analysis_score ON analysis(score DESC);
     CREATE INDEX IF NOT EXISTS idx_diag_slug ON diagnoses(diag_slug);
+    CREATE INDEX IF NOT EXISTS idx_bookings_lead_date ON bookings(lead_id, date);
+    CREATE INDEX IF NOT EXISTS idx_staff_lead ON staff(lead_id, active);
+    CREATE INDEX IF NOT EXISTS idx_card_sends_lead ON card_sends(lead_id, status);
 `;
 
 /**
@@ -378,6 +449,152 @@ export function saveDiagnosis(leadId, d) {
       model: d.model || null,
       diagnosed_at: new Date().toISOString(),
     });
+}
+
+/** 商户自己维护的营业时间。每次调用整条覆盖——店主改营业时间不用先查旧值。 */
+export function setBookingSettings(leadId, { slotMinutes = 90, hours }) {
+  open()
+    .prepare(
+      `INSERT INTO booking_settings (lead_id, slot_minutes, hours_json, updated_at)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(lead_id) DO UPDATE SET
+         slot_minutes=excluded.slot_minutes, hours_json=excluded.hours_json,
+         updated_at=excluded.updated_at`
+    )
+    .run(leadId, slotMinutes, JSON.stringify(hours), new Date().toISOString());
+}
+
+export function getBookingSettings(leadId) {
+  const r = open().prepare(`SELECT slot_minutes, hours_json FROM booking_settings WHERE lead_id=?`).get(leadId);
+  return r ? { slotMinutes: r.slot_minutes, hours: JSON.parse(r.hours_json) } : null;
+}
+
+/**
+ * @param {number} leadId
+ * @param {{date:string, startTime:string, endTime:string, customerName?:string,
+ *          phone?:string, serviceItem?:string, channel?:string, staffId?:number}} b
+ */
+export function addBooking(leadId, b) {
+  open()
+    .prepare(
+      `INSERT INTO bookings
+       (lead_id, date, start_time, end_time, status, created_at,
+        customer_name, phone, service_item, channel, staff_id)
+       VALUES (?, ?, ?, ?, 'booked', ?, ?, ?, ?, ?, ?)`
+    )
+    .run(
+      leadId, b.date, b.startTime, b.endTime, new Date().toISOString(),
+      b.customerName || null, b.phone || null, b.serviceItem || null,
+      b.channel || "xiaohongshu", b.staffId || null
+    );
+}
+
+/** 未来的全部占用（不分日期），供录入界面展示/删除用。 */
+export function listBookings(leadId) {
+  return open()
+    .prepare(
+      `SELECT id, date, start_time, end_time, customer_name, phone,
+              service_item, channel, staff_id
+       FROM bookings
+       WHERE lead_id=? AND status='booked' AND date >= date('now')
+       ORDER BY date, start_time`
+    )
+    .all(leadId);
+}
+
+export function deleteBooking(id) {
+  open().prepare(`DELETE FROM bookings WHERE id=?`).run(id);
+}
+
+/** 技师列表；activeOnly=false 时连停用的一起返回，管理界面要看全貌时用。 */
+export function listStaff(leadId, { activeOnly = true } = {}) {
+  const where = activeOnly ? "AND active=1" : "";
+  return open()
+    .prepare(`SELECT id, name, active, sort_order FROM staff WHERE lead_id=? ${where} ORDER BY sort_order, id`)
+    .all(leadId);
+}
+
+export function addStaff(leadId, name) {
+  const r = open()
+    .prepare(`INSERT INTO staff (lead_id, name, created_at) VALUES (?, ?, ?)`)
+    .run(leadId, name, new Date().toISOString());
+  return r.lastInsertRowid;
+}
+
+/** 技师离职/下线——不物理删除，已经挂在历史预约上的 staff_id 不该跟着变野。 */
+export function deactivateStaff(id) {
+  open().prepare(`UPDATE staff SET active=0 WHERE id=?`).run(id);
+}
+
+/**
+ * 卡片发出去那一刻，把当时显示的空位快照落一份——卡片是静态图，发出去之后
+ * 系统管不着那份拷贝，只能靠这份快照在日后撞车时提醒店主。
+ */
+export function recordCardSend(leadId, slots, note) {
+  open()
+    .prepare(`INSERT INTO card_sends (lead_id, slots_json, note, sent_at, status) VALUES (?, ?, ?, ?, 'active')`)
+    .run(leadId, JSON.stringify(slots), note || null, new Date().toISOString());
+}
+
+/**
+ * 找出还是 active、且快照里的时段跟这个新预约有重叠的发送记录。
+ * 按时间段重叠做启发式匹配——没有客户身份体系，做不到精确匹配到同一个人，
+ * 只能提醒店主自己判断，不做强控制（不阻止预约写入）。
+ */
+export function findConflictingSends(leadId, date, startTime, endTime) {
+  return open()
+    .prepare(`SELECT id, slots_json, note, sent_at FROM card_sends WHERE lead_id=? AND status='active'`)
+    .all(leadId)
+    .filter((r) =>
+      JSON.parse(r.slots_json).some((s) => s.date === date && s.time < endTime && s.end > startTime)
+    );
+}
+
+export function resolveCardSend(id) {
+  open().prepare(`UPDATE card_sends SET status='resolved' WHERE id=?`).run(id);
+}
+
+/**
+ * 够格出预约卡的线索——不是「所有真线索」，是「靠时段吃饭的生意」。
+ * 预约卡这个功能只对『预约系统』产品线有意义：地产经纪、摄影师这些不按
+ * 时段卖钱，混进这个列表只会让人不知道点进去要干嘛。
+ * has_card 标出已经配过卡片素材的。
+ */
+export function leadsForCards(productLine = "预约系统") {
+  return open()
+    .prepare(
+      `SELECT l.id, l.author, a.product_line,
+              CASE WHEN cm.lead_id IS NULL THEN 0 ELSE 1 END AS has_card
+       FROM leads l
+       JOIN analysis a ON a.lead_id = l.id
+       LEFT JOIN card_meta cm ON cm.lead_id = l.id
+       WHERE a.is_lead = 1 AND a.product_line = ?
+       ORDER BY has_card DESC, l.id DESC`
+    )
+    .all(productLine);
+}
+
+export function bookingsOn(leadId, date) {
+  return open()
+    .prepare(`SELECT start_time, end_time, staff_id FROM bookings WHERE lead_id=? AND date=? AND status='booked'`)
+    .all(leadId, date);
+}
+
+export function setCardMeta(leadId, { brandName, regionLabel, styleTags, backgroundFile }) {
+  open()
+    .prepare(
+      `INSERT INTO card_meta (lead_id, brand_name, region_label, style_tags, background_file, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(lead_id) DO UPDATE SET
+         brand_name=excluded.brand_name, region_label=excluded.region_label,
+         style_tags=excluded.style_tags, background_file=excluded.background_file,
+         updated_at=excluded.updated_at`
+    )
+    .run(leadId, brandName || null, regionLabel || null, styleTags || null, backgroundFile, new Date().toISOString());
+}
+
+export function getCardMeta(leadId) {
+  return open().prepare(`SELECT * FROM card_meta WHERE lead_id=?`).get(leadId) || null;
 }
 
 export function stats() {
