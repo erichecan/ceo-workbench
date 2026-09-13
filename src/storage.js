@@ -473,9 +473,22 @@ export function getBookingSettings(leadId) {
  * @param {number} leadId
  * @param {{date:string, startTime:string, endTime:string, customerName?:string,
  *          phone?:string, serviceItem?:string, channel?:string, staffId?:number}} b
+ * @returns {number} 插入（或命中的已有）那条预约的 id
  */
 export function addBooking(leadId, b) {
-  open()
+  const d = open();
+  const staffId = b.staffId || null;
+  // 同一技师/同一店铺、同一天同一起止时间的记录已经存在——大概率是表单重复
+  // 提交（双击 / 网络重试），不再插第二条，直接把已有那条的 id 还回去。
+  const dup = d
+    .prepare(
+      `SELECT id FROM bookings WHERE lead_id=? AND date=? AND start_time=? AND end_time=?
+       AND status='booked' AND staff_id IS ?`
+    )
+    .get(leadId, b.date, b.startTime, b.endTime, staffId);
+  if (dup) return dup.id;
+
+  const r = d
     .prepare(
       `INSERT INTO bookings
        (lead_id, date, start_time, end_time, status, created_at,
@@ -485,9 +498,11 @@ export function addBooking(leadId, b) {
     .run(
       leadId, b.date, b.startTime, b.endTime, new Date().toISOString(),
       b.customerName || null, b.phone || null, b.serviceItem || null,
-      b.channel || "xiaohongshu", b.staffId || null
+      b.channel || "xiaohongshu", staffId
     );
+  return r.lastInsertRowid;
 }
+
 
 /** 未来的全部占用（不分日期），供录入界面展示/删除用。 */
 export function listBookings(leadId) {
@@ -552,6 +567,11 @@ export function findConflictingSends(leadId, date, startTime, endTime) {
 
 export function resolveCardSend(id) {
   open().prepare(`UPDATE card_sends SET status='resolved' WHERE id=?`).run(id);
+}
+
+/** 卡片文件名兜底要用到昵称，取最小字段就够。 */
+export function getLead(id) {
+  return open().prepare(`SELECT id, author FROM leads WHERE id=?`).get(id) || null;
 }
 
 /**

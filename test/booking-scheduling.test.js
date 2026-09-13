@@ -102,6 +102,15 @@ test("多技师店：没标技师的预约按占满全部技师保守处理", ()
   assert.deepEqual(slots.map((s) => s.time), ["11:00"]);
 });
 
+test("同一技师同一时段重复提交不会插出两条一样的预约", () => {
+  freshDb();
+  const leadId = mkLead();
+  const id1 = store.addBooking(leadId, { date: "2026-09-20", startTime: "10:00", endTime: "11:00" });
+  const id2 = store.addBooking(leadId, { date: "2026-09-20", startTime: "10:00", endTime: "11:00" });
+  assert.equal(id1, id2);
+  assert.equal(store.listBookings(leadId).length, 1);
+});
+
 test("卡片发送快照能找出重叠时段的冲突，标记已处理后不再命中", () => {
   freshDb();
   const leadId = mkLead();
