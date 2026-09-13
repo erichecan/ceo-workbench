@@ -64,7 +64,7 @@ jobs:
             --project ${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --min-instances=0 --max-instances=2 \
-            --cpu=1 --memory=512Mi --port=8080 \
+            --cpu=1 --memory=1Gi --port=8080 \
             --set-env-vars="NODE_ENV=production,DEFAULT_LEAD_ID=99" \
             --set-secrets="DATABASE_URL=booking-portal-database-url:latest,PORTAL_USER=booking-portal-user:latest,PORTAL_PASS=booking-portal-pass:latest" \
             --quiet
@@ -84,4 +84,22 @@ jobs:
             echo "✗ 鉴权未生效：期望 401，实际 $CODE"
             exit 1
           fi
-          echo "✅ 部署成功，鉴权生效 → $URL"
+
+          # ⚠️ 401 只证明鉴权生效，不证明卡片渲染能跑（2026-09-13 实测：
+          # 512Mi 内存跑 chromium 截图会被 OOM 杀掉，容器不断重启，但这一步
+          # 之前只检查到 401 就判定部署成功）。登录后触发一次真实渲染，
+          # 确认 chromium + CJK 字体 + 内存额度这条链路真的没问题。
+          U=$(gcloud secrets versions access latest --secret=booking-portal-user --project=${{ env.PROJECT_ID }})
+          P=$(gcloud secrets versions access latest --secret=booking-portal-pass --project=${{ env.PROJECT_ID }})
+          curl -s -c /tmp/cookies.txt -X POST "$URL/login" --data-urlencode "u=$U" --data-urlencode "p=$P" -o /dev/null
+          curl -s -b /tmp/cookies.txt -X POST "$URL/hours/save" \
+            --data-urlencode "lead=99" --data-urlencode "slot_minutes=90" \
+            --data-urlencode "day2_on=on" --data-urlencode "day2_start=10:00" --data-urlencode "day2_end=19:00" \
+            -o /dev/null
+          CARD_CODE=$(curl -s -b /tmp/cookies.txt -o /dev/null -w "%{http_code}" "$URL/card.png?lead=99")
+          echo "登录后触发一次卡片渲染 → HTTP $CARD_CODE"
+          if [ "$CARD_CODE" != "200" ]; then
+            echo "✗ 卡片渲染失败（chromium 崩了/内存不够/底图缺失），期望 200，实际 $CARD_CODE"
+            exit 1
+          fi
+          echo "✅ 部署成功：鉴权生效 + 卡片渲染正常 → $URL"
