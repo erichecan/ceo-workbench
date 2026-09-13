@@ -12,7 +12,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { DATA_DIR } from "./config.js";
-import { open, getCardMeta } from "./storage.js";
 import { getFreeSlots } from "./booking.js";
 
 export const CARD_BG_DIR = path.join(DATA_DIR, "cards", "backgrounds");
@@ -87,6 +86,10 @@ export function renderCardPng(html, outPath) {
         "--headless",
         "--disable-gpu",
         "--hide-scrollbars",
+        // 容器里跑（Cloud Run 的 chromium）才需要这两个：沙盒在无特权容器里
+        // 起不来，/dev/shm 默认太小会直接崩掉；本机 Chrome 加了也无害。
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
         `--window-size=${CARD_W},${CARD_H}`,
         "--allow-file-access-from-files",
         `--screenshot=${outPath}`,
@@ -110,29 +113,31 @@ export function cardSlug(brandName, author, leadId) {
 
 /**
  * 生成一张预约卡。要求 lead 已经在 card_meta 里配好店名/地区/风格标签/底图——
- * 没配的直接报错，不用默认值瞎猜，免得批量跑出一堆张冠李戴的卡。
+ * 没配的直接报错，不用默认值瞎猜，免得批量跑出一堆张冠李生的卡。
+ *
+ * @param {object} store  见 booking.js 文件头注释——storage.js 或 booking-db.js。
+ *   store.getCardMeta() 除了 brand_name 等字段，必须带一个 fallback_name
+ *   （品牌名为空时用来兜底的名字，SQLite 那边是 JOIN leads.author 拿到的，
+ *   Postgres 那边是迁移时直接写进 card_meta 的一列）——这样这个函数不用
+ *   关心「名字从哪个表来」，两边店铺信息表结构不同也不用两套逻辑。
  */
-export function generateCard(leadId) {
-  const db = open();
-  const lead = db.prepare(`SELECT id, author FROM leads WHERE id=?`).get(leadId);
-  if (!lead) throw new Error(`lead ${leadId} 不存在`);
-
-  const meta = getCardMeta(leadId);
+export async function generateCard(store, leadId) {
+  const meta = await store.getCardMeta(leadId);
   if (!meta) throw new Error(`lead ${leadId} 还没配置 card_meta（店名/地区/风格标签/底图），先调 setCardMeta`);
 
   const bgFile = path.join(CARD_BG_DIR, meta.background_file);
   if (!fs.existsSync(bgFile)) throw new Error(`底图不存在：${bgFile}`);
 
-  const slots = getFreeSlots(leadId, { days: 7, count: 3 });
+  const slots = await getFreeSlots(store, leadId, { days: 7, count: 3 });
   const html = buildCardHtml({
-    brandName: meta.brand_name || lead.author,
+    brandName: meta.brand_name || meta.fallback_name,
     regionLabel: meta.region_label,
     styleTags: meta.style_tags,
     slots,
     bgFile: meta.background_file,
   });
 
-  const slug = cardSlug(meta.brand_name, lead.author, leadId);
+  const slug = cardSlug(meta.brand_name, meta.fallback_name, leadId);
   const outPath = path.join(CARD_OUT_DIR, `${slug}.png`);
   renderCardPng(html, outPath);
   return { outPath, slots };

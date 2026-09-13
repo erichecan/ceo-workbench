@@ -55,17 +55,17 @@ test("技师停用后 listStaff 默认不再返回，但历史预约的 staff_id
   assert.equal(store.listBookings(leadId)[0].staff_id, staffId);
 });
 
-test("单人店（没有技师）：一个预约占满这个时段", () => {
+test("单人店（没有技师）：一个预约占满这个时段", async () => {
   freshDb();
   const leadId = mkLead();
   const now = new Date("2026-09-14T09:00:00"); // 周一
   store.setBookingSettings(leadId, { slotMinutes: 60, hours: { "1": ["10:00", "12:00"] } });
   store.addBooking(leadId, { date: "2026-09-14", startTime: "10:00", endTime: "11:00" });
-  const slots = getFreeSlots(leadId, { days: 1, count: 5, now });
+  const slots = await getFreeSlots(store, leadId, { days: 1, count: 5, now });
   assert.deepEqual(slots.map((s) => s.time), ["11:00"]);
 });
 
-test("多技师店：技师A被占用，技师B还空着，这个时段仍然显示在卡片上", () => {
+test("多技师店：技师A被占用，技师B还空着，这个时段仍然显示在卡片上", async () => {
   freshDb();
   const leadId = mkLead();
   const now = new Date("2026-09-14T09:00:00");
@@ -73,11 +73,11 @@ test("多技师店：技师A被占用，技师B还空着，这个时段仍然显
   store.addStaff(leadId, "技师B");
   store.setBookingSettings(leadId, { slotMinutes: 60, hours: { "1": ["10:00", "12:00"] } });
   store.addBooking(leadId, { date: "2026-09-14", startTime: "10:00", endTime: "11:00", staffId: a });
-  const slots = getFreeSlots(leadId, { days: 1, count: 5, now });
+  const slots = await getFreeSlots(store, leadId, { days: 1, count: 5, now });
   assert.deepEqual(slots.map((s) => s.time), ["10:00", "11:00"]);
 });
 
-test("多技师店：两个技师都被占用，这个时段才算满", () => {
+test("多技师店：两个技师都被占用，这个时段才算满", async () => {
   freshDb();
   const leadId = mkLead();
   const now = new Date("2026-09-14T09:00:00");
@@ -86,11 +86,11 @@ test("多技师店：两个技师都被占用，这个时段才算满", () => {
   store.setBookingSettings(leadId, { slotMinutes: 60, hours: { "1": ["10:00", "12:00"] } });
   store.addBooking(leadId, { date: "2026-09-14", startTime: "10:00", endTime: "11:00", staffId: a });
   store.addBooking(leadId, { date: "2026-09-14", startTime: "10:00", endTime: "11:00", staffId: b });
-  const slots = getFreeSlots(leadId, { days: 1, count: 5, now });
+  const slots = await getFreeSlots(store, leadId, { days: 1, count: 5, now });
   assert.deepEqual(slots.map((s) => s.time), ["11:00"]);
 });
 
-test("多技师店：没标技师的预约按占满全部技师保守处理", () => {
+test("多技师店：没标技师的预约按占满全部技师保守处理", async () => {
   freshDb();
   const leadId = mkLead();
   const now = new Date("2026-09-14T09:00:00");
@@ -98,7 +98,7 @@ test("多技师店：没标技师的预约按占满全部技师保守处理", ()
   store.addStaff(leadId, "技师B");
   store.setBookingSettings(leadId, { slotMinutes: 60, hours: { "1": ["10:00", "12:00"] } });
   store.addBooking(leadId, { date: "2026-09-14", startTime: "10:00", endTime: "11:00" }); // 没填 staffId
-  const slots = getFreeSlots(leadId, { days: 1, count: 5, now });
+  const slots = await getFreeSlots(store, leadId, { days: 1, count: 5, now });
   assert.deepEqual(slots.map((s) => s.time), ["11:00"]);
 });
 

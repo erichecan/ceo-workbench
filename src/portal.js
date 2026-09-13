@@ -5,39 +5,42 @@
  * card-admin.js 是「我」管理所有线索的内部工具，一进去就是一整个列表，
  * 混着好几个不相关的商户，那种东西绝对不能给客户看到（她不该看见同行）。
  *
- * portal.js 是**演示/未来真给客户用**的版本：一次只服务一个商户
- * （?lead=<id> 认成「这就是你」），不出现任何别的商户信息，文案换成
- * 店主看得懂的大白话（"客人什么时候来"，不是 "booking_start"）。
+ * portal.js 是**给客户用、能部署到公网**的版本：一次只服务一个商户
+ * （DEFAULT_LEAD_ID 或 ?lead=<id> 认成「这就是你」），不出现任何别的商户
+ * 信息，文案换成店主看得懂的大白话（"客人什么时候来"，不是 "booking_start"）。
  *
- * 现在还没有账号登录——先把这个当成销售演示/单店demo。真的要给客户用，
- * 下一步是给这个 URL 套一层她自己的登录态，界面本身已经是完整的了。
+ * 数据存在 Postgres（booking-db.js），不是本地 SQLite——这个文件会被部署到
+ * Cloud Run，容器磁盘不持久，本地 SQLite 文件放这里等于每次冷启动就清空。
+ * 内部工具 card-admin.js 继续用本地 SQLite，两边不共用存储层。
  *
- * 用法：node src/portal.js [--port 4322]
+ * 环境变量：
+ *   DATABASE_URL              Postgres 连接串（必需，booking-db.js 读取）
+ *   PORTAL_USER / PORTAL_PASS 登录凭据；生产环境（NODE_ENV=production）必填，
+ *                             本地不设就跳过鉴权，方便开发时直接开着用
+ *   DEFAULT_LEAD_ID           这个部署实例服务哪个商户，默认 99（本地演示值）
+ *   PORT                      监听端口（Cloud Run 注入，默认 4322）
+ *
+ * 本地用法：node src/portal.js [--port 4322]
  */
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
-import {
-  getBookingSettings,
-  setBookingSettings,
-  listBookings,
-  addBooking,
-  deleteBooking,
-  listStaff,
-  addStaff,
-  deactivateStaff,
-  recordCardSend,
-  findConflictingSends,
-  resolveCardSend,
-  getCardMeta,
-  getLead,
-} from "./storage.js";
+import * as store from "./booking-db.js";
 import { getFreeSlots } from "./booking.js";
 import { generateCard, cardSlug, CARD_OUT_DIR } from "./card.js";
+import { createAuth } from "./auth.js";
 
-const PORT = Number(process.argv.find((a) => a.startsWith("--port="))?.split("=")[1]) || 4322;
+const PORT = Number(process.argv.find((a) => a.startsWith("--port="))?.split("=")[1]) || Number(process.env.PORT) || 4322;
+const DEFAULT_LEAD_ID = Number(process.env.DEFAULT_LEAD_ID) || 99;
 const WEEKDAYS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 const CHANNEL_LABELS = { xiaohongshu: "小红书", phone: "电话", walk_in: "到店", other: "其他" };
+
+const auth = createAuth({ user: process.env.PORTAL_USER, pass: process.env.PORTAL_PASS, cookieName: "portal_session", title: "预约后台" });
+if (!auth && process.env.NODE_ENV === "production") {
+  console.error("✗ 拒绝启动：生产环境必须配置 PORTAL_USER / PORTAL_PASS。");
+  process.exit(1);
+}
+if (!auth) console.warn("⚠️ 未配置 PORTAL_USER/PORTAL_PASS，本地演示模式，不鉴权。");
 
 const esc = (s) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -55,11 +58,10 @@ function fmtDate(iso) {
   return `${iso.slice(5).replace("-", "/")} 周${"日一二三四五六"[d.getDay()]}`;
 }
 
-/** 卡片文件名要跟 card.js 生成文件时用的算法完全一致——店名为空时兜底用昵称，
- *  否则店主没填品牌名时这里会算出另一个文件名，预览永远 404。 */
-function slugFor(leadId, meta) {
-  const lead = getLead(leadId);
-  return cardSlug(meta?.brand_name, lead?.author, leadId);
+/** 卡片文件名要跟 card.js 生成文件时用的算法完全一致——meta.fallback_name
+ *  就是店名为空时的兜底名字，两边算法保持一致，预览才不会 404。 */
+function slugFor(meta, leadId) {
+  return cardSlug(meta?.brand_name, meta?.fallback_name, leadId);
 }
 
 function staffOptions(staffList, selected) {
@@ -85,15 +87,14 @@ function bookingRow(leadId, b, staffList) {
 }
 
 /**
- * 找出「已经标过 resolved 之前的 active 发送快照」里，跟现在这些预约时段
- * 重叠的记录——说明这个时段的卡片发出去过，而现在确实有人订上了，值得
- * 店主回头确认一下是不是发给过不止一位客人。在渲染时现算，不靠 URL 传状态，
- * 刷新页面也能看到，不会因为重定向丢了信息。
+ * 找出还是 active、且快照里的时段跟现在这些预约重叠的发送记录——说明这个
+ * 时段的卡片发出去过，而现在确实有人订上了，值得店主回头确认是不是发给过
+ * 不止一位客人。在渲染时现算，不靠 URL 传状态，刷新页面也能看到。
  */
-function collectSendConflicts(leadId, bookings) {
+async function collectSendConflicts(leadId, bookings) {
   const seen = new Map();
   for (const b of bookings) {
-    for (const hit of findConflictingSends(leadId, b.date, b.start_time, b.end_time)) {
+    for (const hit of await store.findConflictingSends(leadId, b.date, b.start_time, b.end_time)) {
       seen.set(hit.id, hit);
     }
   }
@@ -291,12 +292,12 @@ function page({ leadId, meta, settings, bookings, staffList, freeSlots, slug, sa
 </body></html>`;
 }
 
-function schedulePage(leadId, days = 5) {
-  const meta = getCardMeta(leadId);
-  const settings = getBookingSettings(leadId) || { slotMinutes: 90, hours: {} };
-  const staffList = listStaff(leadId);
+async function schedulePage(leadId, days = 5) {
+  const meta = await store.getCardMeta(leadId);
+  const settings = (await store.getBookingSettings(leadId)) || { slotMinutes: 90, hours: {} };
+  const staffList = await store.listStaff(leadId);
   const columns = staffList.length ? staffList : [{ id: null, name: "店铺" }];
-  const bookings = listBookings(leadId);
+  const bookings = await store.listBookings(leadId);
 
   const toMin = (hhmm) => {
     const [h, m] = hhmm.split(":").map(Number);
@@ -387,14 +388,14 @@ function parseHoursFromForm(form) {
   return hours;
 }
 
-function render(leadId, { saved = false, errorMsg = "" } = {}, res) {
-  const meta = getCardMeta(leadId);
-  const settings = getBookingSettings(leadId) || { slotMinutes: 90, hours: {} };
-  const bookings = listBookings(leadId);
-  const staffList = listStaff(leadId);
-  const freeSlots = getFreeSlots(leadId, { days: 7, count: 3 });
-  const slug = slugFor(leadId, meta);
-  const sendConflicts = collectSendConflicts(leadId, bookings);
+async function render(leadId, { saved = false, errorMsg = "" } = {}, res) {
+  const meta = await store.getCardMeta(leadId);
+  const settings = (await store.getBookingSettings(leadId)) || { slotMinutes: 90, hours: {} };
+  const bookings = await store.listBookings(leadId);
+  const staffList = await store.listStaff(leadId);
+  const freeSlots = await getFreeSlots(store, leadId, { days: 7, count: 3 });
+  const slug = slugFor(meta, leadId);
+  const sendConflicts = await collectSendConflicts(leadId, bookings);
   const staffOverlaps = collectStaffOverlaps(bookings);
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   res.end(page({ leadId, meta, settings, bookings, staffList, freeSlots, slug, saved, errorMsg, sendConflicts, staffOverlaps }));
@@ -403,9 +404,25 @@ function render(leadId, { saved = false, errorMsg = "" } = {}, res) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   try {
+    if (req.method === "POST" && url.pathname === "/login" && auth) {
+      const form = new URLSearchParams(await readBody(req));
+      const result = auth.handleLogin(form);
+      if (!result.ok) {
+        res.writeHead(401, { "Content-Type": "text/html; charset=utf-8" });
+        return res.end(auth.loginPage(result.msg));
+      }
+      res.writeHead(302, { "Set-Cookie": result.cookie, Location: "/" });
+      return res.end();
+    }
+    if (req.method === "GET" && url.pathname === "/logout" && auth) {
+      res.writeHead(302, { "Set-Cookie": auth.logoutCookie(), Location: "/login" });
+      return res.end();
+    }
+    if (auth && auth.guard(req, res)) return;
+
     if (req.method === "GET" && url.pathname === "/") {
-      const leadId = Number(url.searchParams.get("lead")) || 99;
-      return render(
+      const leadId = Number(url.searchParams.get("lead")) || DEFAULT_LEAD_ID;
+      return await render(
         leadId,
         {
           saved: url.searchParams.get("saved") === "1",
@@ -415,14 +432,14 @@ const server = http.createServer(async (req, res) => {
       );
     }
     if (req.method === "GET" && url.pathname === "/schedule") {
-      const leadId = Number(url.searchParams.get("lead")) || 99;
+      const leadId = Number(url.searchParams.get("lead")) || DEFAULT_LEAD_ID;
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-      return res.end(schedulePage(leadId));
+      return res.end(await schedulePage(leadId));
     }
     if (req.method === "GET" && url.pathname === "/card.png") {
-      const leadId = Number(url.searchParams.get("lead")) || 99;
-      const meta = getCardMeta(leadId);
-      return serveCard(res, slugFor(leadId, meta));
+      const leadId = Number(url.searchParams.get("lead")) || DEFAULT_LEAD_ID;
+      const meta = await store.getCardMeta(leadId);
+      return serveCard(res, slugFor(meta, leadId));
     }
     if (req.method === "POST" && url.pathname === "/booking/add") {
       const form = new URLSearchParams(await readBody(req));
@@ -435,7 +452,7 @@ const server = http.createServer(async (req, res) => {
         return res.end();
       }
       const staffId = form.get("staff_id") ? Number(form.get("staff_id")) : null;
-      addBooking(leadId, {
+      await store.addBooking(leadId, {
         date, startTime, endTime,
         customerName: form.get("customer_name"),
         phone: form.get("phone"),
@@ -443,26 +460,26 @@ const server = http.createServer(async (req, res) => {
         channel: form.get("channel") || "xiaohongshu",
         staffId,
       });
-      if (getCardMeta(leadId)) generateCard(leadId);
+      if (await store.getCardMeta(leadId)) await generateCard(store, leadId);
       res.writeHead(302, { Location: `/?lead=${leadId}&saved=1` });
       return res.end();
     }
     if (req.method === "POST" && url.pathname === "/booking/delete") {
       const form = new URLSearchParams(await readBody(req));
       const leadId = Number(form.get("lead"));
-      deleteBooking(Number(form.get("id")));
-      if (getCardMeta(leadId)) generateCard(leadId);
+      await store.deleteBooking(Number(form.get("id")));
+      if (await store.getCardMeta(leadId)) await generateCard(store, leadId);
       res.writeHead(302, { Location: `/?lead=${leadId}&saved=1` });
       return res.end();
     }
     if (req.method === "POST" && url.pathname === "/hours/save") {
       const form = new URLSearchParams(await readBody(req));
       const leadId = Number(form.get("lead"));
-      setBookingSettings(leadId, {
+      await store.setBookingSettings(leadId, {
         slotMinutes: Number(form.get("slot_minutes")) || 90,
         hours: parseHoursFromForm(form),
       });
-      if (getCardMeta(leadId)) generateCard(leadId);
+      if (await store.getCardMeta(leadId)) await generateCard(store, leadId);
       res.writeHead(302, { Location: `/?lead=${leadId}&saved=1` });
       return res.end();
     }
@@ -470,28 +487,28 @@ const server = http.createServer(async (req, res) => {
       const form = new URLSearchParams(await readBody(req));
       const leadId = Number(form.get("lead"));
       const name = (form.get("name") || "").trim();
-      if (name) addStaff(leadId, name);
+      if (name) await store.addStaff(leadId, name);
       res.writeHead(302, { Location: `/?lead=${leadId}&saved=1` });
       return res.end();
     }
     if (req.method === "POST" && url.pathname === "/staff/deactivate") {
       const form = new URLSearchParams(await readBody(req));
       const leadId = Number(form.get("lead"));
-      deactivateStaff(Number(form.get("id")));
+      await store.deactivateStaff(Number(form.get("id")));
       res.writeHead(302, { Location: `/?lead=${leadId}&saved=1` });
       return res.end();
     }
     if (req.method === "POST" && url.pathname === "/card/mark-sent") {
       const form = new URLSearchParams(await readBody(req));
       const leadId = Number(form.get("lead"));
-      const slots = getFreeSlots(leadId, { days: 7, count: 3 });
-      recordCardSend(leadId, slots, form.get("note"));
+      const slots = await getFreeSlots(store, leadId, { days: 7, count: 3 });
+      await store.recordCardSend(leadId, slots, form.get("note"));
       res.writeHead(302, { Location: `/?lead=${leadId}&saved=1` });
       return res.end();
     }
     if (req.method === "POST" && url.pathname === "/card/resolve-send") {
       const form = new URLSearchParams(await readBody(req));
-      resolveCardSend(Number(form.get("send_id")));
+      await store.resolveCardSend(Number(form.get("send_id")));
       res.writeHead(302, { Location: req.headers.referer || "/" });
       return res.end();
     }
@@ -504,6 +521,6 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, "127.0.0.1", () => {
-  console.log(`店主预约后台（演示）→ http://localhost:${PORT}/?lead=99`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`店主预约后台 → http://localhost:${PORT}/?lead=${DEFAULT_LEAD_ID}`);
 });

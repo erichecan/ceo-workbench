@@ -1,0 +1,82 @@
+name: Deploy Booking Portal to Cloud Run
+
+# 预约后台（portal.js）：给客户用、部署到公网的那份，数据在 Neon Postgres。
+# 跟 deploy-ceo-site.yml 是完全独立的两条流水线，互不触发（paths 各管各的）。
+#
+# 部署前必须在 GCP 项目里手动建好 3 个 Secret（本仓库暂时没有权限从 CI
+# 之外的地方自动建，见 docs/ 里的部署记录）：
+#   gcloud secrets create booking-portal-database-url --data-file=- <<< "<Neon 连接串>" --project=$PROJECT_ID
+#   gcloud secrets create booking-portal-user          --data-file=- <<< "<登录用户名>"  --project=$PROJECT_ID
+#   gcloud secrets create booking-portal-pass          --data-file=- <<< "<登录密码，至少10位>" --project=$PROJECT_ID
+# 同一个 GCP_SA_KEY（已经在用）只要有 secretmanager.secretAccessor 角色即可读取。
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/portal.js"
+      - "src/booking.js"
+      - "src/card.js"
+      - "src/booking-db.js"
+      - "src/auth.js"
+      - "src/config.js"
+      - "data/cards/backgrounds/**"
+      - "portal/Dockerfile"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-booking-portal.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: supply-491510
+      REGION: northamerica-northeast1
+      SERVICE_NAME: booking-portal
+      IMAGE: northamerica-northeast1-docker.pkg.dev/supply-491510/triplan/booking-portal:${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build
+        run: docker build -t ${{ env.IMAGE }} -f portal/Dockerfile .
+
+      - run: docker push ${{ env.IMAGE }}
+
+      - name: Deploy
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.IMAGE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --allow-unauthenticated \
+            --min-instances=0 --max-instances=2 \
+            --cpu=1 --memory=512Mi --port=8080 \
+            --set-env-vars="NODE_ENV=production,DEFAULT_LEAD_ID=99" \
+            --set-secrets="DATABASE_URL=booking-portal-database-url:latest,PORTAL_USER=booking-portal-user:latest,PORTAL_PASS=booking-portal-pass:latest" \
+            --quiet
+          # --allow-unauthenticated 让浏览器能直接访问，真正的门在应用层
+          # 登录表单 + 签名 cookie（src/auth.js），没配置 PORTAL_USER/PASS
+          # 且 NODE_ENV=production 时 portal.js 会直接拒绝启动。
+
+      - name: Verify
+        run: |
+          URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
+            --format="value(status.url)")
+          echo "URL: $URL"
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
+          echo "未带凭据访问首页 → HTTP $CODE"
+          if [ "$CODE" != "401" ]; then
+            echo "✗ 鉴权未生效：期望 401，实际 $CODE"
+            exit 1
+          fi
+          echo "✅ 部署成功，鉴权生效 → $URL"

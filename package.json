@@ -15,6 +15,9 @@
     "report": "node src/cli.js report",
     "daily": "node src/cli.js daily",
     "list": "node src/cli.js list",
+    "card": "node src/cli.js card",
+    "card:admin": "node src/card-admin.js",
+    "portal": "node src/portal.js",
     "doctor": "node src/cli.js doctor",
     "test": "node --test \"test/**/*.test.js\"",
     "board": "node tasks/scripts/board.mjs",
@@ -24,7 +27,8 @@
   },
   "dependencies": {
     "better-sqlite3": "^12.2.0",
-    "marked": "^18.0.9"
+    "marked": "^18.0.9",
+    "pg": "^8.23.0"
   },
   "engines": {
     "node": ">=20"

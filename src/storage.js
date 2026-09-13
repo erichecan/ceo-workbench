@@ -613,8 +613,17 @@ export function setCardMeta(leadId, { brandName, regionLabel, styleTags, backgro
     .run(leadId, brandName || null, regionLabel || null, styleTags || null, backgroundFile, new Date().toISOString());
 }
 
+/** fallback_name：品牌名为空时 card.js 用来兜底的名字，统一走 leads.author——
+ *  跟 Postgres 那边 card_meta.fallback_name 是同一个作用，接口形状对齐。 */
 export function getCardMeta(leadId) {
-  return open().prepare(`SELECT * FROM card_meta WHERE lead_id=?`).get(leadId) || null;
+  return (
+    open()
+      .prepare(
+        `SELECT cm.*, l.author AS fallback_name FROM card_meta cm
+         JOIN leads l ON l.id = cm.lead_id WHERE cm.lead_id=?`
+      )
+      .get(leadId) || null
+  );
 }
 
 export function stats() {

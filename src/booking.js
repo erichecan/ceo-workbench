@@ -9,8 +9,12 @@
  * 客人来说就是能约的——不能因为技师 A 满了就把整个时段标成不可约，那样卡片
  * 会平白少掉本来能接的生意。没指定技师的预约（含单人店的全部预约）按「占满
  * 所有技师」处理，这是保守默认：店主没标技师，系统没法知道具体是谁被占用了。
+ *
+ * 数据存哪不写死在这里——`store` 由调用方传入（本地 CLI/card-admin 用
+ * storage.js 的 SQLite 实现，部署到公网的 portal.js 用 booking-db.js 的
+ * Postgres 实现）。`await store.xxx()` 对同步返回值和 Promise 都成立，
+ * 所以这里统一用 async，两边实现互不用改代码就能共用同一份算法。
  */
-import { getBookingSettings, bookingsOn, listStaff } from "./storage.js";
 
 const WEEKDAY_LABEL = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
@@ -30,15 +34,16 @@ const toHHMM = (mins) =>
   `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
 
 /**
+ * @param {object} store  见文件头注释——storage.js 或 booking-db.js
  * @param {number} leadId
  * @param {{days?:number, count?:number, now?:Date}} opts  now 只在测试里传
- * @returns {{date:string, weekday:number, time:string, end:string, label:string}[]}
+ * @returns {Promise<{date:string, weekday:number, time:string, end:string, label:string}[]>}
  */
-export function getFreeSlots(leadId, { days = 7, count = 3, now = new Date() } = {}) {
-  const settings = getBookingSettings(leadId);
+export async function getFreeSlots(store, leadId, { days = 7, count = 3, now = new Date() } = {}) {
+  const settings = await store.getBookingSettings(leadId);
   if (!settings) return [];
   const { slotMinutes, hours } = settings;
-  const staffIds = listStaff(leadId).map((s) => s.id);
+  const staffIds = (await store.listStaff(leadId)).map((s) => s.id);
 
   const results = [];
   for (let d = 0; d < days && results.length < count; d++) {
@@ -50,7 +55,7 @@ export function getFreeSlots(leadId, { days = 7, count = 3, now = new Date() } =
     if (!range) continue; // 当天不营业
 
     const [openT, closeT] = range;
-    const booked = bookingsOn(leadId, iso);
+    const booked = await store.bookingsOn(leadId, iso);
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
     for (let t = toMinutes(openT); t + slotMinutes <= toMinutes(closeT); t += slotMinutes) {

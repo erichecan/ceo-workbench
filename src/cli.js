@@ -14,6 +14,7 @@
  */
 import { analyzePending } from "./analyzer.js";
 import { config, DEFAULT_KEYWORDS, DEMAND_KEYWORDS, ensureDirs, jitter, today } from "./config.js";
+import { generateCard } from "./card.js";
 import { DIAG_DIR, writeDiagCards } from "./diagcard.js";
 import { diagnosePending } from "./diagnose.js";
 import * as opencli from "./opencli.js";
@@ -21,6 +22,7 @@ import { fetchProfiles } from "./profile.js";
 import { generate } from "./reporter.js";
 import * as scraper from "./scraper.js";
 import { analyzedLeads, insertLead, open, setStatus, stats } from "./storage.js";
+import * as sqliteStore from "./storage.js";
 
 function parseArgs(argv) {
   const flags = { keyword: [], url: [] };
@@ -191,6 +193,18 @@ function cmdList(flags) {
   return 0;
 }
 
+async function cmdCard(rest) {
+  const [id] = rest;
+  if (!id) {
+    console.error("用法：node src/cli.js card <leadId>");
+    return 1;
+  }
+  const { outPath, slots } = await generateCard(sqliteStore, Number(id));
+  console.log(`卡片 → ${outPath}`);
+  console.log(slots.length ? `空闲时段：${slots.map((s) => `${s.label} ${s.time}`).join(" · ")}` : "近期无空闲时段");
+  return 0;
+}
+
 function cmdStatus(rest) {
   const [id, status, ...note] = rest;
   if (!id || !status) {
@@ -249,6 +263,7 @@ const HELP = `咨询式获客产线 —— 找北美华人商家，判断生意�
   npm run list     [-- --min-score 70 --status new]
   npm run doctor                       # 自检（含真实只读命令验登录态）
   node src/cli.js status <id> contacted "已私信"
+  node src/cli.js card <leadId>         # 出预约卡（要求先配好 card_meta + booking_settings）
 
 ⛔ 私信永不代发。草稿由你本人点发送。
 
@@ -278,6 +293,8 @@ async function main() {
     }
     case "list":
       return cmdList(flags);
+    case "card":
+      return cmdCard(rest);
     case "status":
       return cmdStatus(rest);
     case "doctor":

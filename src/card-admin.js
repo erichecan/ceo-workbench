@@ -14,6 +14,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import * as sqliteStore from "./storage.js";
 import {
   leadsForCards,
   getBookingSettings,
@@ -422,7 +423,7 @@ const server = http.createServer(async (req, res) => {
         slotMinutes: Number(form.get("slot_minutes")) || 90,
         hours: parseHoursFromForm(form),
       });
-      generateCard(leadId);
+      await generateCard(sqliteStore, leadId);
 
       // 改店名会换一个文件名——旧文件不会再被更新，永远定格在改名那一刻的
       // 空位状态，留着就是一份可能已经发出去的过期信息，直接删掉。
@@ -455,7 +456,7 @@ const server = http.createServer(async (req, res) => {
         channel: form.get("channel") || "xiaohongshu",
         staffId,
       });
-      if (getCardMeta(leadId)) generateCard(leadId);
+      if (getCardMeta(leadId)) await generateCard(sqliteStore, leadId);
       res.writeHead(302, { Location: `/edit?lead=${leadId}&saved=1` });
       return res.end();
     }
@@ -464,7 +465,7 @@ const server = http.createServer(async (req, res) => {
       const form = new URLSearchParams(await readBody(req));
       const leadId = Number(form.get("lead"));
       deleteBooking(Number(form.get("id")));
-      if (getCardMeta(leadId)) generateCard(leadId);
+      if (getCardMeta(leadId)) await generateCard(sqliteStore, leadId);
       res.writeHead(302, { Location: `/edit?lead=${leadId}&saved=1` });
       return res.end();
     }
@@ -489,7 +490,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && url.pathname === "/card/mark-sent") {
       const form = new URLSearchParams(await readBody(req));
       const leadId = Number(form.get("lead"));
-      recordCardSend(leadId, getFreeSlots(leadId, { days: 7, count: 3 }), form.get("note"));
+      recordCardSend(leadId, await getFreeSlots(sqliteStore, leadId, { days: 7, count: 3 }), form.get("note"));
       res.writeHead(302, { Location: `/edit?lead=${leadId}&saved=1` });
       return res.end();
     }

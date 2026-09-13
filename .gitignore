@@ -9,6 +9,13 @@ data/*
 reports/*
 !reports/.gitkeep
 
+# 预约卡的底图是固定素材（不是抓来的运行时数据），portal.js 部署到
+# Cloud Run 时要靠 git 提交的内容进镜像，必须例外放行；生成出来的卡片
+# png（data/cards/output/）还是运行时产物，继续不入库。
+!data/cards/
+data/cards/output/
+!data/cards/backgrounds/
+
 # CEO 站点生成产物（由 npm run site 从 docs/ tasks/ finance/ 编译而来）
 site/dist/
 
