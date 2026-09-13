@@ -20,11 +20,11 @@ export function Sidebar() {
 
   async function handleLogout() {
     try {
-      await fetch('/admin/api/auth/logout', { method: 'POST' })
+      await fetch('/api/auth/logout', { method: 'POST' })
     } catch (err) {
       console.error('[Logout] request failed', err)
     }
-    window.location.assign('/admin/login')
+    window.location.assign('/login')
   }
 
   return (

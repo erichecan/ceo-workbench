@@ -21,12 +21,12 @@ export default function TeamTable({ initialMembers }: { initialMembers: TeamMemb
   const [error, setError] = useState<string | null>(null)
 
   async function refresh() {
-    const res = await fetch('/admin/api/team')
+    const res = await fetch('/api/team')
     setMembers(await res.json())
   }
 
   async function handleArchive(id: string) {
-    const res = await fetch(`/admin/api/team/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/team/${id}`, { method: 'DELETE' })
     if (!res.ok) {
       setError('Failed to archive member')
       return

@@ -101,7 +101,7 @@ export default function AppointmentModal({
 
       let res: Response
       if (appointment?.id) {
-        res = await fetch(`/admin/api/appointments/${appointment.id}`, {
+        res = await fetch(`/api/appointments/${appointment.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -112,7 +112,7 @@ export default function AppointmentModal({
           }),
         })
       } else {
-        res = await fetch('/admin/api/appointments', {
+        res = await fetch('/api/appointments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
@@ -137,7 +137,7 @@ export default function AppointmentModal({
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/admin/api/appointments/${appointment.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/appointments/${appointment.id}`, { method: 'DELETE' })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
         setError(data.error ?? 'Failed to cancel appointment')
@@ -156,7 +156,7 @@ export default function AppointmentModal({
     if (!appointment?.id) return
     setStatus(newStatus)
     try {
-      const res = await fetch(`/admin/api/appointments/${appointment.id}`, {
+      const res = await fetch(`/api/appointments/${appointment.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),

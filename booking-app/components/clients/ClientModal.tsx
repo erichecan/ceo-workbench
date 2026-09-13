@@ -42,7 +42,7 @@ export default function ClientModal({ open, client, onClose, onSaved }: Props) {
     setLoading(true)
     setError(null)
     try {
-      const url = client?.id ? `/admin/api/clients/${client.id}` : '/admin/api/clients'
+      const url = client?.id ? `/api/clients/${client.id}` : '/api/clients'
       const method = client?.id ? 'PATCH' : 'POST'
       const res = await fetch(url, {
         method,

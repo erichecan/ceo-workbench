@@ -42,7 +42,7 @@ export default function TeamMemberModal({ open, member, onClose, onSaved }: Prop
   async function handleSave() {
     setLoading(true)
     setError(null)
-    const url = member?.id ? `/admin/api/team/${member.id}` : '/admin/api/team'
+    const url = member?.id ? `/api/team/${member.id}` : '/api/team'
     const method = member?.id ? 'PATCH' : 'POST'
     const res = await fetch(url, {
       method,

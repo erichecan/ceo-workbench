@@ -54,7 +54,7 @@ export default function CalendarClient({ locationId, clients, teamMembers, servi
     setError(null)
     try {
       const res = await fetch(
-        `/admin/api/appointments?locationId=${locationId}&from=${from.toISOString()}&to=${to.toISOString()}`,
+        `/api/appointments?locationId=${locationId}&from=${from.toISOString()}&to=${to.toISOString()}`,
         { signal: abortRef.current.signal }
       )
       if (!res.ok) {

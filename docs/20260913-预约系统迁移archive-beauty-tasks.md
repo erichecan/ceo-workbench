@@ -49,10 +49,68 @@
   的字段是否还要保留"这类收尾问题记录下来,不用堵在这次迁移里现在决定。
 
 ## 依赖顺序
-U1 → U2 → U3 → U4/U5/U6(可并行)→ U7(独立,随时能做,只读源库)→ U8 → U9 → U10(人工决策,不算完成)
+U1 → U2 → U3 → U4/U5/U6(可并行)→ U7(独立,随时能做,只读源库)→ **U11(卡片预览迁移,
+新增,阻塞 U8)** → U8 → U9 → U10(人工决策,不算完成)
+
+⛔ U8 当前不能执行:.github/workflows/deploy-booking-portal.yml 和 booking-app/Dockerfile
+已经改好并验证过(本地 docker run 实测登录+日历正常),但**没有 push**——push 到 main 会
+立刻触发部署,而 booking-app 现在还没有卡片预览功能(U11),部署了会让店主在后台丢失预览/
+重新生成卡片的入口。下次接手先确认 U11 做完再考虑要不要 push 这个 workflow 改动。
 
 ## 状态记录
 (每完成一条在这里补一行:日期 · 任务号 · 结果 · commit)
+
+- 2026-09-13 · ⚠️ 事故记录(U8 执行中) · 把新 schema `prisma db push` 到生产库
+  (`webproject-booking` 分支)时,`db push` 把 schema.prisma 里没声明的表当成"漂移"
+  直接删了——`staff/bookings/booking_settings/card_meta/card_sends` 五张旧表全部被删,
+  而当时线上 Cloud Run 服务(`booking-portal`)跑的还是**旧的 portal.js**,不是新系统,
+  相当于把还在服役的生产服务的数据库桌子直接抽掉了。
+  影响窗口:发现到修复之间(几分钟内)如果有人访问预约后台会报错;没有证据显示期间
+  有真实用户访问。
+  已恢复:凭只读检查阶段记录下来的确切字段值,重建了 5 张旧表结构 + 写回 card_meta/
+  booking_settings 那 2 行真实数据;用生产登录凭据实测 `/`、`/schedule` 恢复 200,
+  `/login` 恢复 302——功能与事故前一致。`/card.png` 返回 404 是**事故前就存在**的
+  已知行为(容器本地文件系统不持久,重启后生成过的 png 就没了),跟这次无关,不是新增
+  的问题。
+  同时因为这次操作,新 schema 已经提前推到了生产库(新表和旧表现在共存,互不干扰);
+  也顺手把这一条真实门店数据(Shine Nail Studio)重建进了新表,并按生产 Secret
+  Manager 里现有的用户名密码在新系统里建好了对应登录账号(bcrypt hash,同一套密码)。
+  **教训(已存入记忆)**:`prisma db push`/`migrate dev` 是把 schema.prisma 当成
+  数据库的完整真相,不在 schema 里声明的表会被当成漂移清掉,不是只增不减——
+  跟目标库共享物理数据库、但只想"新增自己的表"时,必须先确认目标库里除了自己要管
+  的表之外还有没有别人在用的表,否则等于无差别 drop。
+  ⛔ 因为这个事故,U8 的"直接替换 booking-portal"整体停下来,没有继续部署新镜像、
+  没有 push 新的 GitHub Actions workflow——见下面新发现的范围缺口。
+
+- 2026-09-13 · U8 范围缺口(未解决,记入台账) · 排查事故过程中发现 portal.js 除了
+  排班后台,还有一个 `/card.png` 路由(登录态下把 `card-admin.js`/`diagcard.js`
+  生成的预约卡 PNG 读出来给店主自己预览——不是发给顾客的公开链接,顾客看到的是
+  一张手动发送的静态图片,不经过这个 URL)。archive/beauty 迁移过来的 booking-app
+  完全没有卡片生成/预览这块功能,如果直接替换 booking-portal 服务,店主会失去在
+  后台里预览卡片的入口(不影响已经发出去的卡片,因为那是静态文件,但会影响以后
+  改店名/改背景图后要重新预览的流程)。
+  **2026-09-13 Eric 已拍板**:把卡片预览也迁进 booking-app,不留在 card-admin.js。
+
+- [ ] U11 card-preview-port:把 `src/card.js`(`buildCardHtml`/`renderCardPng`/
+  `cardSlug`/`generateCard`,144 行)的能力搬进 booking-app,给新系统加一个"预览/
+  重新生成预约卡"的入口,替代 portal.js 原来的 `/card.png`。
+  范围要点(下次做的时候先看这几个文件,不要凭记忆猜):
+  - `renderCardPng` 靠系统 Chrome 截图(不是 puppeteer),`booking-app/Dockerfile`
+    需要照 `portal/Dockerfile` 的样子加 `chromium` + `font-noto-cjk`(2026-09-13
+    实测过 alpine 默认没有中文字形,不装会变方块)。
+    `.env`/Cloud Run 需要 `CHROME_PATH`。
+  - portal.js 的 `/card.png` 只是"读现成文件"(`serveCard`),真正生成在
+    `card-admin.js` 那边调 `generateCard`——生成后的 png 写在容器本地磁盘
+    (`data/cards/output/`),**不持久化**,重启就没了(2026-09-13 事故排查时
+    确认过,是既有行为)。booking-app 里做这块时要一并想清楚:继续接受"重启丢图,
+    需要时随时能重新生成"这个模型,还是换成写 Cloud Storage/数据库 bytea 之类
+    持久化方案——不要在没想清楚这个之前就直接照抄旧逻辑。
+  - `buildCardHtml` 用的字段(brandName/regionLabel/styleTags/slots/bgFile)现在
+    对应新 schema 的 `Workspace.name`/`Location.name`/(styleTags 和 bgFile 新
+    schema里没有对应字段,需要新增,或者暂时挂在 `Location`/`Workspace` 的某个
+    JSON 字段里,U7 迁移时特意跳过了这两个字段没搬,回头一起处理)。
+  验收:booking-app 里能触发生成一张新卡片、能预览,内容(店名/地区/风格标签/
+  空闲时段)跟原来 portal.js 生成的一致。
 
 - 2026-09-13 · U1-U6 · `booking-app/` 落地,Neon `beauty` 项目下新建隔离分支 `booking-app-dev`
   (从旧 `production` 分支切出,不碰 `webproject-booking` 生产分支和原 `production` 分支)。

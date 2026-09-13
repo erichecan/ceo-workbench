@@ -56,7 +56,7 @@ export default function ServiceModal({ open, service, categories, onClose, onSav
   async function handleSave() {
     setLoading(true)
     setError(null)
-    const url = service?.id ? `/admin/api/services/${service.id}` : '/admin/api/services'
+    const url = service?.id ? `/api/services/${service.id}` : '/api/services'
     const method = service?.id ? 'PATCH' : 'POST'
     const res = await fetch(url, {
       method,

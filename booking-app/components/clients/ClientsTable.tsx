@@ -25,7 +25,7 @@ export default function ClientsTable({ initialClients }: { initialClients: Clien
     setError(null)
     abortRef.current?.abort()
     abortRef.current = new AbortController()
-    const url = q ? `/admin/api/clients?search=${encodeURIComponent(q)}` : '/admin/api/clients'
+    const url = q ? `/api/clients?search=${encodeURIComponent(q)}` : '/api/clients'
     try {
       const res = await fetch(url, { signal: abortRef.current.signal })
       if (!res.ok) {

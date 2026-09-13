@@ -99,7 +99,7 @@ export default function CheckoutModal({ open, appointment, locationId, onClose, 
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/admin/api/sales', {
+      const res = await fetch('/api/sales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

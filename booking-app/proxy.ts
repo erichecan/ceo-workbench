@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, SESSION_COOKIE } from '@/lib/auth'
 
-// Routes that handle their own Bearer-token auth or are truly public
 const PUBLIC_PATHS = [
   '/login',
-  '/guide',
   '/api/auth/login',
-  '/api/public',
-  '/api/customer', // customer routes validate Bearer token inside each handler
-  '/api/staff',    // staff routes validate Bearer token inside each handler
 ]
 
 function redirectToLogin(req: NextRequest) {

@@ -1,28 +1,20 @@
 name: Deploy Booking Portal to Cloud Run
 
-# 预约后台（portal.js）：给客户用、部署到公网的那份，数据在 Neon Postgres。
+# 预约后台:2026-09-13 起从 portal.js（Node 原生 http server）直接换成
+# booking-app/(Next.js + Prisma,迁移自 archive/beauty),复用同一个 Cloud Run
+# 服务名/URL,不是新增独立服务——Eric 明确要求"没必要新增独立的,就还用刚刚那个"。
 # 跟 deploy-ceo-site.yml 是完全独立的两条流水线，互不触发（paths 各管各的）。
 #
-# 部署前必须在 GCP 项目里手动建好 3 个 Secret（本仓库暂时没有权限从 CI
+# 部署前必须在 GCP 项目里手动建好以下 Secret（本仓库暂时没有权限从 CI
 # 之外的地方自动建，见 docs/ 里的部署记录）：
-#   gcloud secrets create booking-portal-database-url --data-file=- <<< "<Neon 连接串>" --project=$PROJECT_ID
-#   gcloud secrets create booking-portal-user          --data-file=- <<< "<登录用户名>"  --project=$PROJECT_ID
-#   gcloud secrets create booking-portal-pass          --data-file=- <<< "<登录密码，至少10位>" --project=$PROJECT_ID
-# 同一个 GCP_SA_KEY（已经在用）只要有 secretmanager.secretAccessor 角色即可读取。
+#   booking-portal-database-url（沿用旧的，同一个 Neon 连接串，schema 已在库内升级）
+#   booking-portal-jwt-secret（2026-09-13 新增，签发登录 session）
+# 同一个 GCP_SA_KEY（已经在用）需要有这两个 secret 的 secretmanager.secretAccessor 角色。
 on:
   push:
     branches: ["main"]
     paths:
-      - "src/portal.js"
-      - "src/booking.js"
-      - "src/card.js"
-      - "src/booking-db.js"
-      - "src/auth.js"
-      - "src/config.js"
-      - "data/cards/backgrounds/**"
-      - "portal/Dockerfile"
-      - "package.json"
-      - "package-lock.json"
+      - "booking-app/**"
       - ".github/workflows/deploy-booking-portal.yml"
   workflow_dispatch:
 
@@ -38,7 +30,7 @@ jobs:
       # 真影响体验了再单独迁移，不提前优化一个还没验证是不是问题的问题。
       REGION: asia-east1
       SERVICE_NAME: booking-portal
-      IMAGE: asia-east1-docker.pkg.dev/supply-491510/triplan/booking-portal:${{ github.sha }}
+      IMAGE: asia-east1-docker.pkg.dev/supply-491510/triplan/booking-app:${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +44,7 @@ jobs:
       - run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build
-        run: docker build -t ${{ env.IMAGE }} -f portal/Dockerfile .
+        run: docker build -t ${{ env.IMAGE }} -f booking-app/Dockerfile booking-app/
 
       - run: docker push ${{ env.IMAGE }}
 
@@ -64,13 +56,13 @@ jobs:
             --project ${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --min-instances=0 --max-instances=2 \
-            --cpu=1 --memory=1Gi --port=8080 \
-            --set-env-vars="NODE_ENV=production,DEFAULT_LEAD_ID=99" \
-            --set-secrets="DATABASE_URL=booking-portal-database-url:latest,PORTAL_USER=booking-portal-user:latest,PORTAL_PASS=booking-portal-pass:latest" \
+            --cpu=1 --memory=512Mi --port=8080 \
+            --set-env-vars="NODE_ENV=production" \
+            --set-secrets="DATABASE_URL=booking-portal-database-url:latest,JWT_SECRET=booking-portal-jwt-secret:latest" \
             --quiet
           # --allow-unauthenticated 让浏览器能直接访问，真正的门在应用层
-          # 登录表单 + 签名 cookie（src/auth.js），没配置 PORTAL_USER/PASS
-          # 且 NODE_ENV=production 时 portal.js 会直接拒绝启动。
+          # /login + JWT cookie（booking-app/proxy.ts + lib/auth.ts），
+          # 没有 session cookie 会被重定向到 /login，不是网关层拦截。
 
       - name: Verify
         run: |
@@ -78,28 +70,32 @@ jobs:
             --region ${{ env.REGION }} --project ${{ env.PROJECT_ID }} \
             --format="value(status.url)")
           echo "URL: $URL"
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
-          echo "未带凭据访问首页 → HTTP $CODE"
-          if [ "$CODE" != "401" ]; then
-            echo "✗ 鉴权未生效：期望 401，实际 $CODE"
+
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" -L "$URL/calendar")
+          echo "未带凭据访问 /calendar → HTTP $CODE（期望落在 /login，200）"
+          if [ "$CODE" != "200" ]; then
+            echo "✗ 鉴权重定向异常：期望 200（重定向后落在登录页），实际 $CODE"
             exit 1
           fi
 
-          # ⚠️ 401 只证明鉴权生效，不证明卡片渲染能跑（2026-09-13 实测：
-          # 512Mi 内存跑 chromium 截图会被 OOM 杀掉，容器不断重启，但这一步
-          # 之前只检查到 401 就判定部署成功）。登录后触发一次真实渲染，
-          # 确认 chromium + CJK 字体 + 内存额度这条链路真的没问题。
-          U=$(gcloud secrets versions access latest --secret=booking-portal-user --project=${{ env.PROJECT_ID }})
+          # 光有 200 不代表业务能跑通——2026-09-13 portal.js 那次事故就是只测了
+          # 401 没测真实渲染，被 OOM 混过去。这次测真实登录 + 有数据的日历页。
+          U="shinenail@shine-nail-studio.local"
           P=$(gcloud secrets versions access latest --secret=booking-portal-pass --project=${{ env.PROJECT_ID }})
-          curl -s -c /tmp/cookies.txt -X POST "$URL/login" --data-urlencode "u=$U" --data-urlencode "p=$P" -o /dev/null
-          curl -s -b /tmp/cookies.txt -X POST "$URL/hours/save" \
-            --data-urlencode "lead=99" --data-urlencode "slot_minutes=90" \
-            --data-urlencode "day2_on=on" --data-urlencode "day2_start=10:00" --data-urlencode "day2_end=19:00" \
-            -o /dev/null
-          CARD_CODE=$(curl -s -b /tmp/cookies.txt -o /dev/null -w "%{http_code}" "$URL/card.png?lead=99")
-          echo "登录后触发一次卡片渲染 → HTTP $CARD_CODE"
-          if [ "$CARD_CODE" != "200" ]; then
-            echo "✗ 卡片渲染失败（chromium 崩了/内存不够/底图缺失），期望 200，实际 $CARD_CODE"
+          LOGIN_CODE=$(curl -s -c /tmp/cookies.txt -X POST "$URL/api/auth/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"email\":\"$U\",\"password\":\"$P\"}" \
+            -o /dev/null -w "%{http_code}")
+          echo "登录 API → HTTP $LOGIN_CODE"
+          if [ "$LOGIN_CODE" != "200" ]; then
+            echo "✗ 登录失败，期望 200，实际 $LOGIN_CODE"
             exit 1
           fi
-          echo "✅ 部署成功：鉴权生效 + 卡片渲染正常 → $URL"
+
+          CAL_CODE=$(curl -s -b /tmp/cookies.txt -o /dev/null -w "%{http_code}" "$URL/calendar")
+          echo "登录后访问日历页 → HTTP $CAL_CODE"
+          if [ "$CAL_CODE" != "200" ]; then
+            echo "✗ 日历页渲染失败，期望 200，实际 $CAL_CODE"
+            exit 1
+          fi
+          echo "✅ 部署成功：登录 + 日历渲染正常 → $URL"

@@ -24,7 +24,7 @@ export default function LoginPage() {
 
   async function doLogin(emailVal: string, passwordVal: string) {
     setError('')
-    const res = await fetch('/admin/api/auth/login', {
+    const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: emailVal, password: passwordVal }),
@@ -35,7 +35,7 @@ export default function LoginPage() {
     }
     // Hard navigation — sidesteps Next.js RSC prefetch which has issues behind
     // the nginx proxy on Cloud Run (see nginx.conf for the port-stripping config)
-    window.location.assign('/admin/calendar')
+    window.location.assign('/calendar')
   }
 
   async function handleSubmit(e: React.FormEvent) {

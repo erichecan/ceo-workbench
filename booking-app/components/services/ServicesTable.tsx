@@ -35,7 +35,7 @@ export default function ServicesTable({
   const [error, setError] = useState<string | null>(null)
 
   async function refresh() {
-    const res = await fetch('/admin/api/services')
+    const res = await fetch('/api/services')
     if (!res.ok) {
       setError('Failed to refresh services')
       return
@@ -45,7 +45,7 @@ export default function ServicesTable({
 
   async function handleArchive(id: string) {
     setError(null)
-    const res = await fetch(`/admin/api/services/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/services/${id}`, { method: 'DELETE' })
     if (!res.ok) {
       setError('Failed to archive service')
       return
