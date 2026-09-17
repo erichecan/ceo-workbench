@@ -28,9 +28,9 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-full w-56 flex-col border-r border-slate-200 bg-white">
-      <div className="flex h-14 items-center px-4 border-b border-slate-200">
-        <span className="font-semibold text-slate-900">Beauty & Wellness</span>
+    <aside className="flex h-full w-56 flex-col border-r border-border bg-sidebar">
+      <div className="flex h-14 items-center px-4 border-b border-border">
+        <span className="font-heading italic font-semibold text-primary">Beauty & Wellness</span>
       </div>
 
       <nav className="flex-1 space-y-1 p-3">
@@ -41,8 +41,8 @@ export function Sidebar() {
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
               pathname === href || pathname.startsWith(href + '/')
-                ? 'bg-slate-100 text-slate-900'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-slate-600 hover:bg-accent/50 hover:text-accent-foreground'
             )}
           >
             <Icon className="h-4 w-4" />
@@ -51,7 +51,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-slate-200">
+      <div className="p-3 border-t border-border">
         <Button
           variant="ghost"
           size="sm"

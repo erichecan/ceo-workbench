@@ -196,7 +196,7 @@ export default function AppointmentModal({
                     onClick={() => handleStatusChange(s)}
                     className={`px-2 py-1 rounded-md text-xs font-semibold border transition-colors ${
                       status === s
-                        ? 'bg-violet-600 text-white border-violet-600'
+                        ? 'bg-primary text-primary-foreground border-primary'
                         : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
                     }`}
                   >
@@ -266,7 +266,7 @@ export default function AppointmentModal({
                     onClick={() => toggleService(s.id)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                       selectedServiceIds.includes(s.id)
-                        ? 'bg-violet-600 text-white border-violet-600'
+                        ? 'bg-primary text-primary-foreground border-primary'
                         : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
                     }`}
                   >

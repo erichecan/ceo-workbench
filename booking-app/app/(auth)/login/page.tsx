@@ -11,7 +11,7 @@ const DEMO_ACCOUNTS = [
     label: '店主一键登录',
     email: 'owner@demo.com',
     password: 'password123',
-    color: 'bg-purple-600 hover:bg-purple-700',
+    color: 'bg-primary hover:bg-primary/90',
   },
 ] as const
 
@@ -67,7 +67,7 @@ export default function LoginPage() {
   return (
     <div className="w-full max-w-sm space-y-6 p-8 bg-white rounded-2xl shadow-sm border border-slate-200">
       <div className="space-y-1 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Beauty & Wellness</h1>
+        <h1 className="font-heading italic text-2xl font-semibold tracking-tight text-primary">Beauty & Wellness</h1>
         <p className="text-sm text-slate-500">Sign in to your account</p>
       </div>
 

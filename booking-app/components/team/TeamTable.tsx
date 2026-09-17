@@ -37,7 +37,7 @@ export default function TeamTable({ initialMembers }: { initialMembers: TeamMemb
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Team</h1>
+        <h1 className="font-heading text-2xl font-bold text-primary">Team</h1>
         <Button onClick={() => { setEditing(undefined); setModalOpen(true) }}>
           <Plus size={16} className="mr-2" /> Add Member
         </Button>
