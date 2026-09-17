@@ -33,31 +33,31 @@ export function buildCardHtml({ brandName, regionLabel, styleTags, slots, bgFile
   const tagline = [regionLabel, styleTags].filter(Boolean).join(" · ");
 
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
-  @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;1,500&family=Noto+Sans+SC:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Noto+Sans+SC:wght@400;500;600&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{width:${CARD_W}px;height:${CARD_H}px;overflow:hidden}
   body{font-family:"Noto Sans SC",sans-serif;position:relative;color:#2B2320}
   .bg{position:absolute;inset:0;width:${CARD_W}px;height:${CARD_H}px;object-fit:cover}
   .top-scrim{position:absolute;top:0;left:0;right:0;height:320px;
-    background:linear-gradient(180deg, rgba(20,10,10,.55), rgba(20,10,10,0))}
-  .masthead{position:absolute;top:56px;left:0;right:0;text-align:center;color:#FBF3EC}
-  .brand{font-family:"Bodoni Moda",serif;font-style:italic;font-weight:600;font-size:80px;line-height:1.05;
+    background:linear-gradient(180deg, rgba(24,10,36,.55), rgba(24,10,36,0))}
+  .masthead{position:absolute;top:56px;left:0;right:0;text-align:center;color:#F8F5FE}
+  .brand{font-family:"Playfair Display",serif;font-style:italic;font-weight:600;font-size:80px;line-height:1.05;
     text-shadow:0 4px 24px rgba(0,0,0,.35)}
-  .tagline{margin-top:14px;font-size:22px;letter-spacing:.16em;text-transform:uppercase;color:#F1DCD0;
+  .tagline{margin-top:14px;font-size:22px;letter-spacing:.16em;text-transform:uppercase;color:#E4D9F7;
     text-shadow:0 2px 12px rgba(0,0,0,.4)}
-  .panel{position:absolute;left:48px;right:48px;bottom:56px;background:rgba(30,20,18,.86);
-    backdrop-filter:blur(6px);border-radius:26px;padding:38px 44px 42px;color:#F3E9DD;
+  .panel{position:absolute;left:48px;right:48px;bottom:56px;background:rgba(37,15,54,.86);
+    backdrop-filter:blur(6px);border-radius:26px;padding:38px 44px 42px;color:#F3EFFC;
     box-shadow:0 30px 60px rgba(0,0,0,.4)}
-  .panel-label{font-size:20px;letter-spacing:.1em;color:#D9A85C;text-transform:uppercase}
-  .panel-title{font-size:38px;font-weight:600;margin-top:6px}
+  .panel-label{font-size:20px;letter-spacing:.1em;color:#C9A9F0;text-transform:uppercase}
+  .panel-title{font-size:38px;font-weight:600;margin-top:6px;font-family:"Playfair Display",serif}
   .slots{display:flex;gap:16px;margin-top:24px}
-  .slot{flex:1;text-align:center;background:#F3E9DD;color:#2B2320;border-radius:14px;padding:16px 6px;
+  .slot{flex:1;text-align:center;background:#ECE8FD;color:#33095C;border-radius:18px;padding:16px 6px;
     font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
-  .slot span{display:block;font-size:15px;font-weight:400;color:#8A7A6E;margin-bottom:5px;letter-spacing:.05em}
-  .slot.empty{font-size:17px;color:#8A7A6E;font-weight:500;padding:22px 10px}
-  .cta{margin-top:24px;padding-top:22px;border-top:1px solid rgba(243,233,221,.2);font-size:21px;
-    color:#E6D8CC;text-align:center}
-  .cta b{color:#F3E9DD}
+  .slot span{display:block;font-size:15px;font-weight:400;color:#7C6FA0;margin-bottom:5px;letter-spacing:.05em}
+  .slot.empty{font-size:17px;color:#7C6FA0;font-weight:500;padding:22px 10px}
+  .cta{margin-top:24px;padding-top:22px;border-top:1px solid rgba(243,239,252,.2);font-size:21px;
+    color:#DCD3F2;text-align:center}
+  .cta b{color:#F3EFFC}
   </style></head><body>
   <img class="bg" src="file://${bgPath}">
   <div class="top-scrim"></div>
