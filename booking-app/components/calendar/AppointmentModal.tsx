@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
+import { Globe } from 'lucide-react'
 import { format, addMinutes } from 'date-fns'
 
 const STATUSES = ['BOOKED', 'CONFIRMED', 'ARRIVED', 'STARTED', 'COMPLETED', 'NO_SHOW'] as const
@@ -27,6 +28,7 @@ interface Appointment {
   startTime: string
   endTime?: string
   status?: string
+  channel?: string
   notes?: string
   services?: AppointmentService[]
 }
@@ -177,7 +179,15 @@ export default function AppointmentModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{appointment?.id ? 'Edit Appointment' : 'New Appointment'}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {appointment?.id ? 'Edit Appointment' : 'New Appointment'}
+            {appointment?.channel === 'ONLINE' && (
+              <span className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+                <Globe className="size-3" />
+                顾客线上提交
+              </span>
+            )}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2 max-h-[65vh] overflow-y-auto pr-1">

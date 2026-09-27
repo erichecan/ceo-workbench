@@ -17,6 +17,7 @@ interface Appointment {
   startTime: string
   endTime: string
   status: string
+  channel?: string
   clientId?: string
   teamMemberId?: string
   notes?: string
@@ -156,6 +157,7 @@ export default function CalendarClient({ locationId, clients, teamMembers, servi
                 startTime: editingAppt.startTime,
                 endTime: editingAppt.endTime,
                 status: editingAppt.status,
+                channel: editingAppt.channel,
                 notes: editingAppt.notes,
                 services: editingAppt.services,
               }

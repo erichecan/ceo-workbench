@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { CalendarDays, Users, UserCheck, Scissors, LogOut, ReceiptText } from 'lucide-react'
@@ -14,9 +15,32 @@ const NAV_ITEMS = [
   { href: '/sales', label: '销售记录', icon: ReceiptText },
 ]
 
+const PENDING_POLL_MS = 60_000
+
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const [pendingOnline, setPendingOnline] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    async function poll() {
+      try {
+        const res = await fetch('/api/appointments/pending-count')
+        if (!res.ok || cancelled) return
+        const { count } = await res.json()
+        if (!cancelled) setPendingOnline(count)
+      } catch {
+        // 静默失败：这个红点是提醒性质，不阻塞任何操作
+      }
+    }
+    poll()
+    const timer = setInterval(poll, PENDING_POLL_MS)
+    return () => {
+      cancelled = true
+      clearInterval(timer)
+    }
+  }, [])
 
   async function handleLogout() {
     try {
@@ -46,7 +70,15 @@ export function Sidebar() {
             )}
           >
             <Icon className="h-4 w-4" />
-            {label}
+            <span className="flex-1">{label}</span>
+            {href === '/calendar' && pendingOnline > 0 && (
+              <span
+                className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[11px] font-semibold text-white"
+                title={`${pendingOnline} 个线上预约待确认`}
+              >
+                {pendingOnline}
+              </span>
+            )}
           </Link>
         ))}
       </nav>

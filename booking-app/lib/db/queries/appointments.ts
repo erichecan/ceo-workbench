@@ -24,6 +24,12 @@ export async function getAppointmentsForRange(
   })
 }
 
+export async function countPendingOnlineAppointments(workspaceId: string) {
+  return prisma.appointment.count({
+    where: { workspaceId, channel: 'ONLINE', status: 'BOOKED' },
+  })
+}
+
 export async function getAppointment(id: string, workspaceId: string) {
   return prisma.appointment.findFirst({
     where: { id, workspaceId },

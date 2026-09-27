@@ -1,5 +1,7 @@
 'use client'
 
+import { Globe } from 'lucide-react'
+
 const STATUS_COLORS: Record<string, string> = {
   BOOKED:     'bg-blue-100 border-blue-400 text-blue-900',
   CONFIRMED:  'bg-indigo-100 border-indigo-400 text-indigo-900',
@@ -21,6 +23,7 @@ interface Appointment {
   startTime: string
   endTime: string
   status: string
+  channel?: string
   client?: { name: string } | null
   teamMember?: { name: string; calendarColor: string } | null
   services: AppointmentService[]
@@ -50,7 +53,14 @@ export default function AppointmentBlock({ appointment, topPx, heightPx, onClick
       }}
       onClick={() => onClick(appointment)}
     >
-      <p className="text-xs font-semibold truncate">{appointment.client?.name ?? 'Walk-in'}</p>
+      <p className="flex items-center gap-1 text-xs font-semibold truncate">
+        {appointment.channel === 'ONLINE' && (
+          <span title="顾客线上自助提交，尚未人工确认">
+            <Globe className="size-3 shrink-0 text-blue-600" />
+          </span>
+        )}
+        <span className="truncate">{appointment.client?.name ?? 'Walk-in'}</span>
+      </p>
       {heightPx > 35 && (
         <p className="text-[10px] truncate opacity-70">{serviceNames}</p>
       )}
