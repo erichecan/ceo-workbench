@@ -70,12 +70,22 @@ export default function FeaturesPage() {
       <MarketingNav />
 
       <section className="mx-auto max-w-4xl px-6 py-16">
-        <h1 className="font-heading text-3xl text-primary">功能清单</h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          分两栏说清楚：哪些是系统现在已经在跑的，哪些是能做、但需要额外开发时间的。不把还没做的说成已经有的。
-        </p>
+        <div className="grid items-center gap-8 md:grid-cols-2">
+          <div>
+            <h1 className="font-heading text-3xl text-primary">功能清单</h1>
+            <p className="mt-3 text-muted-foreground">
+              分两栏说清楚：哪些是系统现在已经在跑的，哪些是能做、但需要额外开发时间的。不把还没做的说成已经有的。
+            </p>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1633526543814-9718c8922b7a?auto=format&fit=crop&w=700&q=80"
+            alt="预约日历示意（Unsplash 免费商用占位图，待替换为真实客户门店照片）"
+            className="aspect-[7/5] w-full rounded-2xl object-cover shadow-md"
+          />
+        </div>
 
-        <h2 className="mt-12 font-heading text-xl text-foreground">现在就有</h2>
+        <h2 className="mt-14 font-heading text-xl text-foreground">现在就有</h2>
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           {BUILT_FEATURES.map(({ icon: Icon, title, body }) => (
             <div key={title} className="rounded-xl border border-border p-5">

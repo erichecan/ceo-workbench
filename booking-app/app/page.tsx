@@ -31,23 +31,31 @@ export default function MarketingHome() {
     <div>
       <MarketingNav />
 
-      <section className="mx-auto max-w-5xl px-6 py-20 text-center">
-        <h1 className="font-heading text-4xl leading-tight text-primary md:text-5xl">
-          给美甲、美容、美发这类预约制门店的
-          <br />
-          在线预约与日常管理系统
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
-          一个链接就能收顾客的预约请求，一个日历管好每天的安排，客户、员工、结账都在同一个地方。
-        </p>
-        <div className="mt-8 flex justify-center gap-3">
-          <Link href="/book/demo-salon" className={buttonVariants({ size: 'lg' })}>
-            查看预约页 Demo
-          </Link>
-          <Link href="/business-types" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
-            看看适不适合我的店
-          </Link>
+      <section className="mx-auto grid max-w-5xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
+        <div>
+          <h1 className="font-heading text-4xl leading-tight text-primary md:text-[2.75rem]">
+            给美甲、美容、美发这类预约制门店的
+            <br />
+            在线预约与日常管理系统
+          </h1>
+          <p className="mt-5 max-w-md text-lg text-muted-foreground">
+            一个链接就能收顾客的预约请求，一个日历管好每天的安排，客户、员工、结账都在同一个地方。
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/book/demo-salon" className={buttonVariants({ size: 'lg' })}>
+              查看预约页 Demo
+            </Link>
+            <Link href="/business-types" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
+              看看适不适合我的店
+            </Link>
+          </div>
         </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://images.unsplash.com/photo-1619607146034-5a05296c8f9a?auto=format&fit=crop&w=900&q=80"
+          alt="美甲工作室实景（Unsplash 免费商用占位图，待替换为真实客户门店照片）"
+          className="aspect-[4/5] w-full rounded-2xl object-cover shadow-lg"
+        />
       </section>
 
       <section className="mx-auto max-w-5xl px-6 pb-24">

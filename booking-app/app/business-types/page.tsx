@@ -5,6 +5,7 @@ interface BusinessType {
   fit: 'ready' | 'workable'
   summary: string
   detail: string
+  imageUrl: string
 }
 
 const BUSINESS_TYPES: BusinessType[] = [
@@ -14,6 +15,7 @@ const BUSINESS_TYPES: BusinessType[] = [
     summary: '已有真实门店在用',
     detail:
       '服务项目按时长和价格类型（固定价/起价/免费）管理，顾客在线选款式、选技师空档，是目前验证最完整的场景。',
+    imageUrl: 'https://images.unsplash.com/photo-1534004471323-19f1a470c4c1?auto=format&fit=crop&w=400&q=80',
   },
   {
     name: '美容 / 护肤 Spa',
@@ -21,18 +23,21 @@ const BUSINESS_TYPES: BusinessType[] = [
     summary: '开箱即用',
     detail:
       '服务分类、员工排班、客户档案、结账收银这套组合本来就是按美容业态设计的，套餐类服务（用"起价"价格类型）也支持。',
+    imageUrl: 'https://images.unsplash.com/photo-1787651343620-8d5303006ecb?auto=format&fit=crop&w=400&q=80',
   },
   {
     name: '理发 /理容店',
     fit: 'ready',
     summary: '开箱即用',
     detail: '员工按角色和提成比例管理，日历按员工上色，适合有多个理发师同时接客的门店。',
+    imageUrl: 'https://images.unsplash.com/photo-1759134198561-e2041049419c?auto=format&fit=crop&w=400&q=80',
   },
   {
     name: '按摩 / 推拿',
     fit: 'ready',
     summary: '开箱即用',
     detail: '预约时长和价格灵活配置，结账支持小费——这是按摩类门店常见但很多系统会漏掉的一项。',
+    imageUrl: 'https://images.unsplash.com/photo-1630835425197-50feeba99ecd?auto=format&fit=crop&w=400&q=80',
   },
   {
     name: '私教 / 小型健身工作室',
@@ -40,6 +45,7 @@ const BUSINESS_TYPES: BusinessType[] = [
     summary: '核心能用，按次卡/月卡需定制',
     detail:
       '一对一私教预约没问题；但健身房常见的"次卡""月卡"自动扣次逻辑现在没有，需要额外开发，见功能页说明。',
+    imageUrl: 'https://images.unsplash.com/photo-1648542036561-e1d66a5ae2b1?auto=format&fit=crop&w=400&q=80',
   },
 ]
 
@@ -62,15 +68,23 @@ export default function BusinessTypesPage() {
 
         <div className="mt-10 flex flex-col gap-4">
           {BUSINESS_TYPES.map((b) => (
-            <div key={b.name} className="rounded-xl border border-border p-6">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-heading text-xl text-foreground">{b.name}</h2>
-                <span className={`rounded-full px-3 py-1 text-xs font-medium ${FIT_LABEL[b.fit].className}`}>
-                  {FIT_LABEL[b.fit].text}
-                </span>
+            <div key={b.name} className="flex flex-col overflow-hidden rounded-xl border border-border sm:flex-row">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={b.imageUrl}
+                alt={`${b.name} 场景示意（Unsplash 免费商用占位图，待替换为真实客户门店照片）`}
+                className="h-40 w-full object-cover sm:h-auto sm:w-48 sm:shrink-0"
+              />
+              <div className="p-6">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="font-heading text-xl text-foreground">{b.name}</h2>
+                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${FIT_LABEL[b.fit].className}`}>
+                    {FIT_LABEL[b.fit].text}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm font-medium text-primary">{b.summary}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.detail}</p>
               </div>
-              <p className="mt-1 text-sm font-medium text-primary">{b.summary}</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.detail}</p>
             </div>
           ))}
         </div>
