@@ -1,5 +1,11 @@
 # 预约系统迁移 archive/beauty —— 任务台账
 
+> ⚠️ **2026-09-27 更正**：下面 U8 状态记录到 2026-09-13 当天为止是准确的，但后续没有回来更新——U8 实际上在
+> 2026-09-13 当天（`fix: 预约后台内存 512Mi→1Gi，Verify 加真实渲染检查`）和 2026-09-17（`style: booking-app
+> 主题改深紫/淡紫调`）都已经成功部署到生产（GitHub Actions 记录两次都是绿的），**booking-portal 现在跑的就是
+> booking-app，不是旧 portal.js**。U11（卡片预览）截至今天仍未做，如果店主需要这个功能，是真实缺口，不是
+> "还没上线所以不影响"。下面的"⛔ U8 当前不能执行"是过时状态，不代表现在。
+
 > 依据 `DEV-PLAN.md`(已确认)。目标:把 `_archive/beauty/apps/web`(Next.js+Prisma,真实可用后端)
 > 迁移进 `webproject/booking-app/`,作为独立新服务,不动现有 `src/`(诊断卡片产线)和已上线的
 > `booking-portal`(portal.js,Neon `webproject-booking` 分支)。迁移期新旧并行,验证过再谈切换。
@@ -34,7 +40,7 @@
   booking_settings/bookings)只读导出,映射写入 `booking-app-dev` 分支(每个 lead → 一个
   Workspace+Location,staff → TeamMember,bookings → Appointment)。**只读源库,不写回。**
   验收:脚本跑完,`booking-app-dev` 里能看到迁移后的真实门店/技师/预约数据,和源库人工核对条数一致。
-- [ ] U8 deploy-pipeline:**2026-09-13 改口径**——Eric 明确"没必要新增独立的,就还用刚刚那个"
+- [x] U8 deploy-pipeline（2026-09-27 补记：实际已在 2026-09-13/09-17 完成部署，此前忘了回来勾掉）：**2026-09-13 改口径**——Eric 明确"没必要新增独立的,就还用刚刚那个"
   =直接把新 Next.js 应用部署到现有 `booking-portal` 这个 Cloud Run 服务上,替换掉 portal.js,
   不新建独立服务、不搞新旧并行。改 `.github/workflows/deploy-booking-portal.yml`(构建方式从
   `portal/Dockerfile` 改成 `booking-app/Dockerfile`,Next.js standalone 输出),复用同一个
@@ -141,3 +147,14 @@ U1 → U2 → U3 → U4/U5/U6(可并行)→ U7(独立,随时能做,只读源库)
     已迁移的那条记录。
   - 已知未迁移、非本轮范围:`booking_settings`(营业时间/时段时长配置)、`card_sends`(卡片发送
     追踪)——新 schema 目前没有对应位置,等相关功能在新系统里落地后再补,不是数据丢失。
+
+- 2026-09-27 · U8 状态更正 + 新增公开预约页面 · 发现 U8 早在 2026-09-13/09-17 已成功部署（本台账没回来更新，
+  见文首更正说明）。同时新增 `/book/[slug]` 公开预约页（demo/获客用，不需要客户登录），Workspace 加
+  `logoUrl` 字段。生产库（`ep-fancy-feather-anb8hx3k` 分支）用精确的
+  `ALTER TABLE "Workspace" ADD COLUMN IF NOT EXISTS "logoUrl" TEXT` 手动同步——**没有用 `prisma db push`**，
+  因为生产库里 `staff/bookings/booking_settings/card_meta/card_sends` 这 5 张事故后重建的旧表没有在
+  schema.prisma 里声明，`db push` 的漂移检测会把它们当漂移再删一次。执行前后都核对过表清单，16 张表一张没少。
+  部署后独立验证（不只信 workflow 自带的 verify）：`/book/lead-99` 200、`/book/不存在的slug` 404、
+  `/login` 200、`/calendar` 307，新旧功能都正常。
+  - 遗留:U9(上线前验证清单)、U10(旧代码收尾决策)、U11(卡片预览搬迁)仍未做，U11 如果店主真的需要
+    卡片预览功能，是当前生产环境的真实功能缺口，下次接手先确认这个还要不要做。
