@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, SESSION_COOKIE } from '@/lib/auth'
 
 const PUBLIC_PATHS = [
+  '/',
   '/login',
   '/api/auth/login',
   '/book',
   '/api/public',
+  '/business-types',
+  '/features',
 ]
 
 function redirectToLogin(req: NextRequest) {
