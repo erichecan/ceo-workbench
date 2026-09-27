@@ -49,6 +49,7 @@ model Workspace {
   id               String   @id @default(cuid())
   name             String
   slug             String   @unique
+  logoUrl          String?
   taxRate          Float    @default(13) // Ontario HST——目标客户都在多伦多地区
   pointsPerEuro    Int      @default(1)
   pointsValueCents Int      @default(1)

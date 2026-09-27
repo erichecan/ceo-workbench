@@ -4,6 +4,8 @@ import { verifyToken, SESSION_COOKIE } from '@/lib/auth'
 const PUBLIC_PATHS = [
   '/login',
   '/api/auth/login',
+  '/book',
+  '/api/public',
 ]
 
 function redirectToLogin(req: NextRequest) {
