@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { MarketingNav } from '@/components/marketing/MarketingNav'
 
 interface BusinessType {
@@ -6,6 +7,7 @@ interface BusinessType {
   summary: string
   detail: string
   imageUrl: string
+  href?: string
 }
 
 const BUSINESS_TYPES: BusinessType[] = [
@@ -16,6 +18,7 @@ const BUSINESS_TYPES: BusinessType[] = [
     detail:
       '服务项目按时长和价格类型（固定价/起价/免费）管理，顾客在线选款式、选技师空档，是目前验证最完整的场景。',
     imageUrl: 'https://images.unsplash.com/photo-1534004471323-19f1a470c4c1?auto=format&fit=crop&w=400&q=80',
+    href: '/business-types/nail-salon',
   },
   {
     name: '美容 / 护肤 Spa',
@@ -84,6 +87,11 @@ export default function BusinessTypesPage() {
                 </div>
                 <p className="mt-1 text-sm font-medium text-primary">{b.summary}</p>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.detail}</p>
+                {b.href && (
+                  <Link href={b.href} className="mt-3 inline-block text-sm text-primary hover:underline">
+                    查看详情 →
+                  </Link>
+                )}
               </div>
             </div>
           ))}
