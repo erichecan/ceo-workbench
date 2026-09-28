@@ -27,7 +27,7 @@ export default async function CalendarPage() {
     <CalendarClient
       locationId={location.id}
       clients={clients.map(c => ({ id: c.id, name: c.name }))}
-      teamMembers={teamMembers.map(m => ({ id: m.id, name: m.name, calendarColor: m.calendarColor }))}
+      teamMembers={teamMembers.map(m => ({ id: m.id, name: m.name, calendarColor: m.calendarColor, isBookable: m.isBookable }))}
       services={servicesData.map(s => ({ id: s.id, name: s.name, price: s.price, duration: s.duration }))}
     />
   )

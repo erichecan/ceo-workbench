@@ -21,6 +21,7 @@ interface Service {
   price: number
   duration: number
   isOnlineBookable: boolean
+  commissionRate?: number | null
 }
 
 interface Props {
@@ -39,6 +40,9 @@ export default function ServiceModal({ open, service, categories, onClose, onSav
   const [price, setPrice] = useState(service?.price ?? 0)
   const [duration, setDuration] = useState(service?.duration ?? 60)
   const [isOnlineBookable, setIsOnlineBookable] = useState(service?.isOnlineBookable ?? true)
+  const [commissionRate, setCommissionRate] = useState<string>(
+    service?.commissionRate != null ? String(Math.round(service.commissionRate * 100)) : ''
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -50,6 +54,7 @@ export default function ServiceModal({ open, service, categories, onClose, onSav
     setPrice(service?.price ?? 0)
     setDuration(service?.duration ?? 60)
     setIsOnlineBookable(service?.isOnlineBookable ?? true)
+    setCommissionRate(service?.commissionRate != null ? String(Math.round(service.commissionRate * 100)) : '')
     setError(null)
   }, [service, open])
 
@@ -69,6 +74,7 @@ export default function ServiceModal({ open, service, categories, onClose, onSav
         price,
         duration,
         isOnlineBookable,
+        commissionRate: commissionRate.trim() === '' ? null : Number(commissionRate) / 100,
       }),
     })
     setLoading(false)
@@ -152,6 +158,21 @@ export default function ServiceModal({ open, service, categories, onClose, onSav
               min={5}
               step={5}
             />
+          </div>
+          <div className="space-y-1">
+            <Label>Commission Rate (%)</Label>
+            <Input
+              type="number"
+              value={commissionRate}
+              onChange={(e) => setCommissionRate(e.target.value)}
+              min={0}
+              max={100}
+              placeholder="Uses team member's default rate"
+            />
+            <p className="text-xs text-slate-400">
+              Leave blank to use each team member&apos;s default commission rate. Set a value here to override it for
+              this service specifically.
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <input

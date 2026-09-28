@@ -8,6 +8,7 @@ const createSchema = z.object({
   role: z.enum(['OWNER', 'MANAGER', 'LOW']).default('LOW'),
   calendarColor: z.string().default('#8B5CF6'),
   isBookable: z.boolean().default(true),
+  commissionRate: z.number().min(0).max(1).default(0),
 })
 
 export async function GET() {

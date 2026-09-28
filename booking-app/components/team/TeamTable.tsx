@@ -12,6 +12,7 @@ interface TeamMember {
   role: string
   calendarColor: string
   isBookable: boolean
+  commissionRate: number
 }
 
 export default function TeamTable({ initialMembers }: { initialMembers: TeamMember[] }) {
@@ -50,6 +51,7 @@ export default function TeamTable({ initialMembers }: { initialMembers: TeamMemb
               <th className="px-4 py-3 text-left font-medium text-slate-600">Email</th>
               <th className="px-4 py-3 text-left font-medium text-slate-600">Role</th>
               <th className="px-4 py-3 text-left font-medium text-slate-600">Bookable</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-600">Commission</th>
               <th className="px-4 py-3 text-right font-medium text-slate-600">Actions</th>
             </tr>
           </thead>
@@ -65,6 +67,7 @@ export default function TeamTable({ initialMembers }: { initialMembers: TeamMemb
                   <Badge variant="secondary">{m.role}</Badge>
                 </td>
                 <td className="px-4 py-3 text-slate-600">{m.isBookable ? 'Yes' : 'No'}</td>
+                <td className="px-4 py-3 text-slate-600">{Math.round(m.commissionRate * 100)}%</td>
                 <td className="px-4 py-3 text-right space-x-2">
                   <Button size="sm" variant="ghost" onClick={() => { setEditing(m); setModalOpen(true) }}>
                     <Pencil size={14} />

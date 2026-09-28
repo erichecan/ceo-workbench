@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth'
-import { getAppointmentsForRange, createAppointment } from '@/lib/db/queries/appointments'
+import { getAppointmentsForRange, createAppointment, AppointmentConflictError } from '@/lib/db/queries/appointments'
 import { z } from 'zod'
 
 const createSchema = z.object({
@@ -50,10 +50,17 @@ export async function POST(req: Request) {
   const parsed = createSchema.safeParse(body)
   if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 400 })
   const { startTime, endTime, ...rest } = parsed.data
-  const appointment = await createAppointment(session.workspaceId, {
-    ...rest,
-    startTime: new Date(startTime),
-    endTime: new Date(endTime),
-  })
-  return Response.json(appointment, { status: 201 })
+  try {
+    const appointment = await createAppointment(session.workspaceId, {
+      ...rest,
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+    })
+    return Response.json(appointment, { status: 201 })
+  } catch (err) {
+    if (err instanceof AppointmentConflictError) {
+      return Response.json({ error: err.message }, { status: 409 })
+    }
+    throw err
+  }
 }

@@ -13,6 +13,7 @@ interface TeamMember {
   role: string
   calendarColor: string
   isBookable: boolean
+  commissionRate?: number
 }
 
 interface Props {
@@ -28,6 +29,9 @@ export default function TeamMemberModal({ open, member, onClose, onSaved }: Prop
   const [role, setRole] = useState(member?.role ?? 'LOW')
   const [color, setColor] = useState(member?.calendarColor ?? '#8B5CF6')
   const [isBookable, setIsBookable] = useState(member?.isBookable ?? true)
+  const [commissionRate, setCommissionRate] = useState(
+    member?.commissionRate !== undefined ? Math.round(member.commissionRate * 100) : 0
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,6 +41,7 @@ export default function TeamMemberModal({ open, member, onClose, onSaved }: Prop
     setRole(member?.role ?? 'LOW')
     setColor(member?.calendarColor ?? '#8B5CF6')
     setIsBookable(member?.isBookable ?? true)
+    setCommissionRate(member?.commissionRate !== undefined ? Math.round(member.commissionRate * 100) : 0)
   }, [member, open])
 
   async function handleSave() {
@@ -47,7 +52,14 @@ export default function TeamMemberModal({ open, member, onClose, onSaved }: Prop
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, role, calendarColor: color, isBookable }),
+      body: JSON.stringify({
+        name,
+        email,
+        role,
+        calendarColor: color,
+        isBookable,
+        commissionRate: commissionRate / 100,
+      }),
     })
     setLoading(false)
     if (!res.ok) {
@@ -92,6 +104,19 @@ export default function TeamMemberModal({ open, member, onClose, onSaved }: Prop
           <div className="space-y-1">
             <Label>Calendar Color</Label>
             <input type="color" value={color} onChange={e => setColor(e.target.value)} className="h-9 w-full rounded border border-slate-200 cursor-pointer" />
+          </div>
+          <div className="space-y-1">
+            <Label>Commission Rate (%)</Label>
+            <Input
+              type="number"
+              value={commissionRate}
+              onChange={e => setCommissionRate(Number(e.target.value))}
+              min={0}
+              max={100}
+            />
+            <p className="text-xs text-slate-400">
+              Default payout share of a sale for this member. Individual services can override this.
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" id="bookable" checked={isBookable} onChange={e => setIsBookable(e.target.checked)} />

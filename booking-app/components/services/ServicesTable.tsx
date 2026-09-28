@@ -19,6 +19,7 @@ interface Service {
   price: number
   duration: number
   isOnlineBookable: boolean
+  commissionRate?: number | null
   category?: Category | null
 }
 
@@ -75,6 +76,7 @@ export default function ServicesTable({
               <th className="px-4 py-3 text-left font-medium text-slate-600">Category</th>
               <th className="px-4 py-3 text-left font-medium text-slate-600">Price</th>
               <th className="px-4 py-3 text-left font-medium text-slate-600">Duration</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-600">Commission</th>
               <th className="px-4 py-3 text-right font-medium text-slate-600">Actions</th>
             </tr>
           </thead>
@@ -91,6 +93,9 @@ export default function ServicesTable({
                   )}
                 </td>
                 <td className="px-4 py-3 text-slate-600">{s.duration} min</td>
+                <td className="px-4 py-3 text-slate-600">
+                  {s.commissionRate != null ? `${Math.round(s.commissionRate * 100)}%` : 'Default'}
+                </td>
                 <td className="px-4 py-3 text-right space-x-2">
                   <Button
                     size="sm"

@@ -14,7 +14,14 @@ export async function getTeamMember(id: string, workspaceId: string) {
 
 export async function createTeamMember(
   workspaceId: string,
-  data: { name: string; email: string; role: Role; calendarColor: string; isBookable: boolean }
+  data: {
+    name: string
+    email: string
+    role: Role
+    calendarColor: string
+    isBookable: boolean
+    commissionRate?: number
+  }
 ) {
   return prisma.teamMember.create({ data: { workspaceId, ...data } })
 }
@@ -22,7 +29,15 @@ export async function createTeamMember(
 export async function updateTeamMember(
   id: string,
   workspaceId: string,
-  data: Partial<{ name: string; email: string; role: Role; calendarColor: string; isBookable: boolean; isArchived: boolean }>
+  data: Partial<{
+    name: string
+    email: string
+    role: Role
+    calendarColor: string
+    isBookable: boolean
+    isArchived: boolean
+    commissionRate: number
+  }>
 ) {
   return prisma.teamMember.updateMany({ where: { id, workspaceId }, data })
 }

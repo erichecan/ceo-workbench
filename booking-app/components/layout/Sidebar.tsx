@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { CalendarDays, Users, UserCheck, Scissors, LogOut, ReceiptText } from 'lucide-react'
+import { CalendarDays, Users, UserCheck, Scissors, LogOut, ReceiptText, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: '/team', label: '员工管理', icon: UserCheck },
   { href: '/services', label: '服务项目', icon: Scissors },
   { href: '/sales', label: '销售记录', icon: ReceiptText },
+  { href: '/payroll', label: '工资结算', icon: Wallet },
 ]
 
 const PENDING_POLL_MS = 60_000

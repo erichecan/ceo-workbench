@@ -19,7 +19,24 @@ export async function getClients(workspaceId: string, search?: string) {
 }
 
 export async function getClient(id: string, workspaceId: string) {
-  return prisma.client.findFirst({ where: { id, workspaceId, isBlocked: false } })
+  return prisma.client.findFirst({
+    where: { id, workspaceId, isBlocked: false },
+    include: {
+      appointments: {
+        orderBy: { startTime: 'desc' },
+        take: 50,
+        include: {
+          teamMember: { select: { id: true, name: true } },
+          services: { include: { service: { select: { id: true, name: true } } } },
+        },
+      },
+      sales: {
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        include: { items: true },
+      },
+    },
+  })
 }
 
 export async function createClient(

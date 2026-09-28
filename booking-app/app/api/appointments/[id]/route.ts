@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth'
-import { getAppointment, updateAppointment, cancelAppointment } from '@/lib/db/queries/appointments'
+import { getAppointment, updateAppointment, cancelAppointment, AppointmentConflictError } from '@/lib/db/queries/appointments'
 import { AppointmentStatus } from '@/lib/generated/prisma'
 import { z } from 'zod'
 
@@ -34,14 +34,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const parsed = patchSchema.safeParse(body)
   if (!parsed.success) return Response.json({ error: parsed.error.flatten() }, { status: 400 })
   const { startTime, endTime, status, ...rest } = parsed.data
-  const result = await updateAppointment(id, session.workspaceId, {
-    ...rest,
-    ...(startTime ? { startTime: new Date(startTime) } : {}),
-    ...(endTime ? { endTime: new Date(endTime) } : {}),
-    ...(status ? { status: status as AppointmentStatus } : {}),
-  })
-  if (result.count === 0) return Response.json({ error: 'Not found' }, { status: 404 })
-  return Response.json({ ok: true })
+  try {
+    const result = await updateAppointment(id, session.workspaceId, {
+      ...rest,
+      ...(startTime ? { startTime: new Date(startTime) } : {}),
+      ...(endTime ? { endTime: new Date(endTime) } : {}),
+      ...(status ? { status: status as AppointmentStatus } : {}),
+    })
+    if (result.count === 0) return Response.json({ error: 'Not found' }, { status: 404 })
+    return Response.json({ ok: true })
+  } catch (err) {
+    if (err instanceof AppointmentConflictError) {
+      return Response.json({ error: err.message }, { status: 409 })
+    }
+    throw err
+  }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {

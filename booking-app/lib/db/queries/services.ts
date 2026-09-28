@@ -26,6 +26,7 @@ export async function createService(
     price: number
     duration: number
     isOnlineBookable: boolean
+    commissionRate?: number | null
   }
 ) {
   return prisma.service.create({ data: { workspaceId, ...data } })
@@ -42,6 +43,7 @@ export async function updateService(
     duration: number
     isOnlineBookable: boolean
     isArchived: boolean
+    commissionRate: number | null
   }> & { categoryId?: string | null }
 ) {
   return prisma.service.updateMany({ where: { id, workspaceId }, data })

@@ -1,9 +1,9 @@
 'use client'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { format, addDays, subDays, startOfWeek, endOfWeek } from 'date-fns'
+import { format, addDays, subDays, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns'
 
-type ViewMode = 'day' | 'week'
+type ViewMode = 'day' | 'week' | 'month'
 
 interface Props {
   date: Date
@@ -14,15 +14,21 @@ interface Props {
 
 export default function CalendarToolbar({ date, view, onDateChange, onViewChange }: Props) {
   function prev() {
-    onDateChange(view === 'day' ? subDays(date, 1) : subDays(date, 7))
+    if (view === 'day') onDateChange(subDays(date, 1))
+    else if (view === 'week') onDateChange(subDays(date, 7))
+    else onDateChange(subMonths(date, 1))
   }
   function next() {
-    onDateChange(view === 'day' ? addDays(date, 1) : addDays(date, 7))
+    if (view === 'day') onDateChange(addDays(date, 1))
+    else if (view === 'week') onDateChange(addDays(date, 7))
+    else onDateChange(addMonths(date, 1))
   }
 
   const label = view === 'day'
     ? format(date, 'EEEE, MMMM d, yyyy')
-    : `${format(startOfWeek(date), 'MMM d')} – ${format(endOfWeek(date), 'MMM d, yyyy')}`
+    : view === 'week'
+    ? `${format(startOfWeek(date), 'MMM d')} – ${format(endOfWeek(date), 'MMM d, yyyy')}`
+    : format(date, 'MMMM yyyy')
 
   return (
     <div className="flex items-center justify-between mb-4">
@@ -33,7 +39,7 @@ export default function CalendarToolbar({ date, view, onDateChange, onViewChange
         <Button variant="outline" size="sm" onClick={() => onDateChange(new Date())}>Today</Button>
       </div>
       <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
-        {(['day', 'week'] as ViewMode[]).map(v => (
+        {(['day', 'week', 'month'] as ViewMode[]).map(v => (
           <button
             key={v}
             onClick={() => onViewChange(v)}

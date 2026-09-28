@@ -11,6 +11,7 @@ const createSchema = z.object({
   price: z.number().min(0).default(0),
   duration: z.number().int().min(5),
   isOnlineBookable: z.boolean().default(true),
+  commissionRate: z.number().min(0).max(1).nullable().optional(),
 })
 
 export async function GET() {

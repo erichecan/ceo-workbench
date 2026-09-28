@@ -8,6 +8,7 @@ const patchSchema = z.object({
   role: z.enum(['OWNER', 'MANAGER', 'LOW']).optional(),
   calendarColor: z.string().optional(),
   isBookable: z.boolean().optional(),
+  commissionRate: z.number().min(0).max(1).optional(),
 }).refine(obj => Object.keys(obj).length > 0, { message: 'No fields to update' })
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -1,16 +1,17 @@
 'use client'
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, format } from 'date-fns'
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, format } from 'date-fns'
 import CalendarToolbar from './CalendarToolbar'
 import CalendarDayView from './CalendarDayView'
 import CalendarWeekView from './CalendarWeekView'
+import CalendarMonthView from './CalendarMonthView'
 import AppointmentModal from './AppointmentModal'
 import CheckoutModal from './CheckoutModal'
 
-type ViewMode = 'day' | 'week'
+type ViewMode = 'day' | 'week' | 'month'
 
 interface Client { id: string; name: string }
-interface TeamMember { id: string; name: string; calendarColor: string }
+interface TeamMember { id: string; name: string; calendarColor: string; isBookable: boolean }
 interface Service { id: string; name: string; price: number; duration: number }
 interface Appointment {
   id: string
@@ -33,6 +34,12 @@ interface Props {
   services: Service[]
 }
 
+function rangeForView(d: Date, v: ViewMode): { from: Date; to: Date } {
+  if (v === 'day') return { from: startOfDay(d), to: endOfDay(d) }
+  if (v === 'week') return { from: startOfWeek(d), to: endOfWeek(d) }
+  return { from: startOfWeek(startOfMonth(d)), to: endOfWeek(endOfMonth(d)) }
+}
+
 export default function CalendarClient({ locationId, clients, teamMembers, services }: Props) {
   const [date, setDate] = useState(new Date())
   const [view, setView] = useState<ViewMode>('day')
@@ -42,15 +49,17 @@ export default function CalendarClient({ locationId, clients, teamMembers, servi
   const [modalOpen, setModalOpen] = useState(false)
   const [editingAppt, setEditingAppt] = useState<Appointment | undefined>()
   const [newApptTime, setNewApptTime] = useState('')
+  const [newApptTeamMemberId, setNewApptTeamMemberId] = useState('')
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false)
   const [checkoutAppt, setCheckoutAppt] = useState<Appointment | undefined>()
   const abortRef = useRef<AbortController | null>(null)
 
+  const bookableTeamMembers = teamMembers.filter(m => m.isBookable)
+
   const fetchAppointments = useCallback(async (d: Date, v: ViewMode) => {
     abortRef.current?.abort()
     abortRef.current = new AbortController()
-    const from = v === 'day' ? startOfDay(d) : startOfWeek(d)
-    const to = v === 'day' ? endOfDay(d) : endOfWeek(d)
+    const { from, to } = rangeForView(d, v)
     setLoading(true)
     setError(null)
     try {
@@ -85,10 +94,11 @@ export default function CalendarClient({ locationId, clients, teamMembers, servi
     fetchAppointments(date, v)
   }
 
-  function handleSlotClick(hour: number, minute: number) {
+  function handleSlotClick(hour: number, minute: number, teamMemberId?: string) {
     const d = new Date(date)
     d.setHours(hour, minute, 0, 0)
     setNewApptTime(format(d, "yyyy-MM-dd'T'HH:mm"))
+    setNewApptTeamMemberId(teamMemberId ?? '')
     setEditingAppt(undefined)
     setModalOpen(true)
   }
@@ -97,8 +107,15 @@ export default function CalendarClient({ locationId, clients, teamMembers, servi
     const d = new Date(dayDate)
     d.setHours(hour, minute, 0, 0)
     setNewApptTime(format(d, "yyyy-MM-dd'T'HH:mm"))
+    setNewApptTeamMemberId('')
     setEditingAppt(undefined)
     setModalOpen(true)
+  }
+
+  function handleMonthDayClick(d: Date) {
+    setDate(d)
+    setView('day')
+    fetchAppointments(d, 'day')
   }
 
   function handleAppointmentClick(a: Appointment) {
@@ -132,6 +149,7 @@ export default function CalendarClient({ locationId, clients, teamMembers, servi
         <CalendarDayView
           date={date}
           appointments={appointments}
+          teamMembers={bookableTeamMembers}
           onSlotClick={handleSlotClick}
           onAppointmentClick={handleAppointmentClick}
         />
@@ -143,6 +161,14 @@ export default function CalendarClient({ locationId, clients, teamMembers, servi
           appointments={appointments}
           onSlotClick={handleWeekSlotClick}
           onAppointmentClick={handleAppointmentClick}
+        />
+      )}
+
+      {view === 'month' && (
+        <CalendarMonthView
+          date={date}
+          appointments={appointments}
+          onDayClick={handleMonthDayClick}
         />
       )}
 
@@ -162,7 +188,7 @@ export default function CalendarClient({ locationId, clients, teamMembers, servi
                 services: editingAppt.services,
               }
             : newApptTime
-            ? { startTime: newApptTime }
+            ? { startTime: newApptTime, teamMemberId: newApptTeamMemberId || undefined }
             : undefined
         }
         locationId={locationId}

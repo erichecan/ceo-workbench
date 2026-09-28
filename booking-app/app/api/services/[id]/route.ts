@@ -12,6 +12,7 @@ const patchSchema = z
     price: z.number().min(0).optional(),
     duration: z.number().int().min(5).optional(),
     isOnlineBookable: z.boolean().optional(),
+    commissionRate: z.number().min(0).max(1).nullable().optional(),
   })
   .refine((obj) => Object.keys(obj).length > 0, { message: 'No fields to update' })
 
