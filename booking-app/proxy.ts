@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   '/api/public',
   '/business-types',
   '/features',
+  '/social-media',
 ]
 
 function redirectToLogin(req: NextRequest) {

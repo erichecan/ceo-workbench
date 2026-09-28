@@ -72,6 +72,8 @@
   --chart-3: #a88fd1;
   --chart-4: #c9b8e8;
   --chart-5: #ece8fd;
+  --chart-rose: #9c2f63;
+  --chart-teal: #1f6f6b;
   --radius: 0.75rem;
   --sidebar: #fbfaff;
   --sidebar-foreground: #1f1730;
@@ -107,6 +109,8 @@
   --chart-3: #7c4da6;
   --chart-4: #57327f;
   --chart-5: #33095c;
+  --chart-rose: #c9769e;
+  --chart-teal: #4ea39d;
   --sidebar: #1f1233;
   --sidebar-foreground: #ece8fd;
   --sidebar-primary: #c9b8e8;
@@ -126,5 +130,16 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .bg-brand-gradient {
+    background-image:
+      radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--chart-2) 55%, transparent) 0%, transparent 45%),
+      radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--chart-3) 45%, transparent) 0%, transparent 60%),
+      radial-gradient(circle at 0% 100%, color-mix(in srgb, var(--chart-rose) 45%, transparent) 0%, transparent 55%),
+      radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--chart-teal) 45%, transparent) 0%, transparent 60%),
+      linear-gradient(165deg, var(--primary) 0%, var(--chart-2) 55%, var(--chart-3) 100%);
   }
 }
