@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth'
-import { createSale, getSales } from '@/lib/db/queries/sales'
+import { checkoutSale, getSales, CheckoutError } from '@/lib/db/queries/sales'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
@@ -8,16 +8,21 @@ const createSchema = z.object({
   appointmentId: z.string().optional(),
   clientId: z.string().optional(),
   teamMemberId: z.string().optional(),
-  subtotal: z.number().int().min(0),
   discountAmount: z.number().int().min(0),
   tipAmount: z.number().int().min(0),
   paymentMethod: z.enum(['CASH', 'CARD', 'E_TRANSFER', 'OTHER']),
   notes: z.string().optional(),
   items: z.array(z.object({
     serviceId: z.string().optional(),
+    productId: z.string().optional(),
     name: z.string().min(1),
     price: z.number().int().min(0),
+    quantity: z.number().int().min(1).default(1),
   })).min(1),
+  couponCode: z.string().optional(),
+  giftCardCode: z.string().optional(),
+  giftCardAmount: z.number().int().min(0).optional(),
+  redeemPoints: z.number().int().min(0).optional(),
 })
 
 export async function GET(req: Request) {
@@ -68,9 +73,13 @@ export async function POST(req: Request) {
     if (!appt) return Response.json({ error: 'Appointment not found' }, { status: 404 })
   }
 
-  const { subtotal, discountAmount, tipAmount } = parsed.data
-  const total = Math.max(0, subtotal - discountAmount + tipAmount)
-
-  const sale = await createSale(session.workspaceId, { ...parsed.data, total })
-  return Response.json(sale, { status: 201 })
+  try {
+    const sale = await checkoutSale(session.workspaceId, parsed.data)
+    return Response.json(sale, { status: 201 })
+  } catch (err) {
+    if (err instanceof CheckoutError) {
+      return Response.json({ error: err.message }, { status: 400 })
+    }
+    throw err
+  }
 }

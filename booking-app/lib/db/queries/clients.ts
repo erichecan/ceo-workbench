@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import { syncClientToMailchimp } from '@/lib/notifications/mailchimp'
 
 export async function getClients(workspaceId: string, search?: string) {
   return prisma.client.findMany({
@@ -43,7 +44,12 @@ export async function createClient(
   workspaceId: string,
   data: { name: string; email?: string; phone?: string; notes?: string }
 ) {
-  return prisma.client.create({ data: { workspaceId, ...data } })
+  const client = await prisma.client.create({ data: { workspaceId, ...data } })
+  // fire-and-forget：Mailchimp 同步失败/未配置都不应影响客户创建本身
+  syncClientToMailchimp(workspaceId, { email: client.email, name: client.name }).catch((err) => {
+    console.error('[notify] mailchimp sync threw unexpectedly:', err)
+  })
+  return client
 }
 
 export async function updateClient(

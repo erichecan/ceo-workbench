@@ -33,18 +33,32 @@
       证据：`npx tsc --noEmit` 零错误；`npm run build` 成功（新增路由 `/payroll`、`/api/payroll/time-entries`、`/api/payroll/time-entries/[id]`、`/api/payroll/periods` 均正常生成）。临时验证脚本（用后即删）对隔离的测试 Workspace 断言：2 条 TimeEntry（3h+2h，另有 1 条未 clockOut 和 1 条周期外的均被正确忽略）→ hoursWorked=5（PASS）；1 笔 Sale 的 SaleItem price=10000 分、Service.commissionRate=0.3（TeamMember.commissionRate 故意设为 0.5 以验证服务级覆盖生效，另有 1 笔周期外的 Sale 被正确忽略）→ commissionTotal=3000（PASS，误差 0）；status=DRAFT（PASS）。回退验证：临时把 `commissionCents += item.price * rate` 改回用 `teamMember.commissionRate`（即去掉服务级覆盖），重跑脚本 commissionTotal 变为 5000（FAIL，符合预期，证明测试有效捕获该 bug），随后改回原实现重跑恢复 3000（PASS）。测试数据在断言后已用 `workspace.delete` 级联清理，未残留脏数据。鉴权：`app/api/payroll/*` 三个路由的 GET/POST/PATCH 均先 `getSession()` 返回 401（无 session），再检查 `role !== 'OWNER' && role !== 'MANAGER'` 返回 403（LOW 角色），与 `app/api/team/route.ts`、`app/api/services/route.ts` 现有模式一致，未起服务器实测（代码走查确认逻辑无遗漏分支）。项目无既有单元测试框架（无 jest/vitest 配置、仓库内 0 个 *.test.ts），故"全量单元测试"这一项不适用，如需补齐见台账末尾"已知缺口"。
       依赖：单元 0
 
-- [ ] 3. M4+M5 Inventory + Memberships：商品库存 + 优惠券/积分/礼品卡，结账页联动改造
+- [x] 3. M4+M5 Inventory + Memberships：商品库存 + 优惠券/积分/礼品卡，结账页联动改造 — 续做完成
       验收命令：`npx tsc --noEmit`；手动测试结账选商品扣库存、输入券码打折、用积分抵扣、礼品卡抵扣
-      可看物：docs/shots/20260928-checkout-inventory-membership.png
+      可看物：docs/shots/20260928-inventory-page.png、docs/shots/20260928-inventory-product-created.png（真实新建商品并保存，低库存红色提示正确触发）、docs/shots/20260928-memberships-page.png、docs/shots/20260928-checkout-modal-open.png、docs/shots/20260928-checkout-with-product.png —— 我（主 session）起 dev server 后用 Playwright 亲自走了一遍完整流程：新建商品(库存3)→新建预约→状态改 STARTED→点 Checkout→加商品到结账单(服务$35+商品$25=$60)→Collect 提交 → 回到库存页确认库存从 3 变成 2，端到端扣减正确，不是代码走查
       定性状态：待你确认
-      证据：施工中被下方"生产事故"打断，agent 已 TaskStop，未完成自验、未提交。工作区里残留半成品文件（products/coupons/gift-cards 相关 API 路由与查询层），当前对着修复后的 main `tsc --noEmit` 可以过，但 CheckoutModal 联动改造、事务处理、验证脚本均未完成，不能算做完
+      证据：
+        - 现有基础设施（`lib/db/queries/{products,coupons,gift-cards}.ts`、对应 CRUD API、`checkoutSale()`）复核后判断逻辑完整，未改动，仅在此基础上补齐 UI 与结账联动
+        - 新增页面：`app/(dashboard)/inventory/page.tsx` + `components/inventory/{ProductModal,ProductsTable}.tsx`（新建/编辑/归档商品，库存 ≤ 低库存阈值时用红色 destructive Badge 提示）；`app/(dashboard)/memberships/page.tsx` + `components/memberships/{CouponModal,CouponsTable,GiftCardModal,GiftCardsTable}.tsx`（优惠券启用/停用/编辑，礼品卡创建/停用，卡号系统生成不可编辑）；`components/layout/Sidebar.tsx` 加"库存管理""会员权益"两个导航项（该文件同时有另一并发改动在加 `OWNER_ONLY_NAV_ITEMS`，只做了最小化插入未动其余逻辑）
+        - `components/calendar/CheckoutModal.tsx` 重写：加"添加商品"下拉（从 `/api/products` 拉取未归档商品，选中后加入结账清单，商品行可调数量、可移除，服务行行为不变）；优惠券码输入框 + 校验按钮，失焦/点击时拉取 `/api/coupons` 列表在前端本地复现 `validateCoupon` 同款逻辑（百分比/固定折扣、过期、启用状态、次数上限）做折扣预览，真正生效判断仍在提交时由后端 `checkoutSale` 决定；礼品卡号输入框同理拉取 `/api/gift-cards` 显示余额，可编辑本次抵扣金额（前端封顶 min(卡余额, 订单剩余)）；若有 `clientId` 则拉取 `/api/clients/[id]` 显示客户当前积分余额，超过 0 才显示"使用积分抵扣"输入框；提交时把 `couponCode`/`giftCardCode`/`giftCardAmount`/`redeemPoints`/商品行一起传给 `POST /api/sales`；新增 `translateCheckoutError()` 把后端 `CheckoutError` 的英文消息（库存不足/优惠券失效/礼品卡余额不足等）翻译成中文展示
+        - `npx tsc --noEmit` 零错误；`npm run build` 成功（新增路由 `/inventory`、`/memberships` 正常生成，共 34 routes 全部编译通过）
+        - 新写验证脚本 `scripts/verify-checkout.ts`（隔离 workspace，直接调用 `checkoutSale`，断言后 `workspace.delete` 级联清理，用完即删）11/11 断言通过：①库存不足抛 CheckoutError 且不扣减库存 ②优惠券 20% 折扣金额/订单总额/usedCount 计次/库存扣减全部正确 ③礼品卡请求抵扣金额超过卡余额（但未超订单金额）时抛 CheckoutError 且不扣减余额 ④礼品卡正常抵扣 1000 分 + 积分抵扣 50 分，total/giftCardAmount/pointsRedeemed/礼品卡余额/客户积分余额（含两笔订单的累计与抵扣）全部计算正确
+        - 回退验证：临时把库存双重校验（预检查 + `updateMany` 原子条件）、优惠券折扣计算（改为恒为 0）、礼品卡余额校验（预检查 + `updateMany` 原子条件）同时改坏后重跑，9/11 断言变红（场景1/2/3 全部失败，含出现负库存 -7/-9、负余额 -500/-1500 等异常数据，证明测试确实在验证这些边界）；随后用备份文件逐一恢复三个文件，重跑 tsc 确认无残留改动痕迹（grep 确认无 `false &&`/`BROKEN` 标记），重跑验证脚本回到 11/11 全绿
+        - 鉴权：`/api/products`、`/api/coupons`、`/api/gift-cards`（含 `[id]`）均沿用项目既有模式——GET 只需登录 session，写操作（POST/PATCH/DELETE）额外要求 `role === OWNER || MANAGER`；起 `npm run dev` 实测：未登录访问三个 GET 端点均被中间件 307 重定向到 `/login`（与本项目所有既有 API 路由行为一致，非新问题）；用种子账号 `owner@demo.com` 登录后拿 session cookie 重新请求，三个端点及 `/inventory`、`/memberships` 两个页面均返回 200，页面渲染出真实中文文案（非空白/报错页）
+        - 项目仍无 jest/vitest 单元测试框架（沿用单元2记录的已知缺口），"全量单元测试"这一项继续不适用
       依赖：单元 0（M4/M5 共用 CheckoutModal.tsx，合并为一个单元避免冲突）
 
-- [ ] 4. M2+M6 脚手架：Resend/Twilio/Mailchimp 设置页 + dry-run 模式（无 Key 时只记日志不真发）
+- [x] 4. M2+M6 脚手架：Resend/Twilio/Mailchimp 设置页 + dry-run 模式（无 Key 时只记日志不真发）—— 续做完成，未提交（等 Eric 统一 commit）
       验收命令：`npx tsc --noEmit`；无 Key 时调用发送接口应返回"未配置，已跳过"而非报错
-      可看物：docs/shots/20260928-integrations-settings.png
+      可看物：docs/shots/20260928-integrations-settings.png —— 我（主 session）起 dev server 用 Playwright 实测截图，三个区块（Resend/Twilio/Mailchimp）均显示"未配置"徽标，dry-run 说明文案清晰
       定性状态：待你确认
-      证据：施工中被下方"生产事故"打断，agent 已 TaskStop，未完成自验、未提交。工作区里残留半成品文件（lib/notifications/、app/api/integrations 部分文件），设置页组件在事故处理中被对方会话删除（因为它挡了对方本地 build），需要重做
+      证据：
+        - 续做前先复核：`lib/notifications/{email,sms,mailchimp,appointment-notify}.ts`、`lib/db/queries/integration-settings.ts`、`app/api/integrations/route.ts`、`app/api/integrations/mailchimp/sync/route.ts`、`app/api/cron/appointment-reminders/route.ts` 均已是前一轮 agent 做好的完整逻辑（dry-run 分支齐全、`getIntegrationSettingsView` 已做 Key 脱敏只留后4位、API 路由已限定仅 OWNER），本轮未改动这些文件
+        - 本轮新增/修改：新建 `app/(dashboard)/settings/integrations/page.tsx`（服务端组件，非 OWNER 直接 redirect('/calendar')）、`components/settings/IntegrationsForm.tsx`、`components/settings/IntegrationSection.tsx`（三个区块：Resend/Twilio/Mailchimp，各自"已配置/未配置"徽标 + 表单 + 单独保存按钮）；修改 `components/layout/Sidebar.tsx`（加 `role` prop，仅 role==='OWNER' 时渲染"集成设置"导航项）与 `app/(dashboard)/layout.tsx`（改为 async，`getSession()` 取 role 传给 Sidebar，最小改动，未动其余布局逻辑）
+        - `npx tsc --noEmit`：零错误（过程中一度出现 1 个错误，定位后确认是另一个并发会话在写 `app/(dashboard)/memberships/page.tsx`（Coupon 类型不匹配），不是我的文件，未处理、片刻后对方自己改好了，最终复跑零错误）
+        - `npm run build`：成功，输出路由列表包含 `/settings/integrations` 与 `/api/integrations`、`/api/integrations/mailchimp/sync`
+        - dry-run 回归验证（临时脚本，用后已删，不落库）：对一个未配置 IntegrationSettings 的真实 workspace 依次调用 `sendAppointmentEmail`/`sendAppointmentSms`/`syncClientToMailchimp`，三者均返回 `{sent:false/synced:false, reason:'not_configured'}`，不抛异常；随后调用 `createAppointment(workspaceId, {...})` 正常创建成功（预约创建不受 fire-and-forget 通知逻辑影响），测试数据已清理
+        - 鉴权实测（起 dev server，真实 HTTP，非纯代码走查）：owner 登录后 `GET/PATCH /api/integrations` 200；`PATCH` 写入 `resendApiKey` 后 `GET` 返回 `apiKeyMasked` 只含后4位（如 `***************cdef`），未见明文；staff（非 OWNER）登录后 `GET/PATCH /api/integrations` 均 403，访问 `/settings/integrations` 页面被 307 重定向（页面内 redirect('/calendar') 生效）；未带 cookie 请求 `/api/integrations` 被项目级 `proxy.ts`（Next 16 的 middleware 重命名，非本轮改动）统一 307 重定向到 /login，未到达路由处理函数，未泄露任何数据；测试完成后已清空刚才写入的测试 Key，复查 GET 恢复 `configured:false`
       依赖：单元 0
 
 ## 生产事故记录（2026-09-28）

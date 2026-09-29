@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { CalendarDays, Users, UserCheck, Scissors, LogOut, ReceiptText, Wallet } from 'lucide-react'
+import { CalendarDays, Users, UserCheck, Scissors, LogOut, ReceiptText, Wallet, Plug, Package, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -12,13 +12,19 @@ const NAV_ITEMS = [
   { href: '/clients', label: '客户管理', icon: Users },
   { href: '/team', label: '员工管理', icon: UserCheck },
   { href: '/services', label: '服务项目', icon: Scissors },
+  { href: '/inventory', label: '库存管理', icon: Package },
+  { href: '/memberships', label: '会员权益', icon: Gift },
   { href: '/sales', label: '销售记录', icon: ReceiptText },
   { href: '/payroll', label: '工资结算', icon: Wallet },
 ]
 
+const OWNER_ONLY_NAV_ITEMS = [
+  { href: '/settings/integrations', label: '集成设置', icon: Plug },
+]
+
 const PENDING_POLL_MS = 60_000
 
-export function Sidebar() {
+export function Sidebar({ role }: { role?: string }) {
   const pathname = usePathname()
   const router = useRouter()
   const [pendingOnline, setPendingOnline] = useState(0)
@@ -82,6 +88,22 @@ export function Sidebar() {
             )}
           </Link>
         ))}
+        {role === 'OWNER' &&
+          OWNER_ONLY_NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                pathname === href || pathname.startsWith(href + '/')
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-slate-600 hover:bg-accent/50 hover:text-accent-foreground'
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              <span className="flex-1">{label}</span>
+            </Link>
+          ))}
       </nav>
 
       <div className="p-3 border-t border-border">

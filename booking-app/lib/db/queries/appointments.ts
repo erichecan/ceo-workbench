@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db'
 import { AppointmentStatus } from '@/lib/generated/prisma'
+import { notifyAppointmentCreated } from '@/lib/notifications/appointment-notify'
 
 export class AppointmentConflictError extends Error {
   constructor() {
@@ -92,7 +93,7 @@ export async function createAppointment(
     )
     if (conflict) throw new AppointmentConflictError()
   }
-  return prisma.appointment.create({
+  const appointment = await prisma.appointment.create({
     data: {
       workspaceId,
       ...apptData,
@@ -104,6 +105,9 @@ export async function createAppointment(
       services: { include: { service: true } },
     },
   })
+  // fire-and-forget：通知发送失败/未配置都不应影响预约创建本身
+  notifyAppointmentCreated(workspaceId, appointment)
+  return appointment
 }
 
 export interface AppointmentUpdateData {
@@ -140,5 +144,23 @@ export async function cancelAppointment(id: string, workspaceId: string) {
   return prisma.appointment.updateMany({
     where: { id, workspaceId },
     data: { status: 'CANCELLED' },
+  })
+}
+
+const REMINDER_STATUSES: AppointmentStatus[] = ['BOOKED', 'CONFIRMED']
+
+/**
+ * 供 cron 提醒任务使用：跨全部 workspace 查询未来时间窗口内的预约。
+ */
+export async function getUpcomingAppointmentsForReminders(from: Date, to: Date) {
+  return prisma.appointment.findMany({
+    where: {
+      startTime: { gte: from, lte: to },
+      status: { in: REMINDER_STATUSES },
+    },
+    include: {
+      client: { select: { id: true, name: true, email: true, phone: true } },
+    },
+    orderBy: { startTime: 'asc' },
   })
 }
