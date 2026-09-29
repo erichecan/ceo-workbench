@@ -17,7 +17,7 @@ export default async function SalesPage() {
   })
   if (!location) {
     return (
-      <div className="p-6">
+      <div>
         <p className="text-slate-500">No location configured.</p>
       </div>
     )
@@ -30,7 +30,7 @@ export default async function SalesPage() {
   ])
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="font-heading text-xl font-semibold text-primary">Sales</h1>
         <p className="text-sm text-slate-500 mt-0.5">

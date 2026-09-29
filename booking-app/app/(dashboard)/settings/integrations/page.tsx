@@ -11,7 +11,7 @@ export default async function IntegrationsPage() {
   const settings = await getIntegrationSettingsView(session.workspaceId)
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="max-w-2xl">
       <h1 className="font-heading text-2xl font-bold text-primary mb-1">集成设置</h1>
       <p className="text-sm text-slate-500 mb-6">
         配置邮件 / 短信 / Mailchimp 的 API Key。未配置时相关通知与同步会以 dry-run
