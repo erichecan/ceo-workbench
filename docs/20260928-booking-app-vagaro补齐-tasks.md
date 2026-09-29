@@ -74,5 +74,7 @@
 - 两个并发 Claude 会话共用同一工作目录/main 分支的协作方式要不要改成分 worktree
 - Cloud Run 流量被手动钉住时，CI 的 Verify 步骤该怎么发现"测的是旧版本"这个问题（比如探活时校验镜像 digest/commit sha）
 
+**追加一次（同日）**：单元 3/4 代码续做完成后 push（commit f02e047，不涉及 schema），部署流水线再次触发，果然又撞上同一个坑——`gcloud run revisions list` 显示新 revision `booking-portal-00014-rp4` 已就绪，但 `status.traffic` 仍 100% 指向旧的 `00013`，CI 的 Verify 步骤测的还是旧版本却报了绿勾。这次改用 `gcloud run services update-traffic booking-portal --to-latest`（而不是 `--to-revisions=<具体版本>=100`）把流量切过去——`--to-latest` 会让流量永远跟随最新 ready 的 revision，不会再被"钉死在某个具体版本号"，理论上能根治这个坑，不用每次部署后都记得手动切。切完用真实客户账号（shinenail@shine-nail-studio.local）重新验证：登录 + `/calendar` `/inventory` `/memberships` `/settings/integrations` `/payroll` 全部 200 且渲染出真实中文内容，`/api/products` 带 cookie 200、不带 cookie 307。**建议**：如果以后还发现流量被改回"钉死具体版本号"模式（比如又手动 `update-traffic --to-revisions` 处理了一次紧急止血），处理完之后记得改回 `--to-latest`，否则这个坑会反复出现。
+
 ## 已知缺口（不在本轮台账内，记录不遗忘）
 - 项目至今没有 `scripts/verify.sh`（CLAUDE.md 七节要求的技术验收脚本），本轮只补最小验证（tsc + 手动断言），完整的鉴权探针/性能基线/查询数探针是更大的独立缺口，需要单独立项补齐。
